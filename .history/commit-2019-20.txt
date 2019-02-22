@@ -1,0 +1,2 @@
+commit 2019-20
+feat: setup TypeScript configuration
