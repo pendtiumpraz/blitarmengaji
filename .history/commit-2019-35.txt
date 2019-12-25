@@ -1,0 +1,2 @@
+commit 2019-35
+feat: craft CSS base styles & ornaments
