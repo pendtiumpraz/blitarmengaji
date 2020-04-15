@@ -1,0 +1,2 @@
+commit 2020-38
+feat: NextAuth setup with Credentials provider
