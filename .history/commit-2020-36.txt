@@ -1,0 +1,2 @@
+commit 2020-36
+chore: typescript strict mode
