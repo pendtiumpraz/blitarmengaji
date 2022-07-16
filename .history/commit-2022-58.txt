@@ -1,0 +1,2 @@
+commit 2022-58
+feat: kajian & titik dakwah detail pages
