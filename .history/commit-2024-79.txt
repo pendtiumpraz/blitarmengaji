@@ -1,0 +1,2 @@
+commit 2024-79
+fix: responsive design fixes
