@@ -1,0 +1,2 @@
+commit 2024-97
+feat: business partner model & CRUD
