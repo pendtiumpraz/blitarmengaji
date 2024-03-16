@@ -1,0 +1,2 @@
+commit 2024-174
+feat: event registration & capacity
