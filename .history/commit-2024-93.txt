@@ -1,0 +1,2 @@
+commit 2024-93
+refactor: service layer for partner entities
