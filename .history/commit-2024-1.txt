@@ -1,0 +1,2 @@
+commit 2024-1
+feat: business partner model & CRUD
