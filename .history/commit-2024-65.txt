@@ -1,0 +1,2 @@
+commit 2024-65
+fix: ownership validation for entities
