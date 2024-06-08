@@ -1,0 +1,2 @@
+commit 2024-114
+feat: event registration & capacity
