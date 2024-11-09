@@ -1,0 +1,2 @@
+commit 2024-156
+feat: product poster & shopping workflow
