@@ -1,0 +1,2 @@
+commit 2025-17
+feat: lesson content (video, text, PDF)
