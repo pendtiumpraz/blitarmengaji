@@ -1,0 +1,2 @@
+commit 2026-17
+feat: AI conversation schema & storage
