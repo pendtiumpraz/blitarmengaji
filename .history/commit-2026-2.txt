@@ -1,0 +1,2 @@
+commit 2026-2
+feat: AI chat widget component
