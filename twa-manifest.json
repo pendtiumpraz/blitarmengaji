@@ -1,0 +1,28 @@
+{
+  "packageId": "com.blitarmengaji.twa",
+  "host": "GANTI-DENGAN-DOMAIN-ANDA.vercel.app",
+  "name": "Blitar Mengaji",
+  "launcherName": "Blitar Mengaji",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#0E5C46",
+  "themeColorDark": "#0E5C46",
+  "navigationColor": "#0E5C46",
+  "navigationColorDark": "#0E5C46",
+  "backgroundColor": "#F4EEE1",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/icon-512.png",
+  "maskableIconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/maskable-512.png",
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    { "name": "Jadwal", "url": "/jadwal", "iconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/icon-192.png" },
+    { "name": "Peta", "url": "/peta", "iconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/icon-192.png" },
+    { "name": "Tanya AI", "url": "/tanya-ai", "iconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/icon-192.png" }
+  ],
+  "signingKey": { "path": "./android.keystore", "alias": "blitarmengaji" },
+  "fallbackType": "customtabs",
+  "features": {},
+  "webManifestUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/manifest.webmanifest"
+}
