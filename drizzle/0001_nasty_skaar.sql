@@ -1,0 +1,1 @@
+ALTER TABLE "titik_dakwah" ADD COLUMN "logo_url" text;
