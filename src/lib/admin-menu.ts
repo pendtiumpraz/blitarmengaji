@@ -18,6 +18,7 @@ import {
   Bot,
   Trash2,
   ScrollText,
+  MessagesSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -47,6 +48,7 @@ export const adminMenu: AdminMenuItem[] = [
   { label: "Perpustakaan", href: "/admin/pustaka", icon: Library, permission: "library.upload", section: "Konten" },
   { label: "Event", href: "/admin/event", icon: CalendarPlus, permission: "event.create", section: "Konten" },
   { label: "Lapak", href: "/admin/lapak", icon: Store, permission: "lapak.manage_own", section: "Konten" },
+  { label: "WA Ingest", href: "/admin/wa", icon: MessagesSquare, permission: "kajian.view", section: "Konten" },
   { label: "RBAC & Role", href: "/admin/rbac", icon: ShieldCheck, permission: "role.manage", section: "Sistem" },
   { label: "Pengguna", href: "/admin/users", icon: Users, permission: "user.view", section: "Sistem" },
   { label: "Storage", href: "/admin/storage", icon: HardDrive, permission: "storage.manage", section: "Sistem" },
