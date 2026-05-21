@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      "NotebookEdit",
+      "Bash",
+      "PowerShell",
+      "Agent",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskList",
+      "TaskGet",
+      "TaskOutput",
+      "WebFetch",
+      "WebSearch",
+      "Bash(npx tsc:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(tsx:*)",
+      "Bash(drizzle-kit:*)",
+      "Bash(git:*)",
+      "Bash(curl:*)",
+      "PowerShell(Start-Process:*)",
+      "PowerShell(Stop-Process:*)",
+      "PowerShell(npm run *)"
+    ]
+  }
+}
