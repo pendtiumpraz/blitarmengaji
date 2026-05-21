@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Dashboard Ustadz</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="theme-tokens.css">
+<link rel="stylesheet" href="craft.css">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand:{50:'var(--c-brand-50)',100:'var(--c-brand-100)',200:'var(--c-brand-200)',300:'var(--c-brand-300)',400:'var(--c-brand-400)',500:'var(--c-brand-500)',600:'var(--c-brand-600)',700:'var(--c-brand-700)',800:'var(--c-brand-800)',900:'var(--c-brand-900)'},
+      gold:{DEFAULT:'var(--c-gold)',light:'var(--c-gold-light)',dark:'var(--c-gold-dark)'},
+      cream:'var(--c-cream)', surface:'var(--c-surface)', ink:'var(--c-ink)'
+    },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], arabic:['Amiri','serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .device { width:370px; border:9px solid #0f172a; border-radius:2.4rem; background:#0f172a; box-shadow:0 20px 45px rgba(15,23,42,.25); overflow:hidden; position:relative; }
+  .device .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#0f172a; border-radius:0 0 14px 14px; z-index:50; }
+  .screen { height:760px; overflow-y:auto; background:var(--c-cream); position:relative; }
+  .screen::-webkit-scrollbar { width:0; }
+  .statusbar { height:34px; }
+  .ph { background:linear-gradient(135deg,#0E6E55,#3C9E84); }
+  .ph2 { background:linear-gradient(135deg,#A8851A,#E3C766); }
+  .ph3 { background:linear-gradient(135deg,#0B5947,#18816A); }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+  .annot { font-size:11px; color:#64748b; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2 flex items-center gap-2"><span class="crest inline-block w-6 h-6 align-middle"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span> Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin & RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="bg-brand-600 text-white">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="text-slate-500 hover:bg-slate-100">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<header class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+  <h1 class="text-2xl font-extrabold display">Dashboard Ustadz</h1>
+  <p class="text-sm text-slate-500">Ringkasan · Jawab Tanya Ustadz · Editor Transcript → Catatan · Upload PDF Perpustakaan · Kelola Kelas Online</p>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24 space-y-14">
+
+  <!-- ============================================================
+       FRAME 1 — RINGKASAN USTADZ (HP)
+       ============================================================ -->
+  <section>
+    <h2 class="text-lg font-extrabold mb-1">1 · Ringkasan Ustadz <span class="text-xs font-semibold text-slate-400">(Mobile)</span></h2>
+    <p class="annot mb-4 max-w-2xl">Beranda ustadz: kartu profil terverifikasi, statistik kontribusi, dan antrian tugas yang menunggu tindakan.</p>
+    <div class="flex flex-wrap gap-10">
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <!-- profile card -->
+            <div class="bg-brand-600 text-white px-4 pt-2 pb-6 rounded-b-3xl relative overflow-hidden">
+              <div class="orn-overlay pat-girih-light"></div>
+              <div class="relative z-10 flex items-center gap-3">
+                <div class="w-16 h-16 rounded-full ph2 ring-4 ring-white/30 grid place-items-center text-2xl font-extrabold shrink-0">AF</div>
+                <div class="flex-1">
+                  <p class="font-bold text-lg leading-tight flex items-center gap-1 display">Ust. Ahmad Fauzi, Lc. <i data-lucide="badge-check" class="w-4 h-4 text-gold-light"></i></p>
+                  <p class="text-xs text-white/70">Spesialis Fiqih & Muamalah</p>
+                  <p class="text-[11px] text-white/60 mt-0.5">Masjid Agung Blitar</p>
+                </div>
+              </div>
+            </div>
+            <!-- stats grid -->
+            <div class="p-4 -mt-3">
+              <div class="bg-surface rounded-2xl shadow-card p-3 grid grid-cols-2 gap-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="message-circle-question" class="w-5 h-5 text-brand-700"></i></div>
+                  <div><p class="text-lg font-extrabold leading-none">142</p><p class="text-[11px] text-slate-500">Pertanyaan dijawab</p></div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="notebook-pen" class="w-5 h-5 text-brand-700"></i></div>
+                  <div><p class="text-lg font-extrabold leading-none">38</p><p class="text-[11px] text-slate-500">Catatan ditulis</p></div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="file-text" class="w-5 h-5 text-brand-700"></i></div>
+                  <div><p class="text-lg font-extrabold leading-none">17</p><p class="text-[11px] text-slate-500">PDF diunggah</p></div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="graduation-cap" class="w-5 h-5 text-brand-700"></i></div>
+                  <div><p class="text-lg font-extrabold leading-none">4</p><p class="text-[11px] text-slate-500">Kelas dibuat</p></div>
+                </div>
+              </div>
+            </div>
+            <!-- task list -->
+            <div class="px-4 pb-4">
+              <div class="flex items-center justify-between mb-2">
+                <p class="font-bold text-sm">Perlu tindakan</p>
+                <span class="text-[11px] text-brand-700 font-bold">Lihat semua</span>
+              </div>
+              <div class="space-y-2.5">
+                <div class="bg-surface rounded-2xl shadow-card p-3 flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-gold/15 grid place-items-center shrink-0"><i data-lucide="message-circle-question" class="w-5 h-5 text-gold-dark"></i></div>
+                  <div class="flex-1"><p class="font-semibold text-sm">8 pertanyaan menunggu jawaban</p><p class="text-[11px] text-slate-500">3 baru hari ini · kategori Fiqih</p></div>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                </div>
+                <div class="bg-surface rounded-2xl shadow-card p-3 flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-brand-50 grid place-items-center shrink-0"><i data-lucide="file-edit" class="w-5 h-5 text-brand-700"></i></div>
+                  <div class="flex-1"><p class="font-semibold text-sm">2 transcript siap jadi catatan</p><p class="text-[11px] text-slate-500">Kajian Subuh & Tafsir Pekanan</p></div>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                </div>
+                <div class="bg-surface rounded-2xl shadow-card p-3 flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-brand-50 grid place-items-center shrink-0"><i data-lucide="graduation-cap" class="w-5 h-5 text-brand-700"></i></div>
+                  <div class="flex-1"><p class="font-semibold text-sm">Kelas "Tajwid dari Nol"</p><p class="text-[11px] text-slate-500">5 pelajaran masih draft</p></div>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                </div>
+              </div>
+              <button class="mt-4 w-full h-11 rounded-full bg-brand-600 text-white text-sm font-bold flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Buat Konten Baru</button>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Ringkasan Ustadz</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Profil terverifikasi (badge) · 4 statistik kontribusi · antrian tugas dengan jumlah.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FRAME 2 — JAWAB TANYA USTADZ (PANEL)
+       ============================================================ -->
+  <section>
+    <h2 class="text-lg font-extrabold mb-1">2 · Jawab Tanya Ustadz <span class="text-xs font-semibold text-slate-400">(Panel)</span></h2>
+    <p class="annot mb-4 max-w-2xl">Antrian pertanyaan jamaah (penanya bisa "Hamba Allah") di kiri; editor jawaban di kanan. Nama ustadz selalu tercantum otomatis — jawaban TIDAK bisa anonim.</p>
+    <div class="bg-surface rounded-3xl shadow-card overflow-hidden border" data-theme="teduh">
+      <div class="grid lg:grid-cols-[340px,1fr]">
+        <!-- queue -->
+        <div class="border-r bg-cream/40">
+          <div class="px-4 py-3 border-b flex items-center justify-between">
+            <p class="font-bold text-sm">Antrian Pertanyaan</p>
+            <span class="px-2 py-0.5 rounded-full bg-gold/15 text-gold-dark text-[11px] font-bold">8 menunggu</span>
+          </div>
+          <div class="flex gap-2 px-4 py-2 overflow-x-auto scrollx border-b">
+            <span class="px-3 py-1 rounded-full bg-brand-600 text-white text-xs font-semibold whitespace-nowrap">Menunggu</span>
+            <span class="px-3 py-1 rounded-full bg-surface border text-xs font-semibold whitespace-nowrap">Terjawab</span>
+            <span class="px-3 py-1 rounded-full bg-surface border text-xs font-semibold whitespace-nowrap">Semua kategori</span>
+          </div>
+          <div class="divide-y max-h-[460px] overflow-y-auto scrollx">
+            <div class="px-4 py-3 bg-brand-50/60 border-l-4 border-brand-600">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-slate-200 grid place-items-center shrink-0"><i data-lucide="venetian-mask" class="w-4 h-4 text-slate-500"></i></div>
+                <p class="text-sm font-bold flex-1">Hamba Allah</p>
+                <span class="text-[10px] text-slate-400">2 jam</span>
+              </div>
+              <p class="text-sm font-semibold mt-1.5 leading-tight">Hukum menjamak shalat saat safar?</p>
+              <div class="flex items-center gap-2 mt-1.5"><span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold">Fiqih</span><span class="text-[10px] text-gold-dark font-bold">● Menunggu</span></div>
+            </div>
+            <div class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full ph grid place-items-center shrink-0 text-white text-xs font-bold">SR</div>
+                <p class="text-sm font-bold flex-1">Siti Rohmah</p>
+                <span class="text-[10px] text-slate-400">5 jam</span>
+              </div>
+              <p class="text-sm font-semibold mt-1.5 leading-tight">Apakah boleh berkurban patungan?</p>
+              <div class="flex items-center gap-2 mt-1.5"><span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold">Muamalah</span><span class="text-[10px] text-gold-dark font-bold">● Menunggu</span></div>
+            </div>
+            <div class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-slate-200 grid place-items-center shrink-0"><i data-lucide="venetian-mask" class="w-4 h-4 text-slate-500"></i></div>
+                <p class="text-sm font-bold flex-1">Hamba Allah</p>
+                <span class="text-[10px] text-slate-400">1 hari</span>
+              </div>
+              <p class="text-sm font-semibold mt-1.5 leading-tight">Cara taubat dari riba bank?</p>
+              <div class="flex items-center gap-2 mt-1.5"><span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold">Muamalah</span><span class="text-[10px] text-gold-dark font-bold">● Menunggu</span></div>
+            </div>
+            <div class="px-4 py-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full ph3 grid place-items-center shrink-0 text-white text-xs font-bold">BH</div>
+                <p class="text-sm font-bold flex-1">Budi Hartono</p>
+                <span class="text-[10px] text-slate-400">1 hari</span>
+              </div>
+              <p class="text-sm font-semibold mt-1.5 leading-tight">Bacaan doa setelah witir?</p>
+              <div class="flex items-center gap-2 mt-1.5"><span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold">Ibadah</span><span class="text-[10px] text-gold-dark font-bold">● Menunggu</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- answer editor -->
+        <div class="p-5 lg:p-6">
+          <!-- the question being answered -->
+          <div class="bg-brand-50/60 rounded-2xl p-4 border border-brand-100">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-9 h-9 rounded-full bg-slate-200 grid place-items-center"><i data-lucide="venetian-mask" class="w-4 h-4 text-slate-500"></i></div>
+              <div class="flex-1"><p class="text-sm font-bold">Hamba Allah <span class="text-[10px] font-normal text-slate-400">· identitas disembunyikan penanya</span></p><p class="text-[11px] text-slate-500">Fiqih · diajukan 2 jam lalu</p></div>
+            </div>
+            <p class="font-bold text-base leading-snug">Hukum menjamak shalat saat safar?</p>
+            <p class="text-sm text-slate-600 mt-1.5 leading-relaxed">Ustadz, saya sering perjalanan dinas keluar kota Blitar. Apakah saya boleh menjamak shalat Dzuhur dan Ashar? Berapa jarak minimal agar dianggap safar? Jazakallahu khairan.</p>
+          </div>
+
+          <!-- answerer identity (auto, NOT anonim) -->
+          <div class="mt-4 flex items-center gap-3 bg-cream/60 rounded-xl p-3 border">
+            <div class="w-10 h-10 rounded-full ph2 grid place-items-center text-white text-sm font-extrabold">AF</div>
+            <div class="flex-1">
+              <p class="text-sm font-bold flex items-center gap-1">Dijawab oleh Ust. Ahmad Fauzi, Lc. <i data-lucide="badge-check" class="w-4 h-4 text-gold-dark"></i></p>
+              <p class="text-[11px] text-slate-500">Nama Anda tercantum otomatis pada jawaban — jawaban ustadz tidak bisa anonim.</p>
+            </div>
+            <i data-lucide="lock" class="w-4 h-4 text-slate-400"></i>
+          </div>
+
+          <!-- editor -->
+          <div class="mt-4">
+            <label class="text-xs font-bold text-slate-500">Tulis jawaban</label>
+            <div class="mt-1 border rounded-xl overflow-hidden">
+              <div class="flex items-center gap-1 px-2 py-1.5 border-b bg-cream/40 flex-wrap">
+                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="bold" class="w-4 h-4"></i></button>
+                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="italic" class="w-4 h-4"></i></button>
+                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="list" class="w-4 h-4"></i></button>
+                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="quote" class="w-4 h-4"></i></button>
+                <button class="px-2 h-8 rounded-lg hover:bg-slate-100 grid place-items-center font-arabic text-sm text-brand-700" title="Sisipkan ayat Arab">ع Ayat</button>
+                <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center"><i data-lucide="link" class="w-4 h-4"></i></button>
+              </div>
+              <div class="p-3 text-sm text-ink leading-relaxed min-h-[140px]">
+                <p>Wa'alaikumussalam. Menjamak shalat saat safar hukumnya <strong>boleh (rukhsah)</strong> bagi musafir. Jumhur ulama menetapkan jarak safar minimal sekitar 80–90 km.</p>
+                <p class="font-arabic text-right text-lg text-brand-800 my-2 leading-loose">وَإِذَا ضَرَبْتُمْ فِي الْأَرْضِ فَلَيْسَ عَلَيْكُمْ جُنَاحٌ أَنْ تَقْصُرُوا مِنَ الصَّلَاةِ</p>
+                <p class="text-slate-400">Tulis kelanjutan jawaban di sini…</p>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1.5">Dukung markdown ringan · sisipkan ayat dengan tombol "ع Ayat".</p>
+          </div>
+
+          <div class="mt-4 flex items-center gap-3 flex-wrap">
+            <button class="h-11 px-5 rounded-full bg-brand-600 text-white text-sm font-bold flex items-center gap-2"><i data-lucide="send" class="w-4 h-4"></i> Kirim Jawaban</button>
+            <button class="h-11 px-5 rounded-full border bg-surface text-sm font-semibold flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan Draft</button>
+            <span class="text-[11px] text-slate-400 flex items-center gap-1 ml-auto"><i data-lucide="info" class="w-3.5 h-3.5"></i> Jawaban tampil publik atas nama Anda.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FRAME 3 — EDITOR TRANSCRIPT → CATATAN (PANEL DESKTOP, GAYA TIPTAP)
+       ============================================================ -->
+  <section>
+    <h2 class="text-lg font-extrabold mb-1">3 · Editor Transcript → Catatan <span class="text-xs font-semibold text-slate-400">(Desktop · gaya Tiptap)</span></h2>
+    <p class="annot mb-4 max-w-2xl">Sunting transcript kajian menjadi catatan rapi. Toolbar format kaya, area tulis utama, dan panel metadata di kanan.</p>
+    <div class="bg-surface rounded-3xl shadow-card overflow-hidden border" data-theme="teduh">
+      <!-- top bar -->
+      <div class="px-5 py-3 border-b flex items-center gap-3 bg-cream/40 flex-wrap">
+        <i data-lucide="file-edit" class="w-5 h-5 text-brand-700"></i>
+        <div class="flex-1 min-w-[180px]">
+          <p class="font-bold text-sm leading-tight">Catatan: Tafsir Surat Al-'Ashr</p>
+          <p class="text-[11px] text-slate-400">Otomatis dari transcript "Kajian Subuh 18 Mei" · disimpan 2 menit lalu</p>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-gold/15 text-gold-dark text-[11px] font-bold flex items-center gap-1"><i data-lucide="circle-dot" class="w-3 h-3"></i> Draft</span>
+        <button class="h-9 px-4 rounded-full border bg-surface text-sm font-semibold flex items-center gap-1.5"><i data-lucide="save" class="w-4 h-4"></i> Simpan Draft</button>
+        <button class="h-9 px-4 rounded-full bg-brand-600 text-white text-sm font-bold flex items-center gap-1.5"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Terbitkan</button>
+      </div>
+      <div class="grid lg:grid-cols-[1fr,300px]">
+        <!-- editor column -->
+        <div class="border-r">
+          <!-- toolbar -->
+          <div class="flex items-center gap-1 px-3 py-2 border-b bg-cream/30 flex-wrap sticky top-0 z-10">
+            <select class="h-8 rounded-lg border bg-surface text-xs font-semibold px-2"><option>Paragraf</option><option>Heading 1</option><option>Heading 2</option><option>Heading 3</option></select>
+            <span class="w-px h-5 bg-slate-200 mx-1"></span>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Bold"><i data-lucide="bold" class="w-4 h-4"></i></button>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Italic"><i data-lucide="italic" class="w-4 h-4"></i></button>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Underline"><i data-lucide="underline" class="w-4 h-4"></i></button>
+            <span class="w-px h-5 bg-slate-200 mx-1"></span>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Heading"><i data-lucide="heading" class="w-4 h-4"></i></button>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Kutipan"><i data-lucide="quote" class="w-4 h-4"></i></button>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Daftar"><i data-lucide="list" class="w-4 h-4"></i></button>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Daftar bernomor"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+            <span class="w-px h-5 bg-slate-200 mx-1"></span>
+            <button class="px-2.5 h-8 rounded-lg bg-brand-50 hover:bg-brand-100 grid place-items-center font-arabic text-sm text-brand-700 font-bold" title="Sisipkan ayat Arab">﷽ Ayat Arab</button>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Tautan"><i data-lucide="link" class="w-4 h-4"></i></button>
+            <button class="w-8 h-8 rounded-lg hover:bg-slate-100 grid place-items-center" title="Gambar"><i data-lucide="image" class="w-4 h-4"></i></button>
+          </div>
+          <!-- writing area -->
+          <div class="p-6 lg:p-8 min-h-[460px] max-h-[520px] overflow-y-auto scrollx">
+            <h1 class="text-2xl font-extrabold mb-1 display">Tafsir Surat Al-'Ashr: Pelajaran tentang Waktu</h1>
+            <p class="text-xs text-slate-400 mb-5">oleh Ust. Ahmad Fauzi, Lc. · Kajian Subuh Masjid Agung Blitar</p>
+            <p class="text-[15px] leading-7 text-ink">Surat Al-'Ashr adalah surat ke-103 dalam Al-Qur'an. Meski hanya tiga ayat, Imam Asy-Syafi'i berkata bahwa seandainya manusia merenungkan surat ini saja, niscaya itu cukup bagi mereka.</p>
+            <blockquote class="border-l-4 border-brand-300 bg-brand-50/50 pl-4 py-2 my-4 text-brand-900 italic">"Demi masa, sesungguhnya manusia itu benar-benar dalam kerugian."</blockquote>
+            <p class="font-arabic text-right text-2xl text-brand-800 leading-loose my-4">وَالْعَصْرِ ۝ إِنَّ الْإِنْسَانَ لَفِي خُسْرٍ</p>
+            <h2 class="text-lg font-extrabold mt-5 mb-2">Empat Golongan yang Beruntung</h2>
+            <ol class="list-decimal pl-5 space-y-1.5 text-[15px] leading-7 text-ink">
+              <li>Orang yang <strong>beriman</strong> kepada Allah.</li>
+              <li>Orang yang <strong>beramal saleh</strong>.</li>
+              <li>Saling menasihati dalam <strong>kebenaran</strong>.</li>
+              <li>Saling menasihati dalam <strong>kesabaran</strong>.</li>
+            </ol>
+            <p class="text-[15px] leading-7 text-ink mt-3"><span class="bg-gold/20 rounded px-1">Tempatkan kursor di sini untuk melanjutkan menyunting transcript…</span></p>
+          </div>
+          <div class="px-6 py-2 border-t bg-cream/30 flex items-center gap-4 text-[11px] text-slate-400">
+            <span class="flex items-center gap-1"><i data-lucide="type" class="w-3.5 h-3.5"></i> 412 kata</span>
+            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ± 2 menit baca</span>
+            <span class="flex items-center gap-1 ml-auto"><i data-lucide="check" class="w-3.5 h-3.5 text-green-600"></i> Tersimpan otomatis</span>
+          </div>
+        </div>
+        <!-- metadata panel -->
+        <aside class="p-5 space-y-5 bg-cream/30">
+          <div>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Status</p>
+            <div class="flex bg-slate-100 rounded-full p-1 text-xs font-semibold">
+              <div class="flex-1 text-center py-1.5 rounded-full bg-surface text-gold-dark shadow-sm">Draft</div>
+              <div class="flex-1 text-center py-1.5 text-slate-400">Terbit</div>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Kajian terkait</label>
+            <div class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-surface flex items-center justify-between"><span>Kajian Subuh · 18 Mei</span><i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Kategori</label>
+            <div class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-surface flex items-center justify-between text-slate-400">Pilih kategori <i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              <span class="px-2.5 py-1 rounded-full bg-brand-600 text-white text-[11px] font-semibold flex items-center gap-1">Tafsir <i data-lucide="x" class="w-3 h-3"></i></span>
+              <span class="px-2.5 py-1 rounded-full bg-brand-600 text-white text-[11px] font-semibold flex items-center gap-1">Al-Qur'an <i data-lucide="x" class="w-3 h-3"></i></span>
+              <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-[11px] font-semibold">+ Tambah</span>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Gambar sampul</label>
+            <div class="mt-1 ph rounded-xl h-24 grid place-items-center text-white/80"><i data-lucide="image-plus" class="w-7 h-7"></i></div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Penulis</label>
+            <div class="mt-1 flex items-center gap-2 border rounded-xl px-2.5 h-10 bg-surface">
+              <div class="w-6 h-6 rounded-full ph2 grid place-items-center text-white text-[10px] font-bold">AF</div>
+              <span class="text-sm font-semibold flex-1">Ust. Ahmad Fauzi, Lc.</span>
+              <i data-lucide="lock" class="w-3.5 h-3.5 text-slate-300"></i>
+            </div>
+          </div>
+          <div class="border-t pt-4 space-y-2">
+            <button class="w-full h-10 rounded-full bg-brand-600 text-white text-sm font-bold flex items-center justify-center gap-2"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Terbitkan</button>
+            <button class="w-full h-10 rounded-full border bg-surface text-sm font-semibold flex items-center justify-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan Draft</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FRAME 4 — UPLOAD PDF PERPUSTAKAAN (HP + PANEL)
+       ============================================================ -->
+  <section>
+    <h2 class="text-lg font-extrabold mb-1">4 · Upload PDF Perpustakaan <span class="text-xs font-semibold text-slate-400">(Mobile + Panel)</span></h2>
+    <p class="annot mb-4 max-w-2xl">Form unggah materi (HP) di kiri; daftar PDF milik ustadz beserta jumlah unduhan (panel) di kanan.</p>
+    <div class="flex flex-wrap gap-10 items-start">
+      <!-- mobile form -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3 flex items-center gap-2 relative overflow-hidden"><div class="orn-overlay pat-girih-light"></div><i data-lucide="arrow-left" class="w-5 h-5 relative z-10"></i><p class="font-bold flex-1 relative z-10 display">Unggah PDF</p></div>
+            <div class="p-4 space-y-4">
+              <div>
+                <label class="text-xs font-bold text-slate-500">Judul materi</label>
+                <input class="mt-1 w-full border rounded-xl px-3 h-11 text-sm bg-surface" placeholder="mis. Ringkasan Fiqih Puasa" />
+              </div>
+              <div>
+                <label class="text-xs font-bold text-slate-500">Kategori</label>
+                <div class="mt-1 w-full border rounded-xl px-3 h-11 text-sm bg-surface text-slate-400 flex items-center justify-between">Pilih kategori <i data-lucide="chevron-down" class="w-4 h-4"></i></div>
+                <div class="flex gap-2 mt-2"><span class="px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold">Fiqih</span><span class="px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-xs">Aqidah</span><span class="px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-xs">Hadits</span></div>
+              </div>
+              <div>
+                <label class="text-xs font-bold text-slate-500">Penulis</label>
+                <div class="mt-1 flex items-center gap-2 border rounded-xl px-3 h-11 bg-surface">
+                  <div class="w-6 h-6 rounded-full ph2 grid place-items-center text-white text-[10px] font-bold">AF</div>
+                  <span class="text-sm font-semibold flex-1">Ust. Ahmad Fauzi, Lc.</span>
+                  <i data-lucide="lock" class="w-3.5 h-3.5 text-slate-300"></i>
+                </div>
+              </div>
+              <div>
+                <label class="text-xs font-bold text-slate-500">Berkas PDF</label>
+                <div class="mt-1 border-2 border-dashed border-brand-200 rounded-2xl py-7 px-4 text-center bg-brand-50/40">
+                  <i data-lucide="upload-cloud" class="w-9 h-9 text-brand-600 mx-auto"></i>
+                  <p class="text-sm font-bold mt-2">Tarik & letakkan PDF</p>
+                  <p class="text-[11px] text-slate-500">atau ketuk untuk memilih file · maks 20 MB</p>
+                  <button class="mt-3 px-4 h-9 rounded-full bg-brand-600 text-white text-xs font-bold">Pilih File</button>
+                </div>
+                <!-- selected file -->
+                <div class="mt-2 bg-surface rounded-xl shadow-card p-3 flex items-center gap-3">
+                  <div class="ph w-9 h-11 rounded grid place-items-center shrink-0"><i data-lucide="file-text" class="w-4 h-4 text-white"></i></div>
+                  <div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">fiqih-puasa-ringkas.pdf</p><p class="text-[11px] text-slate-400">2.1 MB</p><div class="mt-1 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-brand-500" style="width:100%"></div></div></div>
+                  <i data-lucide="check-circle-2" class="w-5 h-5 text-green-600 shrink-0"></i>
+                </div>
+              </div>
+              <button class="w-full h-12 rounded-full bg-gold text-white font-bold flex items-center justify-center gap-2"><i data-lucide="upload" class="w-4 h-4"></i> Unggah ke Perpustakaan</button>
+              <p class="text-[11px] text-slate-400 text-center">Materi diverifikasi admin sebelum tampil publik.</p>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Form Unggah PDF</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Judul · kategori · penulis (terkunci) · drag-drop file + progress.</p>
+      </div>
+
+      <!-- panel: my PDFs -->
+      <div class="flex-1 min-w-[320px]">
+        <div class="bg-surface rounded-3xl shadow-card border overflow-hidden" data-theme="teduh">
+          <div class="px-5 py-3 border-b flex items-center justify-between bg-cream/40">
+            <div><p class="font-bold text-sm">PDF Milik Saya</p><p class="text-[11px] text-slate-400">17 berkas · total 12.840 unduhan</p></div>
+            <button class="h-9 px-4 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i> Unggah</button>
+          </div>
+          <table class="w-full text-sm">
+            <thead class="text-[11px] uppercase tracking-wide text-slate-400 bg-cream/30">
+              <tr>
+                <th class="text-left font-bold px-5 py-2.5">Judul</th>
+                <th class="text-left font-bold px-3 py-2.5 hidden sm:table-cell">Kategori</th>
+                <th class="text-right font-bold px-3 py-2.5">Unduhan</th>
+                <th class="text-left font-bold px-3 py-2.5">Status</th>
+                <th class="px-5 py-2.5"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph w-8 h-10 rounded grid place-items-center shrink-0"><i data-lucide="file-text" class="w-4 h-4 text-white"></i></div><div><p class="font-semibold leading-tight">Ringkasan Fiqih Shalat</p><p class="text-[11px] text-slate-400">PDF · 2.4 MB</p></div></div></td>
+                <td class="px-3 py-3 hidden sm:table-cell"><span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 text-[11px] font-bold">Fiqih</span></td>
+                <td class="px-3 py-3 text-right font-bold">1.243</td>
+                <td class="px-3 py-3"><span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-bold">Terbit</span></td>
+                <td class="px-5 py-3 text-right"><i data-lucide="more-vertical" class="w-4 h-4 text-slate-400 inline"></i></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph2 w-8 h-10 rounded grid place-items-center shrink-0"><i data-lucide="file-text" class="w-4 h-4 text-white"></i></div><div><p class="font-semibold leading-tight">Panduan Zakat Fitrah 1447H</p><p class="text-[11px] text-slate-400">PDF · 1.0 MB</p></div></div></td>
+                <td class="px-3 py-3 hidden sm:table-cell"><span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 text-[11px] font-bold">Muamalah</span></td>
+                <td class="px-3 py-3 text-right font-bold">982</td>
+                <td class="px-3 py-3"><span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-bold">Terbit</span></td>
+                <td class="px-5 py-3 text-right"><i data-lucide="more-vertical" class="w-4 h-4 text-slate-400 inline"></i></td>
+              </tr>
+              <tr>
+                <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph3 w-8 h-10 rounded grid place-items-center shrink-0"><i data-lucide="file-text" class="w-4 h-4 text-white"></i></div><div><p class="font-semibold leading-tight">Doa Sehari-hari Pilihan</p><p class="text-[11px] text-slate-400">PDF · 0.8 MB</p></div></div></td>
+                <td class="px-3 py-3 hidden sm:table-cell"><span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 text-[11px] font-bold">Ibadah</span></td>
+                <td class="px-3 py-3 text-right font-bold">2.106</td>
+                <td class="px-3 py-3"><span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-bold">Terbit</span></td>
+                <td class="px-5 py-3 text-right"><i data-lucide="more-vertical" class="w-4 h-4 text-slate-400 inline"></i></td>
+              </tr>
+              <tr class="bg-gold/5">
+                <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph w-8 h-10 rounded grid place-items-center shrink-0"><i data-lucide="file-text" class="w-4 h-4 text-white"></i></div><div><p class="font-semibold leading-tight">Ringkasan Fiqih Puasa</p><p class="text-[11px] text-slate-400">PDF · 2.1 MB · baru diunggah</p></div></div></td>
+                <td class="px-3 py-3 hidden sm:table-cell"><span class="px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 text-[11px] font-bold">Fiqih</span></td>
+                <td class="px-3 py-3 text-right font-bold">0</td>
+                <td class="px-3 py-3"><span class="px-2 py-0.5 rounded-full bg-gold/15 text-gold-dark text-[11px] font-bold">Menunggu</span></td>
+                <td class="px-5 py-3 text-right"><i data-lucide="more-vertical" class="w-4 h-4 text-slate-400 inline"></i></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="annot mt-3">Tabel PDF · jumlah unduhan per berkas · status terbit/menunggu verifikasi admin.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FRAME 5 — KELOLA KELAS ONLINE (PANEL)
+       ============================================================ -->
+  <section>
+    <h2 class="text-lg font-extrabold mb-1">5 · Kelola Kelas Online <span class="text-xs font-semibold text-slate-400">(Panel)</span></h2>
+    <p class="annot mb-4 max-w-2xl">Daftar kelas yang dibuat ustadz; setiap kelas berisi modul & pelajaran dengan tombol untuk menambahkannya.</p>
+    <div class="bg-surface rounded-3xl shadow-card border overflow-hidden" data-theme="teduh">
+      <div class="px-5 py-3 border-b flex items-center justify-between bg-cream/40 flex-wrap gap-2">
+        <div><p class="font-bold text-sm">Kelas Saya</p><p class="text-[11px] text-slate-400">4 kelas · 312 peserta total</p></div>
+        <button class="h-9 px-4 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i> Buat Kelas Baru</button>
+      </div>
+      <div class="grid lg:grid-cols-[300px,1fr]">
+        <!-- class list -->
+        <div class="border-r divide-y bg-cream/20">
+          <div class="p-4 bg-brand-50/60 border-l-4 border-brand-600">
+            <div class="flex items-center gap-3">
+              <div class="ph w-11 h-11 rounded-xl grid place-items-center shrink-0"><i data-lucide="play-circle" class="w-5 h-5 text-white"></i></div>
+              <div class="flex-1"><p class="font-bold text-sm leading-tight">Belajar Tajwid dari Nol</p><p class="text-[11px] text-slate-500">8 pelajaran · 128 peserta</p></div>
+            </div>
+            <span class="inline-block mt-2 px-2 py-0.5 rounded-full bg-gold/15 text-gold-dark text-[10px] font-bold">5 pelajaran draft</span>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center gap-3">
+              <div class="ph2 w-11 h-11 rounded-xl grid place-items-center shrink-0"><i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i></div>
+              <div class="flex-1"><p class="font-bold text-sm leading-tight">Sirah Nabawiyah Lengkap</p><p class="text-[11px] text-slate-500">12 pelajaran · 96 peserta</p></div>
+            </div>
+            <span class="inline-block mt-2 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">Terbit</span>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center gap-3">
+              <div class="ph3 w-11 h-11 rounded-xl grid place-items-center shrink-0"><i data-lucide="book-marked" class="w-5 h-5 text-white"></i></div>
+              <div class="flex-1"><p class="font-bold text-sm leading-tight">Fiqih Muamalah Praktis</p><p class="text-[11px] text-slate-500">6 pelajaran · 54 peserta</p></div>
+            </div>
+            <span class="inline-block mt-2 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">Terbit</span>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center gap-3">
+              <div class="ph w-11 h-11 rounded-xl grid place-items-center shrink-0"><i data-lucide="languages" class="w-5 h-5 text-white"></i></div>
+              <div class="flex-1"><p class="font-bold text-sm leading-tight">Bahasa Arab Pemula</p><p class="text-[11px] text-slate-500">20 pelajaran · 34 peserta</p></div>
+            </div>
+            <span class="inline-block mt-2 px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold">Arsip</span>
+          </div>
+        </div>
+        <!-- class detail / modules -->
+        <div class="p-5">
+          <div class="flex items-start gap-3 mb-4 flex-wrap">
+            <div class="ph w-14 h-14 rounded-2xl grid place-items-center shrink-0"><i data-lucide="play-circle" class="w-7 h-7 text-white"></i></div>
+            <div class="flex-1 min-w-[180px]">
+              <p class="font-extrabold text-lg leading-tight display">Belajar Tajwid dari Nol</p>
+              <p class="text-xs text-slate-500">Ust. Ahmad Fauzi, Lc. · 8 pelajaran · 128 peserta · ⭐ 4.8</p>
+            </div>
+            <button class="h-9 px-4 rounded-full border bg-surface text-sm font-semibold flex items-center gap-1.5"><i data-lucide="settings-2" class="w-4 h-4"></i> Pengaturan</button>
+            <button class="h-9 px-4 rounded-full bg-gold text-white text-sm font-bold flex items-center gap-1.5"><i data-lucide="upload-cloud" class="w-4 h-4"></i> Terbitkan</button>
+          </div>
+
+          <!-- module 1 -->
+          <div class="space-y-3">
+            <div class="border rounded-2xl overflow-hidden">
+              <div class="px-4 py-2.5 flex items-center gap-2 bg-brand-50">
+                <i data-lucide="chevron-down" class="w-4 h-4 text-brand-700"></i>
+                <p class="font-bold text-sm flex-1">Modul 1 · Pengenalan Tajwid</p>
+                <span class="text-[11px] text-slate-500">3 pelajaran</span>
+                <i data-lucide="more-vertical" class="w-4 h-4 text-slate-400"></i>
+              </div>
+              <div class="divide-y">
+                <div class="px-4 py-2.5 flex items-center gap-3">
+                  <i data-lucide="grip-vertical" class="w-4 h-4 text-slate-300"></i>
+                  <i data-lucide="video" class="w-4 h-4 text-brand-600"></i>
+                  <span class="text-sm flex-1">1. Apa itu Tajwid?</span>
+                  <span class="text-[11px] text-slate-400">5m</span>
+                  <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">Terbit</span>
+                  <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+                <div class="px-4 py-2.5 flex items-center gap-3">
+                  <i data-lucide="grip-vertical" class="w-4 h-4 text-slate-300"></i>
+                  <i data-lucide="video" class="w-4 h-4 text-brand-600"></i>
+                  <span class="text-sm flex-1">2. Makhârijul Huruf</span>
+                  <span class="text-[11px] text-slate-400">8m</span>
+                  <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">Terbit</span>
+                  <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+                <div class="px-4 py-2.5 flex items-center gap-3 bg-gold/5">
+                  <i data-lucide="grip-vertical" class="w-4 h-4 text-slate-300"></i>
+                  <i data-lucide="file-text" class="w-4 h-4 text-gold-dark"></i>
+                  <span class="text-sm flex-1">3. Latihan Makhraj (kuis)</span>
+                  <span class="text-[11px] text-slate-400">—</span>
+                  <span class="px-2 py-0.5 rounded-full bg-gold/15 text-gold-dark text-[10px] font-bold">Draft</span>
+                  <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400"></i>
+                </div>
+              </div>
+              <button class="w-full px-4 py-2.5 text-left text-sm font-bold text-brand-700 bg-brand-50/40 flex items-center gap-2 border-t border-dashed"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Pelajaran</button>
+            </div>
+
+            <!-- module 2 (collapsed) -->
+            <div class="border rounded-2xl">
+              <div class="px-4 py-2.5 flex items-center gap-2">
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+                <p class="font-bold text-sm flex-1">Modul 2 · Hukum Nun Mati & Tanwin</p>
+                <span class="text-[11px] text-slate-500">5 pelajaran</span>
+                <i data-lucide="more-vertical" class="w-4 h-4 text-slate-400"></i>
+              </div>
+            </div>
+
+            <!-- add module -->
+            <button class="w-full h-12 rounded-2xl border-2 border-dashed border-brand-200 bg-brand-50/30 text-brand-700 text-sm font-bold flex items-center justify-center gap-2"><i data-lucide="folder-plus" class="w-4 h-4"></i> Tambah Modul</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>lucide.createIcons();</script>
+<script src="theme-switcher.js" defer></script>
+</body>
+</html>

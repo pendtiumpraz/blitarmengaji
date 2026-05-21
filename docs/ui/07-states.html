@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — UX States</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="theme-tokens.css">
+<link rel="stylesheet" href="craft.css">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand:{50:'var(--c-brand-50)',100:'var(--c-brand-100)',200:'var(--c-brand-200)',300:'var(--c-brand-300)',400:'var(--c-brand-400)',500:'var(--c-brand-500)',600:'var(--c-brand-600)',700:'var(--c-brand-700)',800:'var(--c-brand-800)',900:'var(--c-brand-900)'},
+      gold:{DEFAULT:'var(--c-gold)',light:'var(--c-gold-light)',dark:'var(--c-gold-dark)'},
+      cream:'var(--c-cream)', surface:'var(--c-surface)', ink:'var(--c-ink)'
+    },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], arabic:['Amiri','serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .device { width:370px; border:9px solid #0f172a; border-radius:2.4rem; background:#0f172a; box-shadow:0 20px 45px rgba(15,23,42,.25); overflow:hidden; position:relative; }
+  .device .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#0f172a; border-radius:0 0 14px 14px; z-index:50; }
+  .screen { height:760px; overflow-y:auto; background:var(--c-cream); position:relative; }
+  .screen::-webkit-scrollbar { width:0; }
+  .statusbar { height:34px; }
+  .ph { background:linear-gradient(135deg,#0E6E55,#3C9E84); }
+  .ph2 { background:linear-gradient(135deg,#A8851A,#E3C766); }
+  .ph3 { background:linear-gradient(135deg,#0B5947,#18816A); }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+  .annot { font-size:11px; color:#64748b; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+  /* skeleton shimmer */
+  .sk{background:linear-gradient(90deg,#e5e7eb,#f3f4f6,#e5e7eb);background-size:200% 100%;animation:sh 1.3s infinite}
+  @keyframes sh{to{background-position:-200% 0}}
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2">ﷺ Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin & RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="bg-brand-600 text-white">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="text-slate-500 hover:bg-slate-100">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<header class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+  <h1 class="text-2xl font-extrabold display">Galeri UX States</h1>
+  <p class="text-sm text-slate-500">Loading / Skeleton · Empty · Error · Onboarding · Toast & Alert · Konfirmasi & Sheet · Login Wall — semua theme-aware & menenangkan.</p>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24">
+
+  <!-- ============================================================
+       1. LOADING / SKELETON
+       ============================================================ -->
+  <section class="pt-6">
+    <div class="flex items-center gap-2 mb-4"><span class="w-7 h-7 rounded-full bg-brand-600 text-white grid place-items-center text-sm font-extrabold">1</span><h2 class="text-lg font-extrabold display">Loading / Skeleton</h2></div>
+    <div class="flex flex-wrap gap-10 justify-center">
+
+      <!-- Skeleton: daftar jadwal -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Jadwal Kajian</p><p class="text-xs text-white/70">Memuat jadwal terdekat…</p></div>
+            <div class="p-4">
+              <!-- skeleton search -->
+              <div class="sk h-11 rounded-xl mb-3"></div>
+              <!-- skeleton chips -->
+              <div class="flex gap-2 mb-4">
+                <div class="sk h-7 w-16 rounded-full"></div>
+                <div class="sk h-7 w-20 rounded-full"></div>
+                <div class="sk h-7 w-14 rounded-full"></div>
+              </div>
+              <!-- skeleton list cards -->
+              <div class="space-y-3">
+                <div class="bg-surface rounded-2xl shadow-card p-3 flex gap-3">
+                  <div class="sk w-14 h-14 rounded-xl shrink-0"></div>
+                  <div class="flex-1 space-y-2 py-1">
+                    <div class="sk h-3.5 w-3/4 rounded"></div>
+                    <div class="sk h-3 w-1/2 rounded"></div>
+                    <div class="sk h-3 w-2/3 rounded"></div>
+                  </div>
+                </div>
+                <div class="bg-surface rounded-2xl shadow-card p-3 flex gap-3">
+                  <div class="sk w-14 h-14 rounded-xl shrink-0"></div>
+                  <div class="flex-1 space-y-2 py-1">
+                    <div class="sk h-3.5 w-2/3 rounded"></div>
+                    <div class="sk h-3 w-1/2 rounded"></div>
+                    <div class="sk h-3 w-3/5 rounded"></div>
+                  </div>
+                </div>
+                <div class="bg-surface rounded-2xl shadow-card p-3 flex gap-3">
+                  <div class="sk w-14 h-14 rounded-xl shrink-0"></div>
+                  <div class="flex-1 space-y-2 py-1">
+                    <div class="sk h-3.5 w-4/5 rounded"></div>
+                    <div class="sk h-3 w-2/5 rounded"></div>
+                    <div class="sk h-3 w-1/2 rounded"></div>
+                  </div>
+                </div>
+                <div class="bg-surface rounded-2xl shadow-card p-3 flex gap-3">
+                  <div class="sk w-14 h-14 rounded-xl shrink-0"></div>
+                  <div class="flex-1 space-y-2 py-1">
+                    <div class="sk h-3.5 w-3/4 rounded"></div>
+                    <div class="sk h-3 w-1/2 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Loading — Daftar Jadwal</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Skeleton kartu (.sk shimmer) menjaga tata letak stabil saat data dijemput.</p>
+      </div>
+
+      <!-- Skeleton: detail -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <!-- hero skeleton -->
+            <div class="sk h-44 relative">
+              <div class="statusbar absolute top-0 inset-x-0"></div>
+            </div>
+            <div class="p-4 -mt-6">
+              <div class="bg-surface rounded-2xl shadow-card p-4 space-y-3">
+                <div class="sk h-5 w-3/4 rounded"></div>
+                <div class="sk h-3.5 w-1/2 rounded"></div>
+                <div class="flex gap-2 pt-1">
+                  <div class="sk h-9 flex-1 rounded-xl"></div>
+                  <div class="sk h-9 w-9 rounded-xl"></div>
+                </div>
+              </div>
+              <!-- body lines -->
+              <div class="mt-4 space-y-2.5">
+                <div class="sk h-3.5 w-full rounded"></div>
+                <div class="sk h-3.5 w-full rounded"></div>
+                <div class="sk h-3.5 w-5/6 rounded"></div>
+                <div class="sk h-3.5 w-full rounded"></div>
+                <div class="sk h-3.5 w-2/3 rounded"></div>
+              </div>
+              <!-- avatar + name -->
+              <div class="mt-5 flex items-center gap-3">
+                <div class="sk w-12 h-12 rounded-full shrink-0"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="sk h-3.5 w-1/2 rounded"></div>
+                  <div class="sk h-3 w-1/3 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Loading — Detail Kajian</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Hero, judul, paragraf & profil ustadz semua di-skeleton agar tak ada lompatan.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       2. EMPTY STATES
+       ============================================================ -->
+  <section class="pt-12">
+    <div class="flex items-center gap-2 mb-4"><span class="w-7 h-7 rounded-full bg-brand-600 text-white grid place-items-center text-sm font-extrabold">2</span><h2 class="text-lg font-extrabold display">Empty States</h2></div>
+    <div class="flex flex-wrap gap-10 justify-center">
+
+      <!-- Empty: peta -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Kajian di Sekitar</p><p class="text-xs text-white/70">Radius 5 km dari lokasimu</p></div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <div class="w-24 h-24 rounded-full bg-brand-50 grid place-items-center mx-auto"><i data-lucide="map-pin-off" class="w-11 h-11 text-brand-400"></i></div>
+                <p class="font-bold text-base mt-4">Belum ada kajian di area ini</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Tenang, daerahmu pasti akan terisi. Coba perluas radius atau pindah ke wilayah lain.</p>
+                <button class="mt-5 px-5 h-11 rounded-full bg-brand-600 text-white text-sm font-bold inline-flex items-center gap-2"><i data-lucide="search" class="w-4 h-4"></i> Perluas Radius</button>
+                <p class="text-xs text-slate-400 mt-3 underline">Lihat semua kota</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Empty — Peta Kajian</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Ilustrasi lembut + kalimat menenangkan + aksi memperluas radius.</p>
+      </div>
+
+      <!-- Empty: pertanyaan -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Tanya Ustadz</p><p class="text-xs text-white/70">Pertanyaan & jawaban jamaah</p></div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <div class="w-24 h-24 rounded-full bg-brand-50 grid place-items-center mx-auto"><i data-lucide="message-circle-question" class="w-11 h-11 text-brand-400"></i></div>
+                <p class="font-bold text-base mt-4">Belum ada pertanyaan</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Jadilah yang pertama bertanya. Tidak ada pertanyaan yang remeh dalam menuntut ilmu.</p>
+                <button class="mt-5 px-5 h-11 rounded-full bg-gold text-white text-sm font-bold inline-flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Ajukan Pertanyaan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Empty — Pertanyaan</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Mendorong aksi pertama tanpa membuat pengguna merasa salah.</p>
+      </div>
+
+      <!-- Empty: PDF -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Perpustakaan</p><p class="text-xs text-white/70">PDF & materi para ustadz</p></div>
+            <div class="px-4 pt-4">
+              <div class="flex items-center gap-2 bg-surface rounded-xl px-3 h-11 shadow-card"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400">Cari "tajwid"…</span></div>
+            </div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <div class="w-24 h-24 rounded-full bg-brand-50 grid place-items-center mx-auto"><i data-lucide="file-search" class="w-11 h-11 text-brand-400"></i></div>
+                <p class="font-bold text-base mt-4">Belum ada PDF</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Tidak ada materi yang cocok dengan pencarianmu. Insya Allah segera bertambah.</p>
+                <button class="mt-5 px-5 h-11 rounded-full bg-brand-600 text-white text-sm font-bold inline-flex items-center gap-2"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Hapus Filter</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Empty — Perpustakaan</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Empty hasil pencarian: bedakan dari "tidak ada koneksi", tawarkan reset filter.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       3. ERROR STATES
+       ============================================================ -->
+  <section class="pt-12">
+    <div class="flex items-center gap-2 mb-4"><span class="w-7 h-7 rounded-full bg-brand-600 text-white grid place-items-center text-sm font-extrabold">3</span><h2 class="text-lg font-extrabold display">Error States</h2></div>
+    <div class="flex flex-wrap gap-10 justify-center">
+
+      <!-- 404 -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3 flex items-center gap-2"><i data-lucide="arrow-left" class="w-5 h-5"></i><p class="font-bold flex-1">Halaman</p></div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <p class="text-6xl font-extrabold text-brand-200">404</p>
+                <div class="w-20 h-20 rounded-full bg-brand-50 grid place-items-center mx-auto -mt-2"><i data-lucide="compass" class="w-9 h-9 text-brand-400"></i></div>
+                <p class="font-bold text-base mt-4">Halaman tak ditemukan</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Sepertinya kamu tersesat. Mari kembali ke jalan utama.</p>
+                <button class="mt-5 px-5 h-11 rounded-full bg-brand-600 text-white text-sm font-bold inline-flex items-center gap-2"><i data-lucide="home" class="w-4 h-4"></i> Ke Beranda</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Error — 404</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Tautan rusak / route tak dikenal · ajak kembali ke beranda.</p>
+      </div>
+
+      <!-- 500 -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3 flex items-center gap-2"><i data-lucide="arrow-left" class="w-5 h-5"></i><p class="font-bold flex-1">Terjadi Kesalahan</p></div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <div class="w-24 h-24 rounded-full bg-red-50 grid place-items-center mx-auto"><i data-lucide="server-crash" class="w-11 h-11 text-red-400"></i></div>
+                <p class="font-bold text-base mt-4">Ada gangguan di server</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Maaf, ini bukan salahmu. Tim kami sudah diberi tahu. Mohon coba beberapa saat lagi.</p>
+                <button class="mt-5 px-5 h-11 rounded-full bg-brand-600 text-white text-sm font-bold inline-flex items-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Coba Lagi</button>
+                <p class="text-[11px] text-slate-400 mt-3">Kode galat: 500 · ID: a1b2c3</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Error — 500 Server</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Tegaskan "bukan salahmu" · tombol coba lagi · kode galat untuk support.</p>
+      </div>
+
+      <!-- offline / no connection -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar bg-slate-600"></div>
+            <div class="bg-slate-600 text-white px-4 py-3 flex items-center gap-2"><i data-lucide="wifi-off" class="w-5 h-5"></i><p class="font-bold flex-1">Mode Luring</p></div>
+            <!-- persistent offline banner -->
+            <div class="bg-amber-100 text-amber-800 text-xs font-semibold px-4 py-2 flex items-center gap-2"><i data-lucide="cloud-off" class="w-4 h-4"></i> Kamu sedang luring — sebagian data mungkin lama.</div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <div class="w-24 h-24 rounded-full bg-slate-100 grid place-items-center mx-auto"><i data-lucide="wifi-off" class="w-11 h-11 text-slate-400"></i></div>
+                <p class="font-bold text-base mt-4">Tidak ada koneksi</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Periksa jaringan internetmu, lalu coba muat ulang halaman ini.</p>
+                <button class="mt-5 px-5 h-11 rounded-full bg-brand-600 text-white text-sm font-bold inline-flex items-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Coba Lagi</button>
+                <p class="text-[11px] text-slate-400 mt-3">Konten tersimpan tetap bisa dibuka.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Error — Tanpa Koneksi</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Krusial untuk WebView: banner luring persisten + retry + akses konten cache.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       4. ONBOARDING / SPLASH
+       ============================================================ -->
+  <section class="pt-12">
+    <div class="flex items-center gap-2 mb-4"><span class="w-7 h-7 rounded-full bg-brand-600 text-white grid place-items-center text-sm font-extrabold">4</span><h2 class="text-lg font-extrabold display">Onboarding / Splash</h2></div>
+    <div class="flex flex-wrap gap-10 justify-center">
+
+      <!-- Splash -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen ph grid place-items-center text-center text-white relative overflow-hidden" data-theme="teduh">
+            <div class="orn-overlay pat-girih-light"></div>
+            <div class="relative z-10">
+              <div class="w-24 h-24 rounded-3xl grid place-items-center mx-auto overflow-hidden"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div>
+              <h2 class="text-2xl font-extrabold mt-4 display">Blitar Mengaji</h2>
+              <p class="text-sm text-white/80 mt-1">Satu pintu menuju kajian & ilmu</p>
+              <div class="mt-8 flex items-center justify-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-white/40 animate-pulse"></span>
+                <span class="w-2 h-2 rounded-full bg-white/70 animate-pulse"></span>
+                <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Splash Screen</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Logo ﷺ + tagline · indikator memuat saat sesi dipulihkan.</p>
+      </div>
+
+      <!-- Onboarding slide 1 -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar"></div>
+            <div class="px-6 pt-2 text-right"><span class="text-xs font-semibold text-slate-400">Lewati</span></div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <div class="w-40 h-40 rounded-full bg-brand-50 grid place-items-center mx-auto"><i data-lucide="map-pin" class="w-16 h-16 text-brand-500"></i></div>
+                <h3 class="text-xl font-extrabold mt-6 display">Temukan Kajian Terdekat</h3>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">Lihat jadwal pengajian di masjid sekitarmu lengkap dengan peta & waktu.</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-center gap-2 mb-5">
+                <span class="w-6 h-2 rounded-full bg-brand-600"></span>
+                <span class="w-2 h-2 rounded-full bg-brand-200"></span>
+                <span class="w-2 h-2 rounded-full bg-brand-200"></span>
+              </div>
+              <button class="w-full h-12 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center gap-2">Lanjut <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Onboarding 1/3</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Value prop "temukan kajian" · dot 1 aktif · tombol Lewati.</p>
+      </div>
+
+      <!-- Onboarding slide 2 -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar"></div>
+            <div class="px-6 pt-2 text-right"><span class="text-xs font-semibold text-slate-400">Lewati</span></div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <div class="w-40 h-40 rounded-full bg-brand-50 grid place-items-center mx-auto"><i data-lucide="message-circle-heart" class="w-16 h-16 text-brand-500"></i></div>
+                <h3 class="text-xl font-extrabold mt-6 display">Bertanya pada Ustadz</h3>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">Ajukan pertanyaan agama dengan tenang — bisa juga anonim sebagai "Hamba Allah".</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-center gap-2 mb-5">
+                <span class="w-2 h-2 rounded-full bg-brand-200"></span>
+                <span class="w-6 h-2 rounded-full bg-brand-600"></span>
+                <span class="w-2 h-2 rounded-full bg-brand-200"></span>
+              </div>
+              <button class="w-full h-12 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center gap-2">Lanjut <i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Onboarding 2/3</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Value prop "tanya ustadz" · dot 2 aktif.</p>
+      </div>
+
+      <!-- Onboarding slide 3 -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen flex flex-col" data-theme="teduh">
+            <div class="statusbar"></div>
+            <div class="px-6 pt-2 text-right"><span class="text-xs font-semibold text-transparent">Lewati</span></div>
+            <div class="flex-1 grid place-items-center px-8 text-center">
+              <div>
+                <div class="w-40 h-40 rounded-full bg-brand-50 grid place-items-center mx-auto"><i data-lucide="graduation-cap" class="w-16 h-16 text-brand-500"></i></div>
+                <h3 class="text-xl font-extrabold mt-6 display">Belajar Tanpa Biaya</h3>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">Ikuti kelas online, unduh PDF, dan simpan jadwal — semuanya gratis.</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-center gap-2 mb-5">
+                <span class="w-2 h-2 rounded-full bg-brand-200"></span>
+                <span class="w-2 h-2 rounded-full bg-brand-200"></span>
+                <span class="w-6 h-2 rounded-full bg-brand-600"></span>
+              </div>
+              <button class="w-full h-12 rounded-full bg-gold text-white font-bold flex items-center justify-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Mulai</button>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Onboarding 3/3</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Slide terakhir · dot 3 aktif · tombol "Mulai" (emas) masuk aplikasi.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       5. TOAST / ALERT
+       ============================================================ -->
+  <section class="pt-12">
+    <div class="flex items-center gap-2 mb-4"><span class="w-7 h-7 rounded-full bg-brand-600 text-white grid place-items-center text-sm font-extrabold">5</span><h2 class="text-lg font-extrabold display">Toast / Alert</h2></div>
+    <div class="flex flex-wrap gap-10 justify-center">
+
+      <!-- Toast success (top floating) -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Pertanyaanku</p></div>
+            <!-- floating toast -->
+            <div class="px-4 pt-3 absolute inset-x-0 top-[68px] z-30">
+              <div class="bg-surface rounded-2xl shadow-pop border-l-4 border-green-500 p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-green-100 grid place-items-center shrink-0"><i data-lucide="check" class="w-5 h-5 text-green-600"></i></div>
+                <div class="flex-1"><p class="text-sm font-bold">Pertanyaan terkirim</p><p class="text-xs text-slate-500">Ustadz akan menjawab segera, insya Allah.</p></div>
+                <i data-lucide="x" class="w-4 h-4 text-slate-300 shrink-0"></i>
+              </div>
+            </div>
+            <!-- dimmed underlying content -->
+            <div class="p-4 space-y-3 pt-24 opacity-60">
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-2/3 bg-slate-200 rounded"></div><div class="h-3 w-1/2 bg-slate-100 rounded mt-2"></div></div>
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-3/4 bg-slate-200 rounded"></div><div class="h-3 w-1/3 bg-slate-100 rounded mt-2"></div></div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Toast — Sukses (hijau)</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Notifikasi mengambang atas, hilang otomatis · aksen hijau + ikon centang.</p>
+      </div>
+
+      <!-- Toast error (bottom floating) -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Unggah Materi</p></div>
+            <div class="p-4 space-y-3 opacity-60">
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-2/3 bg-slate-200 rounded"></div><div class="h-3 w-1/2 bg-slate-100 rounded mt-2"></div></div>
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-3/4 bg-slate-200 rounded"></div></div>
+            </div>
+            <!-- bottom toast error -->
+            <div class="px-4 absolute inset-x-0 bottom-5 z-30">
+              <div class="bg-surface rounded-2xl shadow-pop border-l-4 border-red-500 p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-red-100 grid place-items-center shrink-0"><i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i></div>
+                <div class="flex-1"><p class="text-sm font-bold">Gagal mengunggah</p><p class="text-xs text-slate-500">Ukuran berkas melebihi 10 MB.</p></div>
+                <span class="text-xs font-bold text-red-600 shrink-0">Ulangi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Toast — Error (merah)</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Aksen merah · sebut sebab kegagalan · aksi "Ulangi" inline.</p>
+      </div>
+
+      <!-- Toast info + inline alerts -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Pemberitahuan</p></div>
+            <!-- floating info toast -->
+            <div class="px-4 pt-3 absolute inset-x-0 top-[68px] z-30">
+              <div class="bg-surface rounded-2xl shadow-pop border-l-4 border-brand-500 p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-brand-50 grid place-items-center shrink-0"><i data-lucide="info" class="w-5 h-5 text-brand-600"></i></div>
+                <div class="flex-1"><p class="text-sm font-bold">Jadwal diperbarui</p><p class="text-xs text-slate-500">3 kajian baru ditambahkan hari ini.</p></div>
+                <i data-lucide="x" class="w-4 h-4 text-slate-300 shrink-0"></i>
+              </div>
+            </div>
+            <!-- inline alert variants -->
+            <div class="p-4 pt-24 space-y-3">
+              <p class="text-xs font-bold text-slate-400 uppercase">Alert sebaris</p>
+              <div class="rounded-xl bg-green-50 border border-green-200 p-3 flex items-start gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-600 mt-0.5"></i><p class="text-xs text-green-800 flex-1"><b>Berhasil.</b> Profilmu sudah diperbarui.</p></div>
+              <div class="rounded-xl bg-amber-50 border border-amber-200 p-3 flex items-start gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 mt-0.5"></i><p class="text-xs text-amber-800 flex-1"><b>Perhatian.</b> Verifikasi emailmu untuk fitur penuh.</p></div>
+              <div class="rounded-xl bg-red-50 border border-red-200 p-3 flex items-start gap-2"><i data-lucide="x-circle" class="w-4 h-4 text-red-600 mt-0.5"></i><p class="text-xs text-red-800 flex-1"><b>Gagal.</b> Sandi lama tidak cocok.</p></div>
+              <div class="rounded-xl bg-brand-50 border border-brand-200 p-3 flex items-start gap-2"><i data-lucide="info" class="w-4 h-4 text-brand-600 mt-0.5"></i><p class="text-xs text-brand-800 flex-1"><b>Info.</b> Aplikasi diperbarui ke versi 1.2.</p></div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Toast Info + Alert Sebaris</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Toast brand (info) · varian alert sukses/peringatan/gagal/info untuk form.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       6. KONFIRMASI / BOTTOM SHEET
+       ============================================================ -->
+  <section class="pt-12">
+    <div class="flex items-center gap-2 mb-4"><span class="w-7 h-7 rounded-full bg-brand-600 text-white grid place-items-center text-sm font-extrabold">6</span><h2 class="text-lg font-extrabold display">Konfirmasi / Bottom Sheet</h2></div>
+    <div class="flex flex-wrap gap-10 justify-center">
+
+      <!-- Confirm delete dialog -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen relative" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Materiku</p></div>
+            <div class="p-4 space-y-3 opacity-50">
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-2/3 bg-slate-200 rounded"></div><div class="h-3 w-1/2 bg-slate-100 rounded mt-2"></div></div>
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-3/4 bg-slate-200 rounded"></div></div>
+            </div>
+            <!-- scrim -->
+            <div class="absolute inset-0 bg-slate-900/40 grid place-items-center px-8 z-30">
+              <div class="bg-surface rounded-3xl shadow-pop p-5 text-center w-full">
+                <div class="w-14 h-14 rounded-full bg-red-100 grid place-items-center mx-auto"><i data-lucide="trash-2" class="w-7 h-7 text-red-600"></i></div>
+                <p class="font-bold text-base mt-3">Hapus materi ini?</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">"Ringkasan Fiqih Shalat" akan dihapus permanen dan tak bisa dikembalikan.</p>
+                <div class="mt-5 flex gap-2">
+                  <button class="flex-1 h-11 rounded-full border border-slate-200 font-bold text-sm">Batal</button>
+                  <button class="flex-1 h-11 rounded-full bg-red-600 text-white font-bold text-sm">Hapus</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Dialog Konfirmasi Hapus</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Aksi merusak · scrim gelap · sebut nama item · aksi destruktif merah.</p>
+      </div>
+
+      <!-- Share bottom sheet -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen relative" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Detail Kajian</p></div>
+            <div class="p-4 space-y-3 opacity-50">
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-2/3 bg-slate-200 rounded"></div><div class="h-3 w-1/2 bg-slate-100 rounded mt-2"></div></div>
+            </div>
+            <!-- scrim -->
+            <div class="absolute inset-0 bg-slate-900/40 z-30 flex flex-col justify-end">
+              <div class="bg-surface rounded-t-3xl p-5">
+                <div class="w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
+                <p class="font-bold text-base mb-3">Bagikan kajian</p>
+                <div class="grid grid-cols-4 gap-3 text-center">
+                  <div><div class="w-14 h-14 rounded-2xl bg-green-100 grid place-items-center mx-auto"><i data-lucide="message-circle" class="w-6 h-6 text-green-600"></i></div><p class="text-[11px] mt-1.5 font-semibold">WhatsApp</p></div>
+                  <div><div class="w-14 h-14 rounded-2xl bg-sky-100 grid place-items-center mx-auto"><i data-lucide="send" class="w-6 h-6 text-sky-600"></i></div><p class="text-[11px] mt-1.5 font-semibold">Telegram</p></div>
+                  <div><div class="w-14 h-14 rounded-2xl bg-pink-100 grid place-items-center mx-auto"><i data-lucide="instagram" class="w-6 h-6 text-pink-600"></i></div><p class="text-[11px] mt-1.5 font-semibold">Instagram</p></div>
+                  <div><div class="w-14 h-14 rounded-2xl bg-brand-50 grid place-items-center mx-auto"><i data-lucide="more-horizontal" class="w-6 h-6 text-brand-600"></i></div><p class="text-[11px] mt-1.5 font-semibold">Lainnya</p></div>
+                </div>
+                <div class="mt-4 flex items-center gap-2 border rounded-xl px-3 h-11 bg-cream">
+                  <i data-lucide="link" class="w-4 h-4 text-slate-400"></i>
+                  <span class="text-xs text-slate-500 flex-1 truncate">blitarmengaji.id/kajian/subuh-fiqih</span>
+                  <span class="text-xs font-bold text-brand-600">Salin</span>
+                </div>
+                <button class="mt-4 w-full h-11 rounded-full bg-slate-100 font-bold text-sm">Tutup</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Bottom Sheet — Bagikan</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Sheet naik dari bawah · grab handle · target bagikan + salin tautan.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       7. PERMISSION / LOGIN WALL
+       ============================================================ -->
+  <section class="pt-12">
+    <div class="flex items-center gap-2 mb-4"><span class="w-7 h-7 rounded-full bg-brand-600 text-white grid place-items-center text-sm font-extrabold">7</span><h2 class="text-lg font-extrabold display">Permission / Login Wall</h2></div>
+    <div class="flex flex-wrap gap-10 justify-center">
+
+      <!-- Login wall (gated action) -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen relative" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3 flex items-center gap-2"><i data-lucide="arrow-left" class="w-5 h-5"></i><p class="font-bold flex-1">Tanya Ustadz</p></div>
+            <div class="p-4 space-y-3 opacity-50">
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-2/3 bg-slate-200 rounded"></div><div class="h-3 w-1/2 bg-slate-100 rounded mt-2"></div></div>
+              <div class="bg-surface rounded-2xl shadow-card p-3"><div class="h-3.5 w-3/4 bg-slate-200 rounded"></div></div>
+            </div>
+            <!-- scrim + login sheet -->
+            <div class="absolute inset-0 bg-slate-900/40 z-30 flex flex-col justify-end">
+              <div class="bg-surface rounded-t-3xl p-6 text-center">
+                <div class="w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
+                <div class="w-16 h-16 rounded-2xl grid place-items-center mx-auto overflow-hidden"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div>
+                <p class="font-bold text-lg mt-3 display">Masuk untuk bertanya</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Akun gratis dibutuhkan agar ustadz bisa menjawab dan menyapamu kembali.</p>
+                <button class="mt-5 w-full h-12 rounded-full bg-brand-600 text-white font-bold">Masuk</button>
+                <button class="mt-2 w-full h-12 rounded-full border bg-surface font-semibold text-sm flex items-center justify-center gap-2"><i data-lucide="chrome" class="w-4 h-4"></i> Lanjut dengan Google</button>
+                <p class="text-xs text-slate-400 mt-3">Belum punya akun? <span class="text-brand-600 font-bold">Daftar gratis</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Login Wall — Aksi Terkunci</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Muncul saat tamu menekan "Ajukan Pertanyaan" · konten latar dibiarkan terlihat.</p>
+      </div>
+
+      <!-- Permission request (location) -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen relative" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Kajian di Sekitar</p></div>
+            <div class="p-4 space-y-3 opacity-50">
+              <div class="sk h-40 rounded-2xl"></div>
+            </div>
+            <!-- permission dialog -->
+            <div class="absolute inset-0 bg-slate-900/40 grid place-items-center px-8 z-30">
+              <div class="bg-surface rounded-3xl shadow-pop p-5 text-center w-full">
+                <div class="w-14 h-14 rounded-full bg-brand-50 grid place-items-center mx-auto"><i data-lucide="navigation" class="w-7 h-7 text-brand-600"></i></div>
+                <p class="font-bold text-base mt-3">Izinkan akses lokasi?</p>
+                <p class="text-sm text-slate-500 mt-1 leading-relaxed">Kami pakai lokasimu hanya untuk menampilkan kajian terdekat. Tidak disimpan.</p>
+                <div class="mt-5 space-y-2">
+                  <button class="w-full h-11 rounded-full bg-brand-600 text-white font-bold text-sm">Izinkan</button>
+                  <button class="w-full h-11 rounded-full font-bold text-sm text-slate-500">Nanti saja</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Permission — Lokasi</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Jelaskan alasan & jaminan privasi sebelum prompt OS · opsi "Nanti saja".</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+<script>lucide.createIcons();</script>
+<script src="theme-switcher.js" defer></script>
+</body>
+</html>

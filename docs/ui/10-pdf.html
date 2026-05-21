@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Template PDF</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:wght@500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  /* PDF = dokumen resmi: warna brand TETAP (literal hex), tidak ikut theme switcher */
+  tailwind.config = { theme: { extend: {
+    colors: { brand:{50:'#E9F5F1',100:'#CDEAE1',600:'#0E6E55',700:'#0B5947',800:'#094736'}, gold:{DEFAULT:'#C9A227',light:'#E3C766',dark:'#A8851A'}, ink:'#1F2A37' },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], serif:['Lora','serif'], arabic:['Amiri','serif'] }
+  } } }
+</script>
+<style>
+  body { background:#9aa3ad; font-family:'Plus Jakarta Sans',sans-serif; color:#1F2A37; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+  .label { color:#fff; font-weight:700; margin:26px auto 6px; max-width:794px; display:flex; align-items:center; gap:8px; }
+  .label .tag { background:rgba(255,255,255,.18); padding:2px 10px; border-radius:999px; font-size:12px; }
+
+  /* ===== A4 PAGE ===== */
+  .page { width:794px; min-height:1123px; background:#fff; margin:0 auto 28px; padding:52px 56px 70px;
+          box-shadow:0 12px 34px rgba(0,0,0,.28); position:relative; }
+  .page.land { width:1123px; min-height:794px; }
+
+  .dochead { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #C9A227; padding-bottom:14px; position:relative; overflow:hidden; }
+  .brandmark { display:flex; gap:12px; align-items:center; position:relative; z-index:1; }
+  .logo { width:46px; height:46px; border-radius:12px; overflow:hidden; display:grid; place-items:center; }
+  .logo svg { display:block; }
+  .doctitle { text-align:right; position:relative; z-index:1; }
+  .doctitle h1 { font-size:18px; font-weight:800; color:#0E6E55; line-height:1.1; font-family:'Lora',serif; }
+
+  /* ornamen halus print-friendly: medali bintang-8 emas tipis di pojok header */
+  .head-orn { position:absolute; top:-14px; right:-12px; width:70px; height:70px; pointer-events:none; z-index:0; }
+  /* ornamen sudut arabesque pada sertifikat */
+  .cert-corn { position:absolute; width:62px; height:62px; pointer-events:none; }
+  .cert-corn.tl { top:6px; left:6px; }
+  .cert-corn.br { bottom:6px; right:6px; transform:rotate(180deg); }
+
+  table.rep { width:100%; border-collapse:collapse; font-size:12px; margin-top:6px; }
+  table.rep th { background:#0E6E55; color:#fff; text-align:left; padding:8px 10px; font-weight:600; }
+  table.rep th:last-child, table.rep td:last-child { text-align:right; }
+  table.rep td { padding:7px 10px; border-bottom:1px solid #eee; }
+  table.rep tfoot td { font-weight:800; border-top:2px solid #0E6E55; background:#F2F8F5; }
+  .num { font-variant-numeric:tabular-nums; }
+  .sectitle { font-size:13px; font-weight:800; color:#0B5947; margin:20px 0 6px; display:flex; align-items:center; gap:6px; }
+
+  .sumgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:18px 0 4px; }
+  .sumbox { border:1px solid #e5e7eb; border-radius:10px; padding:11px 13px; }
+  .sumbox .k { font-size:10px; color:#6B7280; text-transform:uppercase; letter-spacing:.04em; font-weight:700; }
+  .sumbox .v { font-size:16px; font-weight:800; margin-top:3px; }
+  .sumbox.dark { background:#0E6E55; color:#fff; border:none; }
+  .sumbox.dark .k { color:rgba(255,255,255,.7); }
+
+  .sign { display:flex; justify-content:space-between; margin-top:40px; }
+  .sign .col { text-align:center; width:42%; font-size:12px; }
+  .sign .line { margin-top:64px; border-top:1px solid #333; padding-top:4px; font-weight:700; }
+
+  .docfoot { position:absolute; left:56px; right:56px; bottom:26px; border-top:1px solid #eee; padding-top:8px;
+             font-size:10px; color:#9aa1ab; display:flex; justify-content:space-between; }
+  .stamp { display:inline-grid; place-items:center; width:96px; height:96px; border:2px dashed #0E6E55; border-radius:999px;
+           color:#0E6E55; font-size:10px; font-weight:700; text-align:center; transform:rotate(-8deg); opacity:.85; }
+
+  /* Sertifikat */
+  .cert-outer { border:3px solid #0E6E55; height:690px; padding:8px; }
+  .cert-inner { border:1.5px solid #C9A227; height:100%; padding:30px 50px; text-align:center; position:relative; display:flex; flex-direction:column; justify-content:center; }
+  .cert-wm { position:absolute; inset:0; display:grid; place-items:center; font-size:340px; color:#0E6E55; opacity:.04; pointer-events:none; }
+
+  /* toolbar */
+  .toolbar { position:sticky; top:0; z-index:50; background:rgba(255,255,255,.92); backdrop-filter:blur(6px); border-bottom:1px solid #e5e7eb; }
+
+  @media print {
+    body { background:#fff; }
+    .noprint { display:none !important; }
+    .page { box-shadow:none; margin:0; width:auto; min-height:auto; padding:14mm; page-break-after:always; }
+    @page { size:A4; margin:0; }
+  }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- TOOLBAR / NAV (noprint) -->
+<div class="toolbar noprint">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2">ﷺ Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin & RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="text-slate-500 hover:bg-slate-100">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="bg-rose-600 text-white">📄 PDF Umum</a>
+    <a href="11-pdf-masjid.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF Masjid</a>
+    <button onclick="window.print()" class="ml-auto px-3 h-9 rounded-full bg-ink text-white text-xs font-bold flex items-center gap-1"><i data-lucide="printer" class="w-4 h-4"></i> Cetak / Simpan PDF</button>
+  </div>
+  <p class="max-w-7xl mx-auto px-6 pb-2 text-xs text-slate-500">Mockup layout PDF resmi (A4). Final di-generate via <b>@react-pdf/renderer / pdf-lib</b>. Identitas brand tetap (Teduh) — tidak ikut tema.</p>
+</div>
+
+<div class="py-6">
+
+  <!-- ============ 1. LAPORAN KEUANGAN ============ -->
+  <div class="label noprint"><span class="tag">PDF 1</span> Laporan Keuangan (Global / per Titik)</div>
+  <div class="page">
+    <div class="dochead">
+      <svg class="head-orn" viewBox="0 0 70 70"><g transform="translate(35 35)" fill="none" stroke="#C9A227" stroke-opacity=".25" stroke-width="1.2"><circle r="30"/><circle r="24"/><path d="M0-26 6.5-6.5 26 0 6.5 6.5 0 26-6.5 6.5-26 0-6.5-6.5Z"/><path d="M0-26 6.5-6.5 26 0 6.5 6.5 0 26-6.5 6.5-26 0-6.5-6.5Z" transform="rotate(22.5)"/></g></svg>
+      <div class="brandmark">
+        <div class="logo"><svg viewBox="0 0 56 56" width="100%" height="100%"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E6E55"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#C9A227" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div>
+        <div>
+          <p class="font-extrabold text-lg leading-none">BLITAR MENGAJI</p>
+          <p class="text-xs text-slate-500">Sistem Informasi Kajian & Keuangan · blitarmengaji.id</p>
+        </div>
+      </div>
+      <div class="doctitle">
+        <h1>LAPORAN KEUANGAN</h1>
+        <p class="text-xs text-slate-500 mt-1">Periode: <b>April 2026</b></p>
+        <p class="text-xs text-slate-500">Lingkup: <b>Kas Pusat (Global)</b></p>
+      </div>
+    </div>
+
+    <div class="flex justify-between text-xs text-slate-500 mt-3">
+      <span>No. Dokumen: <b>LK/2026/04/001</b></span>
+      <span>Dicetak: 1 Mei 2026, 09.14 WIB</span>
+    </div>
+
+    <div class="sumgrid">
+      <div class="sumbox"><div class="k">Saldo Awal</div><div class="v">Rp 19.100.000</div></div>
+      <div class="sumbox"><div class="k">Pemasukan</div><div class="v" style="color:#16A34A">+ Rp 12.450.000</div></div>
+      <div class="sumbox"><div class="k">Pengeluaran</div><div class="v" style="color:#DC2626">− Rp 7.200.000</div></div>
+      <div class="sumbox dark"><div class="k">Saldo Akhir</div><div class="v">Rp 24.350.000</div></div>
+    </div>
+
+    <div class="sectitle">▸ Rincian Pemasukan</div>
+    <table class="rep">
+      <thead><tr><th style="width:80px">Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Jumlah (Rp)</th></tr></thead>
+      <tbody>
+        <tr><td>03/04</td><td>Infaq Jumat</td><td>Kotak amal Masjid Agung</td><td class="num">3.250.000</td></tr>
+        <tr><td>10/04</td><td>Donasi</td><td>Transfer donatur (Hamba Allah)</td><td class="num">5.000.000</td></tr>
+        <tr><td>17/04</td><td>Infaq Jumat</td><td>Kotak amal gabungan</td><td class="num">2.700.000</td></tr>
+        <tr><td>25/04</td><td>Wakaf</td><td>Wakaf buku & perlengkapan</td><td class="num">1.500.000</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="3">Total Pemasukan</td><td class="num">12.450.000</td></tr></tfoot>
+    </table>
+
+    <div class="sectitle">▸ Rincian Pengeluaran</div>
+    <table class="rep">
+      <thead><tr><th style="width:80px">Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Jumlah (Rp)</th></tr></thead>
+      <tbody>
+        <tr><td>05/04</td><td>Operasional</td><td>Honor ustadz pengisi kajian</td><td class="num">3.000.000</td></tr>
+        <tr><td>12/04</td><td>Sarana</td><td>Perawatan sound system</td><td class="num">1.200.000</td></tr>
+        <tr><td>20/04</td><td>Konsumsi</td><td>Konsumsi kajian akbar</td><td class="num">1.800.000</td></tr>
+        <tr><td>28/04</td><td>Operasional</td><td>Listrik & kebersihan</td><td class="num">1.200.000</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="3">Total Pengeluaran</td><td class="num">7.200.000</td></tr></tfoot>
+    </table>
+
+    <!-- mini grafik komposisi -->
+    <div class="sectitle">▸ Komposisi Pengeluaran</div>
+    <div class="flex items-end gap-4 h-24 border-l border-b border-slate-200 pl-3 pb-0 mt-1">
+      <div class="flex flex-col items-center gap-1"><div style="width:42px;height:88px;background:#0E6E55;border-radius:4px 4px 0 0"></div><span class="text-[10px] text-slate-500">Operasional</span></div>
+      <div class="flex flex-col items-center gap-1"><div style="width:42px;height:50px;background:#3C9E84;border-radius:4px 4px 0 0"></div><span class="text-[10px] text-slate-500">Konsumsi</span></div>
+      <div class="flex flex-col items-center gap-1"><div style="width:42px;height:34px;background:#9FD6C6;border-radius:4px 4px 0 0"></div><span class="text-[10px] text-slate-500">Sarana</span></div>
+    </div>
+
+    <div class="sign">
+      <div class="col">Bendahara,<div class="line">( Hj. Aminah )</div></div>
+      <div class="col">Mengetahui, Ketua,<div class="line">( H. Abdullah Karim )</div></div>
+    </div>
+
+    <div class="docfoot">
+      <span>Dokumen dibuat otomatis oleh sistem Blitar Mengaji — transparansi keuangan untuk umat.</span>
+      <span>Halaman 1</span>
+    </div>
+  </div>
+
+  <!-- ============ 2. LAPORAN DONASI ============ -->
+  <div class="label noprint"><span class="tag">PDF 2</span> Laporan Penggunaan Dana Donasi (per Campaign)</div>
+  <div class="page">
+    <div class="dochead">
+      <svg class="head-orn" viewBox="0 0 70 70"><g transform="translate(35 35)" fill="none" stroke="#C9A227" stroke-opacity=".25" stroke-width="1.2"><circle r="30"/><circle r="24"/><path d="M0-26 6.5-6.5 26 0 6.5 6.5 0 26-6.5 6.5-26 0-6.5-6.5Z"/><path d="M0-26 6.5-6.5 26 0 6.5 6.5 0 26-6.5 6.5-26 0-6.5-6.5Z" transform="rotate(22.5)"/></g></svg>
+      <div class="brandmark"><div class="logo"><svg viewBox="0 0 56 56" width="100%" height="100%"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E6E55"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#C9A227" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div>
+        <div><p class="font-extrabold text-lg leading-none">BLITAR MENGAJI</p><p class="text-xs text-slate-500">Laporan Transparansi Donasi</p></div>
+      </div>
+      <div class="doctitle"><h1>LAPORAN DONASI</h1><p class="text-xs text-slate-500 mt-1">No: <b>DN/2026/AF/007</b></p><p class="text-xs text-slate-500">Per 18 Mei 2026</p></div>
+    </div>
+
+    <div class="mt-4 border border-slate-200 rounded-xl p-4">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-[11px] text-slate-500">Program Donasi</p>
+          <p class="font-extrabold text-base">Renovasi Tempat Wudhu & MCK</p>
+          <p class="text-xs text-slate-500 mt-0.5">Titik Dakwah: <b>Masjid Al-Falah</b>, Kepanjenkidul</p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-bold" style="background:#FBF3D9;color:#A8851A">● Aktif</span>
+      </div>
+      <div class="mt-3">
+        <div class="flex justify-between text-xs mb-1"><span class="font-bold" style="color:#A8851A">Terkumpul Rp 18.500.000</span><span class="text-slate-500">Target Rp 30.000.000</span></div>
+        <div style="height:10px;background:#eee;border-radius:999px;overflow:hidden"><div style="width:62%;height:100%;background:#C9A227"></div></div>
+        <p class="text-[11px] text-slate-500 mt-1">62% tercapai · 132 donatur · sisa target Rp 11.500.000</p>
+      </div>
+    </div>
+
+    <div class="sectitle">▸ Penerimaan Donasi (ringkas)</div>
+    <table class="rep">
+      <thead><tr><th style="width:80px">Tanggal</th><th>Donatur</th><th>Jumlah (Rp)</th></tr></thead>
+      <tbody>
+        <tr><td>02/05</td><td>Hamba Allah</td><td class="num">5.000.000</td></tr>
+        <tr><td>06/05</td><td>Keluarga H. Sulaiman</td><td class="num">3.500.000</td></tr>
+        <tr><td>10/05</td><td>Donasi kolektif jamaah</td><td class="num">6.000.000</td></tr>
+        <tr><td>15/05</td><td>Hamba Allah (×24)</td><td class="num">4.000.000</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="2">Total Diterima</td><td class="num">18.500.000</td></tr></tfoot>
+    </table>
+
+    <div class="sectitle">▸ Penggunaan Dana</div>
+    <table class="rep">
+      <thead><tr><th style="width:80px">Tanggal</th><th>Uraian</th><th>Bukti</th><th>Jumlah (Rp)</th></tr></thead>
+      <tbody>
+        <tr><td>08/05</td><td>Upah tukang (termin 1)</td><td>📎 Nota #112</td><td class="num">3.000.000</td></tr>
+        <tr><td>12/05</td><td>Pembelian keramik & semen</td><td>📎 Nota #118</td><td class="num">7.200.000</td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="3">Total Terpakai</td><td class="num">10.200.000</td></tr></tfoot>
+    </table>
+
+    <div class="sumgrid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="sumbox"><div class="k">Total Diterima</div><div class="v">Rp 18.500.000</div></div>
+      <div class="sumbox"><div class="k">Total Terpakai</div><div class="v" style="color:#DC2626">Rp 10.200.000</div></div>
+      <div class="sumbox dark"><div class="k">Saldo Donasi</div><div class="v">Rp 8.300.000</div></div>
+    </div>
+
+    <div class="sign">
+      <div class="col">Pengelola Titik,<div class="line">( Ust. Ahmad Fauzi )</div></div>
+      <div class="col">Bendahara Program,<div class="line">( Saiful Anwar )</div></div>
+    </div>
+    <div class="docfoot"><span>Setiap rupiah dapat ditelusuri. Jazaakumullahu khairan atas kepercayaannya.</span><span>blitarmengaji.id</span></div>
+  </div>
+
+  <!-- ============ 3. SERTIFIKAT (LANDSCAPE) ============ -->
+  <div class="label noprint"><span class="tag">PDF 3</span> Sertifikat Kelas Online (Landscape)</div>
+  <div class="page land">
+    <div class="cert-outer">
+      <div class="cert-inner">
+        <div class="cert-wm">ﷺ</div>
+        <svg class="cert-corn tl" viewBox="0 0 62 62" fill="none" stroke="#C9A227" stroke-opacity=".3" stroke-width="1.2" stroke-linecap="round"><path d="M4 4 L4 30 M4 4 L30 4"/><path d="M4 4 C26 4 30 8 30 30 M4 4 C4 26 8 30 30 30"/><path d="M4 14 C14 14 14 4 24 4"/><circle cx="10" cy="10" r="2.2"/></svg>
+        <svg class="cert-corn br" viewBox="0 0 62 62" fill="none" stroke="#C9A227" stroke-opacity=".3" stroke-width="1.2" stroke-linecap="round"><path d="M4 4 L4 30 M4 4 L30 4"/><path d="M4 4 C26 4 30 8 30 30 M4 4 C4 26 8 30 30 30"/><path d="M4 14 C14 14 14 4 24 4"/><circle cx="10" cy="10" r="2.2"/></svg>
+        <div style="position:relative">
+          <div class="flex items-center justify-center gap-3 mb-2">
+            <div class="logo" style="width:46px;height:46px"><svg viewBox="0 0 56 56" width="100%" height="100%"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E6E55"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#C9A227" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div><p class="font-extrabold text-lg">BLITAR MENGAJI</p>
+          </div>
+          <p class="font-arabic text-2xl" style="color:#0E6E55">شَهَادَة</p>
+          <h1 class="font-serif" style="font-size:42px;color:#0E6E55;font-weight:700;letter-spacing:.04em">SERTIFIKAT</h1>
+          <p class="text-sm text-slate-500 mt-2">Diberikan dengan bangga kepada</p>
+          <p class="font-serif" style="font-size:34px;font-weight:700;margin:8px 0;border-bottom:2px solid #C9A227;display:inline-block;padding:0 28px 6px">Muhammad Ridwan</p>
+          <p class="text-sm text-slate-600 mt-3 max-w-2xl mx-auto">atas keberhasilannya menyelesaikan kelas online</p>
+          <p class="text-xl font-extrabold mt-1" style="color:#0B5947">“Belajar Tajwid dari Nol”</p>
+          <p class="text-xs text-slate-500 mt-1">Pengajar: Ust. Hamid · 8 pelajaran · Selesai 18 Mei 2026</p>
+
+          <div class="flex items-end justify-between mt-10 px-10">
+            <div class="text-center text-xs">
+              <div style="border-top:1px solid #333;width:170px;padding-top:4px;font-weight:700">Ust. Hamid</div>
+              <span class="text-slate-500">Pengajar</span>
+            </div>
+            <div class="stamp">BLITAR<br>MENGAJI<br>✓ RESMI</div>
+            <div class="text-center text-xs">
+              <div style="border-top:1px solid #333;width:170px;padding-top:4px;font-weight:700">H. Abdullah Karim</div>
+              <span class="text-slate-500">Direktur</span>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-5">No. Sertifikat: BM-CRT-2026-00481 · Verifikasi: blitarmengaji.id/cek/BM00481</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 4. KWITANSI ============ -->
+  <div class="label noprint"><span class="tag">PDF 4</span> Kwitansi / Bukti Donasi</div>
+  <div class="page" style="min-height:auto;padding-bottom:56px">
+    <div class="dochead">
+      <svg class="head-orn" viewBox="0 0 70 70"><g transform="translate(35 35)" fill="none" stroke="#C9A227" stroke-opacity=".25" stroke-width="1.2"><circle r="30"/><circle r="24"/><path d="M0-26 6.5-6.5 26 0 6.5 6.5 0 26-6.5 6.5-26 0-6.5-6.5Z"/><path d="M0-26 6.5-6.5 26 0 6.5 6.5 0 26-6.5 6.5-26 0-6.5-6.5Z" transform="rotate(22.5)"/></g></svg>
+      <div class="brandmark"><div class="logo"><svg viewBox="0 0 56 56" width="100%" height="100%"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E6E55"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#C9A227" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div><div><p class="font-extrabold text-lg leading-none">BLITAR MENGAJI</p><p class="text-xs text-slate-500">Bukti Penerimaan Donasi</p></div></div>
+      <div class="doctitle"><h1>KWITANSI</h1><p class="text-xs text-slate-500 mt-1">No: <b>KW/2026/05/0231</b></p></div>
+    </div>
+    <div class="mt-6 space-y-3 text-sm">
+      <div class="flex"><span class="w-44 text-slate-500">Telah diterima dari</span><span class="font-bold flex-1 border-b border-dotted border-slate-300">Hamba Allah</span></div>
+      <div class="flex"><span class="w-44 text-slate-500">Uang sejumlah</span><span class="font-bold flex-1 border-b border-dotted border-slate-300">Rp 500.000</span></div>
+      <div class="flex"><span class="w-44 text-slate-500">Terbilang</span><span class="italic flex-1 border-b border-dotted border-slate-300">Lima ratus ribu rupiah</span></div>
+      <div class="flex"><span class="w-44 text-slate-500">Untuk program</span><span class="flex-1 border-b border-dotted border-slate-300">Renovasi Tempat Wudhu — Masjid Al-Falah</span></div>
+      <div class="flex"><span class="w-44 text-slate-500">Metode</span><span class="flex-1 border-b border-dotted border-slate-300">Transfer / QRIS</span></div>
+    </div>
+    <div class="flex justify-between items-end mt-8">
+      <div class="px-5 py-4 rounded-xl" style="background:#0E6E55;color:#fff">
+        <p class="text-[11px] opacity-80">Jumlah Donasi</p><p class="text-2xl font-extrabold">Rp 500.000</p>
+      </div>
+      <div class="text-center text-xs">
+        <p class="text-slate-500">Blitar, 15 Mei 2026</p>
+        <div style="margin-top:48px;border-top:1px solid #333;width:170px;padding-top:4px;font-weight:700">Petugas Penerima</div>
+      </div>
+    </div>
+    <div class="docfoot" style="position:static;margin-top:24px"><span>Kwitansi sah dari sistem Blitar Mengaji.</span><span>Jazaakumullahu khairan 🤲</span></div>
+  </div>
+
+  <!-- ============ 5. JADWAL KAJIAN PRINTABLE ============ -->
+  <div class="label noprint"><span class="tag">PDF 5</span> Jadwal Kajian (Printable / Tempel Masjid)</div>
+  <div class="page">
+    <div class="dochead">
+      <svg class="head-orn" viewBox="0 0 70 70"><g transform="translate(35 35)" fill="none" stroke="#C9A227" stroke-opacity=".25" stroke-width="1.2"><circle r="30"/><circle r="24"/><path d="M0-26 6.5-6.5 26 0 6.5 6.5 0 26-6.5 6.5-26 0-6.5-6.5Z"/><path d="M0-26 6.5-6.5 26 0 6.5 6.5 0 26-6.5 6.5-26 0-6.5-6.5Z" transform="rotate(22.5)"/></g></svg>
+      <div class="brandmark"><div class="logo"><svg viewBox="0 0 56 56" width="100%" height="100%"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E6E55"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#C9A227" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div><div><p class="font-extrabold text-lg leading-none">BLITAR MENGAJI</p><p class="text-xs text-slate-500">Jadwal Kajian Pekanan</p></div></div>
+      <div class="doctitle"><h1>JADWAL KAJIAN</h1><p class="text-xs text-slate-500 mt-1">Pekan: 19–25 Mei 2026</p><p class="text-xs text-slate-500">Wilayah: Kota Blitar</p></div>
+    </div>
+    <table class="rep">
+      <thead><tr><th style="width:70px">Hari</th><th style="width:70px">Waktu</th><th>Kajian / Kitab</th><th>Ustadz</th><th>Lokasi</th></tr></thead>
+      <tbody>
+        <tr><td>Senin</td><td>18.00</td><td>Tafsir Al-Baqarah</td><td>Ust. Ahmad Fauzi</td><td>Masjid Al-Falah</td></tr>
+        <tr><td>Selasa</td><td>20.00</td><td>Fiqih Thaharah</td><td>Ust. Yusuf Abdullah</td><td>Mushola An-Nur</td></tr>
+        <tr><td>Rabu</td><td>05.00</td><td>Tazkiyatun Nafs</td><td>Ust. Hamid</td><td>Masjid Agung</td></tr>
+        <tr><td>Kamis</td><td>19.30</td><td>Hadits Arba'in</td><td>Ust. Ahmad Fauzi</td><td>Masjid Al-Falah</td></tr>
+        <tr><td>Jumat</td><td>16.00</td><td>Sirah Nabawiyah</td><td>Ust. Yusuf Abdullah</td><td>Masjid Baiturrahman</td></tr>
+        <tr><td>Sabtu</td><td>09.00</td><td>Kajian Muslimah</td><td>Ustadzah Fatimah</td><td>Mushola An-Nur</td></tr>
+        <tr><td>Ahad</td><td>05.00</td><td>Tafsir Juz 30</td><td>Ust. Hamid</td><td>Masjid Agung</td></tr>
+      </tbody>
+    </table>
+    <div class="mt-4 p-3 rounded-lg text-xs flex items-center gap-3" style="background:#E9F5F1;color:#0B5947">
+      <div style="width:64px;height:64px;background:#fff;border:1px solid #CDEAE1;border-radius:8px;display:grid;place-items:center;font-size:9px;color:#0E6E55;text-align:center">QR<br>SCAN</div>
+      <div><b>Scan untuk jadwal lengkap & lokasi peta.</b><br>Akses real-time di blitarmengaji.id — gratis untuk semua.</div>
+    </div>
+    <div class="docfoot"><span>Jadwal dapat berubah — pastikan via aplikasi Blitar Mengaji.</span><span>Halaman 1</span></div>
+  </div>
+
+</div>
+<script>lucide.createIcons();</script>
+</body>
+</html>

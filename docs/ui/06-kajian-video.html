@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Kajian & Video Player</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme-tokens.css">
+<link rel="stylesheet" href="craft.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand:{50:'var(--c-brand-50)',100:'var(--c-brand-100)',200:'var(--c-brand-200)',300:'var(--c-brand-300)',400:'var(--c-brand-400)',500:'var(--c-brand-500)',600:'var(--c-brand-600)',700:'var(--c-brand-700)',800:'var(--c-brand-800)',900:'var(--c-brand-900)'},
+      gold:{DEFAULT:'var(--c-gold)',light:'var(--c-gold-light)',dark:'var(--c-gold-dark)'},
+      cream:'var(--c-cream)', surface:'var(--c-surface)', ink:'var(--c-ink)'
+    },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], arabic:['Amiri','serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .device { width:370px; border:9px solid #0f172a; border-radius:2.4rem; background:#0f172a; box-shadow:0 20px 45px rgba(15,23,42,.25); overflow:hidden; position:relative; }
+  .device .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#0f172a; border-radius:0 0 14px 14px; z-index:50; }
+  .screen { height:760px; overflow-y:auto; background:var(--c-cream); position:relative; }
+  .screen::-webkit-scrollbar { width:0; }
+  .statusbar { height:34px; }
+  .ph { background:linear-gradient(135deg,#0E6E55,#3C9E84); }
+  .ph2 { background:linear-gradient(135deg,#A8851A,#E3C766); }
+  .ph3 { background:linear-gradient(135deg,#0B5947,#18816A); }
+  .blink { animation:blink 1.2s infinite; } @keyframes blink { 50%{opacity:.4} }
+  .paper { background:#fffdf7; background-image:linear-gradient(#eee 1px, transparent 1px); background-size:100% 32px; }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+  .annot { font-size:11px; color:#64748b; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+  /* mini browser bar */
+  .browserbar { background:#1e293b; }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2 flex items-center gap-2"><span class="crest inline-block w-6 h-6 align-middle"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span> Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin & RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="bg-brand-600 text-white">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="text-slate-500 hover:bg-slate-100">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<header class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+  <h1 class="text-2xl font-extrabold display">Detail Kajian &amp; Video Player</h1>
+  <p class="text-sm text-slate-500">Halaman menonton sesi kajian (live / rekaman) lengkap dengan info ustadz, catatan terkait, jadwal sesi berikutnya, dan asisten AI. Tersedia versi mobile (frame HP) dan desktop (browser-frame dua kolom). Theme-aware.</p>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24 space-y-16">
+
+  <!-- ============================================================= -->
+  <!-- A. VERSI MOBILE                                                -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="smartphone" class="w-5 h-5 text-brand-600"></i> A. Versi Mobile</h2>
+    <p class="text-sm text-slate-500 mb-6">Player di atas, lalu meta kajian, tab Tentang/Catatan/Sesi Berikutnya, rekaman lain (scroll-x), dan CTA Tanya AI. Scroll di dalam frame HP.</p>
+
+    <div class="flex flex-wrap gap-10 justify-center">
+
+      <!-- ===== MOBILE 1: REKAMAN (tab Tentang) ===== -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <!-- PLAYER -->
+            <div class="ph relative aspect-video grid place-items-center">
+              <div class="statusbar absolute top-0 inset-x-0"></div>
+              <!-- top controls -->
+              <div class="absolute top-9 left-0 right-0 px-4 flex items-center justify-between text-white">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                <div class="flex gap-3"><i data-lucide="share-2" class="w-5 h-5"></i><i data-lucide="more-vertical" class="w-5 h-5"></i></div>
+              </div>
+              <!-- play button -->
+              <button class="w-16 h-16 rounded-full bg-white/25 backdrop-blur grid place-items-center"><i data-lucide="play" class="w-8 h-8 text-white fill-white"></i></button>
+              <!-- badge rekaman + sumber -->
+              <span class="absolute top-9 left-1/2 -translate-x-1/2 mt-9 px-2.5 py-0.5 rounded-full bg-black/40 text-white text-[10px] font-bold">Rekaman</span>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center gap-1"><i data-lucide="youtube" class="w-3 h-3"></i> YouTube</span>
+              <!-- progress + duration -->
+              <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-1.5 rounded font-bold">42:15</span>
+              <div class="absolute bottom-0 inset-x-0 h-1 bg-white/30"><div class="h-full bg-gold" style="width:35%"></div></div>
+            </div>
+
+            <!-- META -->
+            <div class="px-4 pt-4">
+              <div class="flex gap-2 mb-2">
+                <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Tafsir</span>
+                <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Al-Qur'an</span>
+              </div>
+              <h1 class="text-lg font-extrabold leading-tight display">Tafsir Al-Baqarah: Hakikat Sabar (Ayat 153–157)</h1>
+              <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5"></i> 1.248 tayang · 18 Mei 2026</p>
+
+              <!-- ustadz -->
+              <div class="flex items-center gap-2 mt-3">
+                <div class="w-10 h-10 rounded-full ph grid place-items-center text-white font-bold">AF</div>
+                <div class="flex-1">
+                  <p class="font-bold text-sm leading-none">Ust. Ahmad Fauzi, Lc.</p>
+                  <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> Masjid Al-Falah · Kepanjenkidul</p>
+                </div>
+                <button class="px-3 h-8 rounded-full bg-brand-600 text-white text-xs font-semibold">Ikuti</button>
+              </div>
+
+              <!-- aksi -->
+              <div class="grid grid-cols-4 gap-2 mt-4 text-center text-[11px] font-semibold text-slate-600">
+                <button class="py-2 rounded-xl bg-cream flex flex-col items-center gap-1"><i data-lucide="thumbs-up" class="w-5 h-5 text-brand-600"></i> 248</button>
+                <button class="py-2 rounded-xl bg-cream flex flex-col items-center gap-1"><i data-lucide="share-2" class="w-5 h-5 text-brand-600"></i> Bagikan</button>
+                <button class="py-2 rounded-xl bg-cream flex flex-col items-center gap-1"><i data-lucide="bookmark" class="w-5 h-5 text-brand-600"></i> Simpan</button>
+                <button class="py-2 rounded-xl bg-cream flex flex-col items-center gap-1"><i data-lucide="download" class="w-5 h-5 text-brand-600"></i> Audio</button>
+              </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="flex border-b text-sm font-semibold text-slate-400 px-2 mt-4">
+              <div class="px-3 py-3 text-brand-700 border-b-2 border-brand-600">Tentang</div>
+              <div class="px-3 py-3">Catatan</div>
+              <div class="px-3 py-3">Sesi Berikutnya</div>
+            </div>
+
+            <!-- TAB CONTENT: Tentang -->
+            <div class="p-4 space-y-4">
+              <!-- deskripsi kitab/tema -->
+              <div>
+                <p class="text-sm leading-relaxed text-ink/90">Kajian rutin pekanan membahas <b>Tafsir Surat Al-Baqarah</b> ayat 153–157 tentang hakikat sabar dan shalat sebagai penolong. Mengupas tiga jenis sabar dan kabar gembira bagi orang yang bersabar.</p>
+                <div class="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                  <span class="flex items-center gap-1"><i data-lucide="book" class="w-3.5 h-3.5 text-brand-600"></i> Kitab: Tafsir Ibnu Katsir</span>
+                </div>
+              </div>
+
+              <!-- kartu catatan terkait -->
+              <a class="block bg-surface rounded-2xl shadow-card p-3 border-l-4 border-brand-500">
+                <p class="text-[11px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1"><i data-lucide="notebook-pen" class="w-3.5 h-3.5"></i> Catatan kajian terkait</p>
+                <p class="font-semibold text-sm leading-tight">Memahami Makna Sabar dalam Surat Al-Baqarah</p>
+                <p class="text-xs text-slate-500 mt-1">6 mnt baca · transkrip sesi ini</p>
+                <span class="inline-flex items-center gap-1 text-xs text-brand-600 font-semibold mt-2">Baca catatan <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></span>
+              </a>
+
+              <!-- kartu jadwal sesi berikutnya -->
+              <div class="bg-surface rounded-2xl shadow-card p-3 flex items-center gap-3">
+                <div class="w-12 text-center"><p class="text-brand-700 font-extrabold leading-none">18.00</p><p class="text-[10px] text-slate-400 mt-0.5">Sen depan</p></div>
+                <div class="flex-1"><p class="text-[11px] font-bold text-slate-400 uppercase">Sesi berikutnya</p><p class="font-semibold text-sm leading-tight">Tafsir Al-Baqarah: Ayat 158–162</p><p class="text-xs text-slate-500">Ust. Ahmad Fauzi · Masjid Al-Falah</p></div>
+                <button class="w-9 h-9 rounded-full bg-brand-50 grid place-items-center shrink-0"><i data-lucide="bell-plus" class="w-4.5 h-4.5 text-brand-600"></i></button>
+              </div>
+            </div>
+
+            <!-- REKAMAN LAINNYA (scroll-x) -->
+            <div class="mt-2">
+              <div class="px-4 flex items-center justify-between mb-2"><h3 class="font-bold text-[15px]">Rekaman lainnya dari kajian ini</h3></div>
+              <div class="flex gap-3 overflow-x-auto px-4 pb-2 scrollx">
+                <div class="w-40 shrink-0">
+                  <div class="ph3 aspect-video rounded-xl relative grid place-items-center"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">38:02</span></div>
+                  <p class="text-xs font-semibold mt-1 leading-tight">Tafsir Al-Baqarah: Ayat 148–152</p>
+                  <p class="text-[10px] text-slate-400">11 Mei 2026</p>
+                </div>
+                <div class="w-40 shrink-0">
+                  <div class="ph2 aspect-video rounded-xl relative grid place-items-center"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">45:30</span></div>
+                  <p class="text-xs font-semibold mt-1 leading-tight">Tafsir Al-Baqarah: Ayat 142–147</p>
+                  <p class="text-[10px] text-slate-400">4 Mei 2026</p>
+                </div>
+                <div class="w-40 shrink-0">
+                  <div class="ph aspect-video rounded-xl relative grid place-items-center"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">51:18</span></div>
+                  <p class="text-xs font-semibold mt-1 leading-tight">Tafsir Al-Baqarah: Ayat 136–141</p>
+                  <p class="text-[10px] text-slate-400">27 Apr 2026</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA Tanya AI -->
+            <div class="px-4 mt-3 mb-6">
+              <button class="w-full h-12 rounded-full bg-gold text-white font-bold flex items-center justify-center gap-2"><i data-lucide="bot" class="w-5 h-5"></i> Tanya AI tentang kajian ini</button>
+              <p class="text-[10px] text-slate-400 text-center mt-2">AI menjawab dari transkrip & catatan sesi ini.</p>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">A1. Tonton Rekaman</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Player + badge "Rekaman" + sumber YouTube, meta + ustadz, tab Tentang (deskripsi kitab, catatan & sesi berikutnya), rekaman lain, Tanya AI.</p>
+      </div>
+
+      <!-- ===== MOBILE 2: LIVE (tab Catatan) ===== -->
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <!-- PLAYER LIVE -->
+            <div class="ph3 relative aspect-video grid place-items-center">
+              <div class="statusbar absolute top-0 inset-x-0"></div>
+              <div class="absolute top-9 left-0 right-0 px-4 flex items-center justify-between text-white">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                <div class="flex gap-3"><i data-lucide="share-2" class="w-5 h-5"></i><i data-lucide="more-vertical" class="w-5 h-5"></i></div>
+              </div>
+              <button class="w-16 h-16 rounded-full bg-white/25 backdrop-blur grid place-items-center"><i data-lucide="play" class="w-8 h-8 text-white fill-white"></i></button>
+              <!-- LIVE badge merah + penonton -->
+              <span class="absolute top-9 left-1/2 -translate-x-1/2 mt-9 px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center gap-1 blink"><span class="w-1.5 h-1.5 bg-white rounded-full"></span> LIVE</span>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-[#1877F2] text-white text-[10px] font-bold flex items-center gap-1"><i data-lucide="facebook" class="w-3 h-3"></i> Facebook</span>
+              <span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-1.5 rounded font-bold flex items-center gap-1"><i data-lucide="eye" class="w-3 h-3"></i> 312</span>
+            </div>
+
+            <!-- META -->
+            <div class="px-4 pt-4">
+              <div class="flex gap-2 mb-2">
+                <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Fiqih</span>
+                <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-bold blink">● Sedang live</span>
+              </div>
+              <h1 class="text-lg font-extrabold leading-tight display">Fiqih Thaharah: Tata Cara Wudhu yang Benar</h1>
+              <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5"><i data-lucide="radio" class="w-3.5 h-3.5"></i> Mulai 19.30 · 312 menonton sekarang</p>
+
+              <div class="flex items-center gap-2 mt-3">
+                <div class="w-10 h-10 rounded-full ph3 grid place-items-center text-white font-bold">YA</div>
+                <div class="flex-1">
+                  <p class="font-bold text-sm leading-none">Ust. Yusuf Abdullah</p>
+                  <p class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> Mushola An-Nur · Sananwetan</p>
+                </div>
+                <button class="px-3 h-8 rounded-full border-2 border-brand-600 text-brand-700 text-xs font-semibold">Ikuti</button>
+              </div>
+
+              <div class="grid grid-cols-4 gap-2 mt-4 text-center text-[11px] font-semibold text-slate-600">
+                <button class="py-2 rounded-xl bg-cream flex flex-col items-center gap-1"><i data-lucide="thumbs-up" class="w-5 h-5 text-brand-600"></i> 96</button>
+                <button class="py-2 rounded-xl bg-cream flex flex-col items-center gap-1"><i data-lucide="share-2" class="w-5 h-5 text-brand-600"></i> Bagikan</button>
+                <button class="py-2 rounded-xl bg-cream flex flex-col items-center gap-1"><i data-lucide="bookmark" class="w-5 h-5 text-brand-600"></i> Simpan</button>
+                <button class="py-2 rounded-xl bg-cream flex flex-col items-center gap-1"><i data-lucide="bell" class="w-5 h-5 text-brand-600"></i> Ingatkan</button>
+              </div>
+            </div>
+
+            <!-- TABS (Catatan aktif) -->
+            <div class="flex border-b text-sm font-semibold text-slate-400 px-2 mt-4">
+              <div class="px-3 py-3">Tentang</div>
+              <div class="px-3 py-3 text-brand-700 border-b-2 border-brand-600">Catatan</div>
+              <div class="px-3 py-3">Sesi Berikutnya</div>
+            </div>
+
+            <!-- TAB CONTENT: Catatan (kertas) -->
+            <div class="p-4 space-y-3">
+              <div class="paper rounded-2xl border p-4">
+                <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Catatan Kajian</span>
+                <h2 class="text-base font-extrabold leading-tight mt-2">Adab Bersuci: Ringkasan Bab Thaharah</h2>
+                <p class="text-xs text-slate-500 mt-1">Ust. Yusuf Abdullah · transkrip otomatis</p>
+                <hr class="my-3 border-slate-200" />
+                <p class="text-sm leading-relaxed text-ink/90">Thaharah adalah syarat sah ibadah, terbagi menjadi thaharah hadats dan thaharah najis. Rukun wudhu meliputi niat, membasuh wajah, kedua tangan…</p>
+                <div class="my-3 bg-brand-50 rounded-xl p-3 border-r-4 border-brand-600">
+                  <p class="font-arabic text-lg text-right text-brand-800 leading-loose" dir="rtl">إِنَّ اللَّهَ يُحِبُّ التَّوَّابِينَ وَيُحِبُّ الْمُتَطَهِّرِينَ</p>
+                  <p class="text-[11px] text-slate-600 mt-1 italic">"Sesungguhnya Allah menyukai orang yang bertaubat dan menyucikan diri." (QS. Al-Baqarah: 222)</p>
+                </div>
+                <a class="inline-flex items-center gap-1 text-xs text-brand-600 font-semibold">Buka catatan lengkap <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
+              </div>
+              <p class="text-[11px] text-slate-400 text-center flex items-center justify-center gap-1"><i data-lucide="info" class="w-3.5 h-3.5"></i> Catatan disusun saat sesi berlangsung, diperbarui otomatis.</p>
+            </div>
+
+            <!-- REKAMAN LAINNYA -->
+            <div class="mt-1">
+              <div class="px-4 flex items-center justify-between mb-2"><h3 class="font-bold text-[15px]">Rekaman lainnya dari kajian ini</h3></div>
+              <div class="flex gap-3 overflow-x-auto px-4 pb-2 scrollx">
+                <div class="w-40 shrink-0">
+                  <div class="ph2 aspect-video rounded-xl relative grid place-items-center"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">28:44</span></div>
+                  <p class="text-xs font-semibold mt-1 leading-tight">Fiqih Thaharah: Jenis-jenis Air</p>
+                </div>
+                <div class="w-40 shrink-0">
+                  <div class="ph aspect-video rounded-xl relative grid place-items-center"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">33:10</span></div>
+                  <p class="text-xs font-semibold mt-1 leading-tight">Fiqih Thaharah: Najis & Cara Menyucikan</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-4 mt-3 mb-6">
+              <button class="w-full h-12 rounded-full bg-gold text-white font-bold flex items-center justify-center gap-2"><i data-lucide="bot" class="w-5 h-5"></i> Tanya AI tentang kajian ini</button>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">A2. Tonton Live (tab Catatan)</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Player live (badge "LIVE" merah berkedip + sumber Facebook + jumlah penonton), tab Catatan menampilkan transkrip "kertas" dengan ayat Amiri.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- B. VERSI DESKTOP                                               -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="monitor-play" class="w-5 h-5 text-brand-600"></i> B. Versi Desktop</h2>
+    <p class="text-sm text-slate-500 mb-5">Dua kolom: kiri player besar + deskripsi + daftar rekaman; kanan sidebar (info ustadz, sesi berikutnya, catatan terkait, embed sumber, langganan/ikuti).</p>
+
+    <div class="rounded-2xl shadow-pop overflow-hidden border bg-cream" data-theme="teduh">
+      <!-- browser bar -->
+      <div class="browserbar px-4 py-2.5 flex items-center gap-3">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+        <div class="flex-1 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-300 flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i> blitarmengaji.id/kajian/tafsir-al-baqarah-sabar</div>
+        <i data-lucide="rotate-cw" class="w-4 h-4 text-slate-400"></i>
+      </div>
+
+      <!-- navbar compact -->
+      <nav class="bg-white border-b sticky top-0">
+        <div class="px-6 lg:px-10 h-14 flex items-center gap-4">
+          <span class="font-extrabold flex items-center gap-2"><span class="crest inline-block w-6 h-6 align-middle"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span> Blitar<span class="text-brand-600">Mengaji</span></span>
+          <span class="text-sm font-semibold text-brand-700 ml-4 bg-brand-50 px-3 py-1.5 rounded-lg">Kajian</span>
+          <div class="flex items-center gap-2 bg-cream rounded-full px-3 h-9 w-56 ml-2"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400">Cari kajian / ustadz…</span></div>
+          <button class="px-5 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold ml-auto">Masuk</button>
+        </div>
+      </nav>
+
+      <!-- breadcrumb -->
+      <div class="px-6 lg:px-10 pt-5 text-xs text-slate-500 flex items-center gap-1.5">
+        <a class="hover:text-brand-600">Kajian</a><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        <a class="hover:text-brand-600">Tafsir</a><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        <span class="text-ink font-semibold">Tafsir Al-Baqarah: Hakikat Sabar</span>
+      </div>
+
+      <!-- GRID dua kolom -->
+      <div class="px-6 lg:px-10 py-6 grid lg:grid-cols-3 gap-6 items-start">
+
+        <!-- ===== KOLOM KIRI ===== -->
+        <div class="lg:col-span-2 space-y-6">
+
+          <!-- PLAYER BESAR -->
+          <div class="rounded-2xl overflow-hidden shadow-card bg-black">
+            <div class="ph relative aspect-video grid place-items-center">
+              <button class="w-20 h-20 rounded-full bg-white/25 backdrop-blur grid place-items-center hover:scale-105 transition"><i data-lucide="play" class="w-10 h-10 text-white fill-white"></i></button>
+              <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-black/40 text-white text-[11px] font-bold">Rekaman</span>
+              <span class="absolute top-3 right-3 px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center gap-1"><i data-lucide="youtube" class="w-3.5 h-3.5"></i> YouTube</span>
+              <!-- control bar -->
+              <div class="absolute bottom-0 inset-x-0 px-4 pb-3 pt-8 bg-gradient-to-t from-black/70 to-transparent">
+                <div class="h-1 bg-white/30 rounded-full mb-2"><div class="h-full bg-gold rounded-full relative" style="width:35%"><span class="absolute -right-1.5 -top-1 w-3 h-3 rounded-full bg-gold"></span></div></div>
+                <div class="flex items-center gap-3 text-white">
+                  <i data-lucide="play" class="w-5 h-5"></i>
+                  <i data-lucide="volume-2" class="w-5 h-5"></i>
+                  <span class="text-xs font-semibold">14:48 / 42:15</span>
+                  <span class="ml-auto text-xs font-semibold bg-white/20 px-2 py-0.5 rounded">1x</span>
+                  <i data-lucide="settings" class="w-5 h-5"></i>
+                  <i data-lucide="maximize" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- JUDUL + AKSI -->
+          <div>
+            <div class="flex gap-2 mb-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 text-xs font-bold">Tafsir</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 text-xs font-bold">Al-Qur'an</span>
+            </div>
+            <h1 class="text-2xl font-extrabold leading-tight display">Tafsir Al-Baqarah: Hakikat Sabar (Ayat 153–157)</h1>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3">
+              <p class="text-sm text-slate-500 flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4"></i> 1.248 tayang · 18 Mei 2026</p>
+              <div class="flex gap-2 ml-auto flex-wrap">
+                <button class="px-4 h-10 rounded-full bg-cream border text-sm font-semibold flex items-center gap-2"><i data-lucide="thumbs-up" class="w-4 h-4 text-brand-600"></i> 248</button>
+                <button class="px-4 h-10 rounded-full bg-cream border text-sm font-semibold flex items-center gap-2"><i data-lucide="share-2" class="w-4 h-4 text-brand-600"></i> Bagikan</button>
+                <button class="px-4 h-10 rounded-full bg-cream border text-sm font-semibold flex items-center gap-2"><i data-lucide="bookmark" class="w-4 h-4 text-brand-600"></i> Simpan</button>
+                <button class="px-4 h-10 rounded-full bg-cream border text-sm font-semibold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4 text-brand-600"></i> Audio</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- DESKRIPSI -->
+          <div class="bg-surface rounded-2xl shadow-card p-5">
+            <h3 class="font-bold text-sm mb-2 flex items-center gap-2"><i data-lucide="text" class="w-4 h-4 text-brand-600"></i> Tentang Kajian Ini</h3>
+            <p class="text-sm leading-relaxed text-ink/90">Kajian rutin pekanan yang membahas <b>Tafsir Surat Al-Baqarah</b> ayat 153–157, mengupas hakikat sabar dan shalat sebagai penolong, tiga jenis sabar (dalam ketaatan, menjauhi maksiat, dan atas takdir), serta kabar gembira bagi orang-orang yang bersabar. Disampaikan dengan rujukan utama Tafsir Ibnu Katsir dan Tafsir As-Sa'di.</p>
+            <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
+              <span class="flex items-center gap-1.5 bg-cream px-3 py-1.5 rounded-full"><i data-lucide="book" class="w-3.5 h-3.5 text-brand-600"></i> Kitab: Tafsir Ibnu Katsir</span>
+              <span class="flex items-center gap-1.5 bg-cream px-3 py-1.5 rounded-full"><i data-lucide="layers" class="w-3.5 h-3.5 text-brand-600"></i> Seri ke-18 dari Tafsir Al-Baqarah</span>
+              <span class="flex items-center gap-1.5 bg-cream px-3 py-1.5 rounded-full"><i data-lucide="clock" class="w-3.5 h-3.5 text-brand-600"></i> Durasi 42 menit</span>
+            </div>
+          </div>
+
+          <!-- DAFTAR REKAMAN -->
+          <div>
+            <div class="flex items-end justify-between mb-3"><h3 class="text-lg font-extrabold">Rekaman lainnya dari kajian ini</h3><a class="text-sm text-brand-600 font-semibold flex items-center gap-1">Semua seri <i data-lucide="arrow-right" class="w-4 h-4"></i></a></div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div class="bg-surface rounded-2xl shadow-card overflow-hidden flex gap-3 p-3">
+                <div class="ph3 w-32 aspect-video rounded-lg relative grid place-items-center shrink-0"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">38:02</span></div>
+                <div class="flex-1"><p class="font-semibold text-sm leading-tight">Tafsir Al-Baqarah: Ayat 148–152</p><p class="text-xs text-slate-400 mt-1">Seri ke-17 · 11 Mei 2026</p><p class="text-xs text-slate-400 mt-0.5">980 tayang</p></div>
+              </div>
+              <div class="bg-surface rounded-2xl shadow-card overflow-hidden flex gap-3 p-3">
+                <div class="ph2 w-32 aspect-video rounded-lg relative grid place-items-center shrink-0"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">45:30</span></div>
+                <div class="flex-1"><p class="font-semibold text-sm leading-tight">Tafsir Al-Baqarah: Ayat 142–147</p><p class="text-xs text-slate-400 mt-1">Seri ke-16 · 4 Mei 2026</p><p class="text-xs text-slate-400 mt-0.5">1.1rb tayang</p></div>
+              </div>
+              <div class="bg-surface rounded-2xl shadow-card overflow-hidden flex gap-3 p-3">
+                <div class="ph w-32 aspect-video rounded-lg relative grid place-items-center shrink-0"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">51:18</span></div>
+                <div class="flex-1"><p class="font-semibold text-sm leading-tight">Tafsir Al-Baqarah: Ayat 136–141</p><p class="text-xs text-slate-400 mt-1">Seri ke-15 · 27 Apr 2026</p><p class="text-xs text-slate-400 mt-0.5">1.4rb tayang</p></div>
+              </div>
+              <div class="bg-surface rounded-2xl shadow-card overflow-hidden flex gap-3 p-3">
+                <div class="ph3 w-32 aspect-video rounded-lg relative grid place-items-center shrink-0"><i data-lucide="play" class="w-7 h-7 text-white"></i><span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1 rounded font-bold">40:55</span></div>
+                <div class="flex-1"><p class="font-semibold text-sm leading-tight">Tafsir Al-Baqarah: Ayat 130–135</p><p class="text-xs text-slate-400 mt-1">Seri ke-14 · 20 Apr 2026</p><p class="text-xs text-slate-400 mt-0.5">890 tayang</p></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CTA Tanya AI -->
+          <div class="bg-brand-700 text-white rounded-2xl p-5 flex items-center gap-4 relative overflow-hidden">
+            <div class="orn-overlay pat-girih-light"></div>
+            <div class="relative z-10 w-12 h-12 rounded-2xl bg-white/15 grid place-items-center shrink-0"><i data-lucide="bot" class="w-6 h-6 text-gold-light"></i></div>
+            <div class="relative z-10 flex-1"><p class="font-bold">Tanya AI tentang kajian ini</p><p class="text-xs text-white/70">Tanyakan poin, dalil, atau ringkasan — AI menjawab dari transkrip & catatan sesi ini.</p></div>
+            <button class="relative z-10 px-5 h-11 rounded-full bg-gold text-white font-bold text-sm whitespace-nowrap flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Tanya</button>
+          </div>
+        </div>
+
+        <!-- ===== KOLOM KANAN (SIDEBAR) ===== -->
+        <aside class="space-y-5 lg:sticky lg:top-20">
+
+          <!-- INFO USTADZ -->
+          <div class="bg-surface rounded-2xl shadow-card p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-full ph grid place-items-center text-white font-bold text-lg">AF</div>
+              <div class="flex-1">
+                <p class="font-bold leading-tight">Ust. Ahmad Fauzi, Lc.</p>
+                <p class="text-xs text-slate-500 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> Masjid Al-Falah · Kepanjenkidul</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+              <div><p class="font-extrabold text-brand-700">42</p><p class="text-[11px] text-slate-400">Kajian</p></div>
+              <div><p class="font-extrabold text-brand-700">3.2rb</p><p class="text-[11px] text-slate-400">Pengikut</p></div>
+              <div><p class="font-extrabold text-brand-700">86rb</p><p class="text-[11px] text-slate-400">Tayang</p></div>
+            </div>
+            <button class="w-full h-10 rounded-full bg-brand-600 text-white font-semibold text-sm mt-4 flex items-center justify-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i> Ikuti Ustadz</button>
+          </div>
+
+          <!-- SESI BERIKUTNYA -->
+          <div class="bg-surface rounded-2xl shadow-card p-5">
+            <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="calendar-clock" class="w-4 h-4 text-brand-600"></i> Jadwal Sesi Berikutnya</h4>
+            <div class="rounded-xl bg-cream p-3 flex items-center gap-3">
+              <div class="text-center w-14"><p class="text-brand-700 font-extrabold leading-none">18.00</p><p class="text-[10px] text-slate-400 mt-1">Sen, 26 Mei</p></div>
+              <div class="flex-1"><p class="font-semibold text-sm leading-tight">Tafsir Al-Baqarah: Ayat 158–162</p><p class="text-xs text-slate-500">Seri ke-19 · Masjid Al-Falah</p></div>
+            </div>
+            <div class="flex gap-2 mt-3">
+              <button class="flex-1 h-10 rounded-full bg-brand-600 text-white font-semibold text-sm flex items-center justify-center gap-2"><i data-lucide="bell-plus" class="w-4 h-4"></i> Ingatkan</button>
+              <button class="w-10 h-10 rounded-full border grid place-items-center"><i data-lucide="calendar-plus" class="w-4 h-4 text-brand-700"></i></button>
+            </div>
+          </div>
+
+          <!-- CATATAN TERKAIT -->
+          <div class="bg-surface rounded-2xl shadow-card p-5">
+            <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="notebook-pen" class="w-4 h-4 text-brand-600"></i> Catatan Kajian Terkait</h4>
+            <a class="block rounded-xl border-l-4 border-brand-500 bg-cream p-3 mb-2">
+              <p class="font-semibold text-sm leading-tight">Memahami Makna Sabar dalam Surat Al-Baqarah</p>
+              <p class="text-xs text-slate-500 mt-1">6 mnt baca · transkrip sesi ini</p>
+            </a>
+            <a class="block rounded-xl border-l-4 border-gold bg-cream p-3">
+              <p class="font-semibold text-sm leading-tight">Tiga Jenis Sabar Menurut Ulama</p>
+              <p class="text-xs text-slate-500 mt-1">4 mnt baca · ringkasan</p>
+            </a>
+            <a class="inline-flex items-center gap-1 text-xs text-brand-600 font-semibold mt-3">Semua catatan kajian ini <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
+          </div>
+
+          <!-- EMBED SUMBER -->
+          <div class="bg-surface rounded-2xl shadow-card p-5">
+            <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="link" class="w-4 h-4 text-brand-600"></i> Sumber &amp; Tonton di Platform</h4>
+            <div class="space-y-2">
+              <a class="flex items-center gap-3 rounded-xl border p-3 hover:border-brand-300">
+                <span class="w-9 h-9 rounded-lg bg-red-600 grid place-items-center"><i data-lucide="youtube" class="w-5 h-5 text-white"></i></span>
+                <div class="flex-1"><p class="font-semibold text-sm">YouTube</p><p class="text-[11px] text-slate-400">Sumber utama rekaman</p></div>
+                <i data-lucide="external-link" class="w-4 h-4 text-slate-400"></i>
+              </a>
+              <a class="flex items-center gap-3 rounded-xl border p-3 hover:border-brand-300">
+                <span class="w-9 h-9 rounded-lg bg-[#1877F2] grid place-items-center"><i data-lucide="facebook" class="w-5 h-5 text-white"></i></span>
+                <div class="flex-1"><p class="font-semibold text-sm">Facebook</p><p class="text-[11px] text-slate-400">Tayang ulang live</p></div>
+                <i data-lucide="external-link" class="w-4 h-4 text-slate-400"></i>
+              </a>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-3 flex items-center gap-1"><i data-lucide="info" class="w-3.5 h-3.5"></i> Video di-embed dari platform sumber, bukan diunggah ulang.</p>
+          </div>
+
+          <!-- LANGGANAN -->
+          <div class="bg-brand-50 rounded-2xl p-5 text-center">
+            <i data-lucide="bell-ring" class="w-7 h-7 text-brand-600 mx-auto"></i>
+            <p class="font-bold text-sm mt-2">Jangan lewatkan kajian berikutnya</p>
+            <p class="text-xs text-slate-500 mt-1">Aktifkan notifikasi untuk seri Tafsir Al-Baqarah.</p>
+            <button class="w-full h-10 rounded-full bg-brand-600 text-white font-semibold text-sm mt-3">Langganan Notifikasi</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <p class="annot mt-3">Kolom kiri (~66%): player besar dengan control bar + badge "Rekaman"/sumber, judul, aksi, deskripsi kitab/seri, daftar rekaman, dan CTA Tanya AI. Kolom kanan (sticky): profil ustadz + ikuti, sesi berikutnya + ingatkan, catatan terkait, embed YouTube/Facebook, kartu langganan.</p>
+  </section>
+
+  <footer class="text-center text-xs text-slate-400 pt-6">
+    Blitar Mengaji · Prototype UI/UX — Kajian &amp; Video Player · dibuat untuk brainstorming sebelum eksekusi · 2026-05-20
+  </footer>
+
+</main>
+
+<script>lucide.createIcons();</script>
+<script src="theme-switcher.js" defer></script>
+</body>
+</html>

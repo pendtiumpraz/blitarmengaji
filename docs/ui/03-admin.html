@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Admin & RBAC</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="theme-tokens.css">
+<link rel="stylesheet" href="craft.css">
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand:{50:'var(--c-brand-50)',100:'var(--c-brand-100)',200:'var(--c-brand-200)',300:'var(--c-brand-300)',400:'var(--c-brand-400)',500:'var(--c-brand-500)',600:'var(--c-brand-600)',700:'var(--c-brand-700)',800:'var(--c-brand-800)',900:'var(--c-brand-900)'},
+      gold:{DEFAULT:'var(--c-gold)',light:'var(--c-gold-light)',dark:'var(--c-gold-dark)'},
+      cream:'var(--c-cream)', surface:'var(--c-surface)', ink:'var(--c-ink)'
+    },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], arabic:['Amiri','serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .ph { background:linear-gradient(135deg,#0E6E55,#3C9E84); }
+  .ph2 { background:linear-gradient(135deg,#A8851A,#E3C766); }
+  .ph3 { background:linear-gradient(135deg,#0B5947,#18816A); }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+  .annot { font-size:11px; color:#64748b; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+  /* fake checkbox toggles */
+  .chk { width:18px; height:18px; border-radius:5px; border:2px solid #cbd5e1; display:inline-grid; place-items:center; }
+  .chk.on { background:#0E6E55; border-color:#0E6E55; color:#fff; }
+  .sw { width:38px; height:22px; border-radius:999px; position:relative; transition:.2s; }
+  .sw .dot { position:absolute; top:2px; width:18px; height:18px; border-radius:999px; background:#fff; transition:.2s; }
+  .sw.on { background:#0E6E55; } .sw.on .dot { right:2px; }
+  .sw.off { background:#cbd5e1; } .sw.off .dot { left:2px; }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2 inline-flex items-center gap-1.5"><span class="w-5 h-5 inline-block align-middle"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span> Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="bg-brand-600 text-white">Admin &amp; RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="text-slate-500 hover:bg-slate-100">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<header class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+  <h1 class="text-2xl font-extrabold display">Admin Panel &amp; RBAC</h1>
+  <p class="text-sm text-slate-500">Role &amp; Permission dinamis · Builder Menu · CRUD · Keuangan · Donasi · Verifikasi entitas. Layout desktop dengan sidebar dinamis + topbar + role switcher.</p>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24 space-y-12">
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 1 — MANAJEMEN ROLE & PERMISSION (RBAC)                          -->
+  <!-- ===================================================================== -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2 display"><i data-lucide="shield-check" class="w-5 h-5 text-brand-600"></i> 1. Manajemen Role &amp; Permission (RBAC Dinamis)</h2>
+    <p class="text-sm text-slate-500 mb-4">Inti sistem: role dibuat bebas, tiap role diberi matriks permission per grup. Permission user menentukan menu & aksi yang muncul.</p>
+
+    <div data-theme="teduh" class="rounded-2xl overflow-hidden shadow-pop border bg-surface">
+      <div class="flex">
+        <!-- sidebar dinamis -->
+        <aside class="w-60 bg-ink text-white p-4 shrink-0 relative overflow-hidden">
+          <div class="orn-overlay pat-girih-light"></div>
+          <div class="relative z-10">
+          <div class="flex items-center gap-2 mb-6"><div class="w-9 h-9 rounded-xl overflow-hidden"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div><div><p class="font-bold text-sm leading-none">Blitar Mengaji</p><p class="text-[10px] text-white/50">Admin Panel</p></div></div>
+          <nav class="space-y-1 text-sm">
+            <p class="text-[10px] uppercase text-white/30 font-bold px-3 mb-1">Menu (sesuai role)</p>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="book-open-text" class="w-4 h-4"></i> Kajian &amp; Jadwal</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="map-pin" class="w-4 h-4"></i> Titik Dakwah</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="wallet" class="w-4 h-4"></i> Keuangan</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="hand-heart" class="w-4 h-4"></i> Donasi</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="user-check" class="w-4 h-4"></i> Verifikasi</a>
+            <p class="text-[10px] uppercase text-white/30 font-bold px-3 mb-1 mt-3">Sistem</p>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-600 font-semibold"><i data-lucide="shield-check" class="w-4 h-4"></i> RBAC &amp; Role</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="list-tree" class="w-4 h-4"></i> Builder Menu</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="users" class="w-4 h-4"></i> Pengguna</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="bot" class="w-4 h-4"></i> AI &amp; Konten</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="settings" class="w-4 h-4"></i> Pengaturan</a>
+          </nav>
+          </div>
+        </aside>
+        <!-- main -->
+        <div class="flex-1 bg-cream min-w-0">
+          <!-- topbar -->
+          <div class="bg-surface border-b px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2 bg-cream rounded-lg px-3 h-9 w-72"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400">Cari role, permission, user…</span></div>
+            <div class="flex items-center gap-4">
+              <div class="relative">
+                <select class="appearance-none text-xs border rounded-lg pl-3 pr-7 py-2 font-semibold text-brand-700 bg-surface"><option>Role aktif: Super Admin</option><option>Role aktif: Bendahara</option><option>Role aktif: Ustadz</option></select>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-brand-700 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              </div>
+              <div class="relative"><i data-lucide="bell" class="w-5 h-5 text-slate-500"></i><span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gold rounded-full"></span></div>
+              <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full ph"></div><div class="leading-none"><p class="text-sm font-semibold">Pak Hadi</p><p class="text-[10px] text-slate-400">Super Admin</p></div></div>
+            </div>
+          </div>
+          <!-- content -->
+          <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div><h3 class="text-xl font-extrabold display">Role &amp; Permission</h3><p class="text-sm text-slate-500">9 role terdaftar · permission dikelompokkan per modul</p></div>
+              <button class="px-4 h-10 rounded-full bg-brand-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Role</button>
+            </div>
+
+            <!-- Daftar role -->
+            <div class="bg-surface rounded-2xl shadow-card overflow-hidden mb-6">
+              <table class="w-full text-sm">
+                <thead class="bg-cream text-slate-500 text-xs uppercase">
+                  <tr><th class="text-left font-bold px-4 py-3">Role</th><th class="text-left font-bold px-4 py-3">Deskripsi</th><th class="text-center font-bold px-4 py-3">Jumlah User</th><th class="text-right font-bold px-4 py-3">Aksi</th></tr>
+                </thead>
+                <tbody class="divide-y">
+                  <tr class="hover:bg-cream/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-ink text-white text-xs font-bold">Super Admin</span></td><td class="px-4 py-3 text-slate-500">Akses penuh seluruh sistem</td><td class="px-4 py-3 text-center font-semibold">2</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-slate-400"><i data-lucide="lock" class="w-4 h-4"></i></span></td></tr>
+                  <tr class="hover:bg-cream/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold">Admin</span></td><td class="px-4 py-3 text-slate-500">Kelola konten & operasional</td><td class="px-4 py-3 text-center font-semibold">5</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i><i data-lucide="copy" class="w-4 h-4"></i></span></td></tr>
+                  <tr class="bg-brand-50/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-gold/20 text-gold-dark text-xs font-bold">Bendahara</span></td><td class="px-4 py-3 text-slate-500">Keuangan & laporan kas</td><td class="px-4 py-3 text-center font-semibold">3</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i><i data-lucide="copy" class="w-4 h-4"></i></span></td></tr>
+                  <tr class="hover:bg-cream/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold">Ustadz</span> <span class="ml-1 text-[10px] text-brand-600 font-bold">← sedang diedit</span></td><td class="px-4 py-3 text-slate-500">Jawab pertanyaan, kelas, perpustakaan</td><td class="px-4 py-3 text-center font-semibold">24</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i><i data-lucide="copy" class="w-4 h-4"></i></span></td></tr>
+                  <tr class="hover:bg-cream/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold">Pengelola Titik</span></td><td class="px-4 py-3 text-slate-500">Kelola titik dakwah & jadwal sendiri</td><td class="px-4 py-3 text-center font-semibold">48</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i><i data-lucide="copy" class="w-4 h-4"></i></span></td></tr>
+                  <tr class="hover:bg-cream/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold">Media Partner</span></td><td class="px-4 py-3 text-slate-500">Publikasi video & liputan</td><td class="px-4 py-3 text-center font-semibold">6</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i><i data-lucide="copy" class="w-4 h-4"></i></span></td></tr>
+                  <tr class="hover:bg-cream/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold">Partner Usaha</span></td><td class="px-4 py-3 text-slate-500">Kelola lapak UMKM (maks 3 produk)</td><td class="px-4 py-3 text-center font-semibold">31</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i><i data-lucide="copy" class="w-4 h-4"></i></span></td></tr>
+                  <tr class="hover:bg-cream/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold">Penulis</span></td><td class="px-4 py-3 text-slate-500">Tulis catatan/blog kajian</td><td class="px-4 py-3 text-center font-semibold">9</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i><i data-lucide="copy" class="w-4 h-4"></i></span></td></tr>
+                  <tr class="hover:bg-cream/60"><td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">Jamaah</span></td><td class="px-4 py-3 text-slate-500">Pengguna umum (role default)</td><td class="px-4 py-3 text-center font-semibold">2.340</td><td class="px-4 py-3 text-right"><span class="inline-flex gap-2 text-brand-700"><i data-lucide="pencil" class="w-4 h-4"></i><i data-lucide="copy" class="w-4 h-4"></i></span></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Panel EDIT ROLE -->
+            <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+              <div class="px-5 py-4 border-b flex items-center justify-between bg-brand-50/40">
+                <div class="flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-5 h-5 text-brand-600"></i><div><h4 class="font-bold">Edit Permission — Role: <span class="text-brand-700">Ustadz</span></h4><p class="text-xs text-slate-500">Centang aksi per grup modul. Perubahan langsung memengaruhi 24 user.</p></div></div>
+                <div class="flex gap-2"><button class="px-3 h-9 rounded-full border text-sm font-semibold text-slate-600">Batal</button><button class="px-4 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan</button></div>
+              </div>
+
+              <!-- legend -->
+              <div class="px-5 py-2.5 bg-cream/60 border-b flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] text-slate-500">
+                <span class="font-bold text-slate-600">Legenda aksi:</span>
+                <span>view = lihat</span><span>create = tambah</span><span>update = ubah</span><span>delete = hapus</span><span>publish = terbitkan</span><span>manage = kelola penuh</span><span>manage_own = kelola milik sendiri</span>
+              </div>
+
+              <!-- matrix -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm min-w-[760px]">
+                  <thead class="text-slate-500 text-[11px] uppercase border-b bg-cream/40">
+                    <tr>
+                      <th class="text-left font-bold px-5 py-3 w-44">Grup Modul</th>
+                      <th class="font-bold px-2 py-3 text-center w-20">view</th>
+                      <th class="font-bold px-2 py-3 text-center w-20">create</th>
+                      <th class="font-bold px-2 py-3 text-center w-20">update</th>
+                      <th class="font-bold px-2 py-3 text-center w-20">delete</th>
+                      <th class="font-bold px-2 py-3 text-center w-20">publish</th>
+                      <th class="font-bold px-2 py-3 text-center w-24">manage</th>
+                      <th class="font-bold px-2 py-3 text-center w-28">manage_own</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    <!-- helper: .chk.on = tercentang; cells kosong/dash = aksi tak relevan utk modul -->
+                    <tr><td class="px-5 py-2.5 font-semibold">Dashboard</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center text-slate-300">—</td><td class="text-center text-slate-300">—</td><td class="text-center text-slate-300">—</td><td class="text-center text-slate-300">—</td><td class="text-center text-slate-300">—</td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Kajian</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Jadwal</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Titik Dakwah</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Media</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Partner</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Ustadz</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Keuangan</td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Donasi</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Galeri</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Video</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Catatan / Blog</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Tanya Ustadz</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center text-slate-300">—</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center text-slate-300">—</td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Perpustakaan</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Kelas</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Event</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Lapak</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">User</td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">RBAC</td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center"><span class="chk"></span></td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">AI</td>
+                      <td class="text-center"><span class="chk on"><i data-lucide="check" class="w-3 h-3"></i></span></td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center text-slate-300">—</td><td class="text-center text-slate-300">—</td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center text-slate-300">—</td></tr>
+                    <tr><td class="px-5 py-2.5 font-semibold">Settings</td>
+                      <td class="text-center"><span class="chk"></span></td><td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center text-slate-300">—</td>
+                      <td class="text-center text-slate-300">—</td><td class="text-center"><span class="chk"></span></td><td class="text-center text-slate-300">—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Catatan: matriks ini disimpan di tabel <code>permissions</code> (mis. <code>kajian.publish</code>) ↔ <code>role_permissions</code>. "—" = aksi tidak relevan untuk modul tersebut. Centang di sini langsung menentukan tombol & menu yang dirender per role.</p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 2 — BUILDER MENU DINAMIS                                        -->
+  <!-- ===================================================================== -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2 display"><i data-lucide="list-tree" class="w-5 h-5 text-brand-600"></i> 2. Builder Menu Dinamis</h2>
+    <p class="text-sm text-slate-500 mb-4">Item di sini yang menentukan apa yang muncul di sidebar tiap role. Atur urutan (drag), permission yang dibutuhkan, nesting, dan aktif/nonaktif.</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2 text-xs text-slate-500"><i data-lucide="info" class="w-4 h-4 text-brand-600"></i> Sidebar admin dirender dari tabel <code class="bg-cream px-1.5 py-0.5 rounded">menu_items</code> + permission user. Item tanpa permission cocok = disembunyikan otomatis.</div>
+        <button class="px-4 h-10 rounded-full bg-brand-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Menu</button>
+      </div>
+
+      <div class="space-y-2">
+        <!-- header row -->
+        <div class="hidden md:grid grid-cols-[28px_1fr_1.4fr_1.6fr_70px] gap-3 px-3 text-[11px] uppercase font-bold text-slate-400">
+          <span></span><span>Label &amp; Icon</span><span>Path</span><span>Permission dibutuhkan</span><span class="text-center">Aktif</span>
+        </div>
+
+        <!-- item: Dashboard -->
+        <div class="grid grid-cols-[28px_1fr_1.4fr_1.6fr_70px] gap-3 items-center bg-cream/60 rounded-xl px-3 py-2.5">
+          <span class="text-slate-300 cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></span>
+          <span class="flex items-center gap-2 font-semibold"><span class="w-8 h-8 rounded-lg bg-brand-50 grid place-items-center"><i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-600"></i></span> Dashboard</span>
+          <span class="text-xs text-slate-500 font-mono">/admin</span>
+          <span class="relative"><span class="text-xs border rounded-lg px-2.5 py-1.5 bg-surface flex items-center justify-between"><span class="text-slate-600">dashboard.view</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i></span></span>
+          <span class="grid place-items-center"><span class="sw on"><span class="dot"></span></span></span>
+        </div>
+
+        <!-- item: Kajian (parent w/ children) -->
+        <div class="grid grid-cols-[28px_1fr_1.4fr_1.6fr_70px] gap-3 items-center bg-cream/60 rounded-xl px-3 py-2.5">
+          <span class="text-slate-300 cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></span>
+          <span class="flex items-center gap-2 font-semibold"><span class="w-8 h-8 rounded-lg bg-brand-50 grid place-items-center"><i data-lucide="book-open-text" class="w-4 h-4 text-brand-600"></i></span> Kajian &amp; Jadwal <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 font-bold">grup</span></span>
+          <span class="text-xs text-slate-500 font-mono">/admin/kajian</span>
+          <span class="relative"><span class="text-xs border rounded-lg px-2.5 py-1.5 bg-surface flex items-center justify-between"><span class="text-slate-600">kajian.view</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i></span></span>
+          <span class="grid place-items-center"><span class="sw on"><span class="dot"></span></span></span>
+        </div>
+        <!-- child 1 (indented) -->
+        <div class="grid grid-cols-[28px_1fr_1.4fr_1.6fr_70px] gap-3 items-center rounded-xl px-3 py-2 ml-8 border-l-2 border-brand-200 bg-surface">
+          <span class="text-slate-300 cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></span>
+          <span class="flex items-center gap-2 text-sm"><i data-lucide="corner-down-right" class="w-4 h-4 text-slate-300"></i><span class="w-7 h-7 rounded-lg bg-slate-100 grid place-items-center"><i data-lucide="calendar-days" class="w-3.5 h-3.5 text-slate-500"></i></span> Daftar Jadwal</span>
+          <span class="text-xs text-slate-500 font-mono">/admin/kajian/jadwal</span>
+          <span class="relative"><span class="text-xs border rounded-lg px-2.5 py-1.5 bg-surface flex items-center justify-between"><span class="text-slate-600">jadwal.view</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i></span></span>
+          <span class="grid place-items-center"><span class="sw on"><span class="dot"></span></span></span>
+        </div>
+        <!-- child 2 (indented) -->
+        <div class="grid grid-cols-[28px_1fr_1.4fr_1.6fr_70px] gap-3 items-center rounded-xl px-3 py-2 ml-8 border-l-2 border-brand-200 bg-surface">
+          <span class="text-slate-300 cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></span>
+          <span class="flex items-center gap-2 text-sm"><i data-lucide="corner-down-right" class="w-4 h-4 text-slate-300"></i><span class="w-7 h-7 rounded-lg bg-slate-100 grid place-items-center"><i data-lucide="book-open" class="w-3.5 h-3.5 text-slate-500"></i></span> Catatan Kajian</span>
+          <span class="text-xs text-slate-500 font-mono">/admin/kajian/catatan</span>
+          <span class="relative"><span class="text-xs border rounded-lg px-2.5 py-1.5 bg-surface flex items-center justify-between"><span class="text-slate-600">blog.view</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i></span></span>
+          <span class="grid place-items-center"><span class="sw on"><span class="dot"></span></span></span>
+        </div>
+
+        <!-- item: Titik Dakwah -->
+        <div class="grid grid-cols-[28px_1fr_1.4fr_1.6fr_70px] gap-3 items-center bg-cream/60 rounded-xl px-3 py-2.5">
+          <span class="text-slate-300 cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></span>
+          <span class="flex items-center gap-2 font-semibold"><span class="w-8 h-8 rounded-lg bg-brand-50 grid place-items-center"><i data-lucide="map-pin" class="w-4 h-4 text-brand-600"></i></span> Titik Dakwah</span>
+          <span class="text-xs text-slate-500 font-mono">/admin/titik</span>
+          <span class="relative"><span class="text-xs border rounded-lg px-2.5 py-1.5 bg-surface flex items-center justify-between"><span class="text-slate-600">titik.view</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i></span></span>
+          <span class="grid place-items-center"><span class="sw on"><span class="dot"></span></span></span>
+        </div>
+
+        <!-- item: Keuangan -->
+        <div class="grid grid-cols-[28px_1fr_1.4fr_1.6fr_70px] gap-3 items-center bg-cream/60 rounded-xl px-3 py-2.5">
+          <span class="text-slate-300 cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></span>
+          <span class="flex items-center gap-2 font-semibold"><span class="w-8 h-8 rounded-lg bg-brand-50 grid place-items-center"><i data-lucide="wallet" class="w-4 h-4 text-brand-600"></i></span> Keuangan</span>
+          <span class="text-xs text-slate-500 font-mono">/admin/keuangan</span>
+          <span class="relative"><span class="text-xs border rounded-lg px-2.5 py-1.5 bg-surface flex items-center justify-between"><span class="text-slate-600">keuangan.manage</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i></span></span>
+          <span class="grid place-items-center"><span class="sw on"><span class="dot"></span></span></span>
+        </div>
+
+        <!-- item: RBAC (nonaktif untuk sebagian) -->
+        <div class="grid grid-cols-[28px_1fr_1.4fr_1.6fr_70px] gap-3 items-center bg-cream/60 rounded-xl px-3 py-2.5 opacity-60">
+          <span class="text-slate-300 cursor-grab"><i data-lucide="grip-vertical" class="w-5 h-5"></i></span>
+          <span class="flex items-center gap-2 font-semibold"><span class="w-8 h-8 rounded-lg bg-slate-100 grid place-items-center"><i data-lucide="flask-conical" class="w-4 h-4 text-slate-500"></i></span> Eksperimen AI <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 font-bold">nonaktif</span></span>
+          <span class="text-xs text-slate-500 font-mono">/admin/ai-lab</span>
+          <span class="relative"><span class="text-xs border rounded-lg px-2.5 py-1.5 bg-surface flex items-center justify-between"><span class="text-slate-600">ai.manage</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i></span></span>
+          <span class="grid place-items-center"><span class="sw off"><span class="dot"></span></span></span>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Drag handle (<i data-lucide="grip-vertical" class="w-3 h-3 inline"></i>) untuk urutkan · child ter-indent = sub-menu. Toggle "Aktif" menyembunyikan item dari semua sidebar tanpa menghapus datanya.</p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 3 — TABEL DATA CRUD (Titik Dakwah / Kajian)                     -->
+  <!-- ===================================================================== -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2 display"><i data-lucide="table-2" class="w-5 h-5 text-brand-600"></i> 3. Tabel Data CRUD — Titik Dakwah</h2>
+    <p class="text-sm text-slate-500 mb-4">Pola tabel data standar dipakai ulang di semua modul (Kajian, Video, Kelas, dll): toolbar + tabel + status badge + pagination.</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface overflow-hidden">
+      <!-- toolbar -->
+      <div class="px-5 py-4 border-b flex flex-wrap items-center gap-3 justify-between">
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 bg-cream rounded-lg px-3 h-9 w-64"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400">Cari titik dakwah…</span></div>
+          <div class="relative"><span class="text-sm border rounded-lg pl-3 pr-8 h-9 flex items-center font-semibold text-slate-600 bg-surface">Kecamatan: Semua</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2"></i></div>
+          <div class="relative"><span class="text-sm border rounded-lg pl-3 pr-8 h-9 flex items-center font-semibold text-slate-600 bg-surface">Status: Semua</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2"></i></div>
+        </div>
+        <button class="px-4 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Titik</button>
+      </div>
+      <!-- table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm min-w-[720px]">
+          <thead class="bg-cream text-slate-500 text-xs uppercase">
+            <tr><th class="text-left font-bold px-5 py-3">Nama</th><th class="text-left font-bold px-5 py-3">Pengelola</th><th class="text-left font-bold px-5 py-3">Lokasi</th><th class="text-left font-bold px-5 py-3">Status</th><th class="text-right font-bold px-5 py-3">Aksi</th></tr>
+          </thead>
+          <tbody class="divide-y">
+            <tr class="hover:bg-cream/60">
+              <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph w-9 h-9 rounded-lg grid place-items-center shrink-0"><i data-lucide="building-2" class="w-4 h-4 text-white"></i></div><span class="font-semibold">Masjid Al-Falah</span></div></td>
+              <td class="px-5 py-3 text-slate-600">Ust. Ahmad Fauzi</td>
+              <td class="px-5 py-3 text-slate-500">Kepanjenkidul</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">Published</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="eye" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+            <tr class="hover:bg-cream/60">
+              <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph3 w-9 h-9 rounded-lg grid place-items-center shrink-0"><i data-lucide="building-2" class="w-4 h-4 text-white"></i></div><span class="font-semibold">Mushola An-Nur</span></div></td>
+              <td class="px-5 py-3 text-slate-600">Ust. Yusuf Abdullah</td>
+              <td class="px-5 py-3 text-slate-500">Sananwetan</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">Published</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="eye" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+            <tr class="hover:bg-cream/60">
+              <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph2 w-9 h-9 rounded-lg grid place-items-center shrink-0"><i data-lucide="building-2" class="w-4 h-4 text-white"></i></div><span class="font-semibold">Masjid Agung Kota Blitar</span></div></td>
+              <td class="px-5 py-3 text-slate-600">Ust. Hamid</td>
+              <td class="px-5 py-3 text-slate-500">Sukorejo</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">Published</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="eye" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+            <tr class="hover:bg-cream/60">
+              <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph w-9 h-9 rounded-lg grid place-items-center shrink-0"><i data-lucide="building-2" class="w-4 h-4 text-white"></i></div><span class="font-semibold">Mushola Al-Ikhlas</span></div></td>
+              <td class="px-5 py-3 text-slate-600">Pengurus RT 03</td>
+              <td class="px-5 py-3 text-slate-500">Kepanjenkidul</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">Draft</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="eye" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+            <tr class="hover:bg-cream/60">
+              <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph3 w-9 h-9 rounded-lg grid place-items-center shrink-0"><i data-lucide="building-2" class="w-4 h-4 text-white"></i></div><span class="font-semibold">Majelis Taklim Ar-Rahman</span></div></td>
+              <td class="px-5 py-3 text-slate-600">Ust. Fauzi</td>
+              <td class="px-5 py-3 text-slate-500">Sananwetan</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">Pending</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="eye" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+            <tr class="hover:bg-cream/60">
+              <td class="px-5 py-3"><div class="flex items-center gap-3"><div class="ph2 w-9 h-9 rounded-lg grid place-items-center shrink-0"><i data-lucide="building-2" class="w-4 h-4 text-white"></i></div><span class="font-semibold">Mushola Baiturrahim</span></div></td>
+              <td class="px-5 py-3 text-slate-600">Ust. Hamid</td>
+              <td class="px-5 py-3 text-slate-500">Sukorejo</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">Pending</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="eye" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- pagination -->
+      <div class="px-5 py-3 border-t flex items-center justify-between text-sm">
+        <span class="text-slate-500">Menampilkan 1–6 dari 48 titik</span>
+        <div class="flex items-center gap-1">
+          <button class="w-8 h-8 rounded-lg border grid place-items-center text-slate-400"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+          <button class="w-8 h-8 rounded-lg bg-brand-600 text-white font-semibold">1</button>
+          <button class="w-8 h-8 rounded-lg border font-semibold text-slate-600">2</button>
+          <button class="w-8 h-8 rounded-lg border font-semibold text-slate-600">3</button>
+          <span class="px-1 text-slate-400">…</span>
+          <button class="w-8 h-8 rounded-lg border font-semibold text-slate-600">8</button>
+          <button class="w-8 h-8 rounded-lg border grid place-items-center text-slate-600"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Status badge: <span class="text-green-700 font-semibold">Published</span> / <span class="text-slate-600 font-semibold">Draft</span> / <span class="text-amber-700 font-semibold">Pending</span>. Tombol aksi (lihat/edit/hapus) muncul sesuai permission user di modul ini.</p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 4 — INPUT KEUANGAN                                              -->
+  <!-- ===================================================================== -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2 display"><i data-lucide="wallet" class="w-5 h-5 text-brand-600"></i> 4. Input Keuangan</h2>
+    <p class="text-sm text-slate-500 mb-4">Bendahara mencatat transaksi (global atau per titik), upload bukti, lalu generate laporan PDF transparan.</p>
+
+    <div data-theme="teduh" class="grid lg:grid-cols-5 gap-5">
+      <!-- form -->
+      <div class="lg:col-span-2 bg-surface rounded-2xl shadow-pop border p-5">
+        <h4 class="font-bold mb-4 flex items-center gap-2"><i data-lucide="file-plus-2" class="w-4 h-4 text-brand-600"></i> Catat Transaksi</h4>
+        <div class="space-y-3.5">
+          <div>
+            <label class="text-xs font-bold text-slate-500">Scope</label>
+            <div class="mt-1 w-full border rounded-xl px-3 h-11 text-sm flex items-center justify-between text-slate-600">Per Titik Dakwah — Masjid Al-Falah <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></div>
+            <p class="text-[11px] text-slate-400 mt-1">Pilihan: Global (Kas Pusat) atau salah satu titik dakwah.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-bold text-slate-500">Tanggal</label>
+              <div class="mt-1 w-full border rounded-xl px-3 h-11 text-sm flex items-center justify-between text-slate-600">20 Mei 2026 <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i></div>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-slate-500">Kategori</label>
+              <div class="mt-1 w-full border rounded-xl px-3 h-11 text-sm flex items-center justify-between text-slate-600">Infaq Jumat <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></div>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Tipe</label>
+            <div class="mt-1 flex gap-2">
+              <button class="flex-1 h-11 rounded-xl bg-green-50 border-2 border-green-500 text-green-700 text-sm font-bold flex items-center justify-center gap-2"><i data-lucide="arrow-down-left" class="w-4 h-4"></i> Pemasukan</button>
+              <button class="flex-1 h-11 rounded-xl border text-slate-500 text-sm font-semibold flex items-center justify-center gap-2"><i data-lucide="arrow-up-right" class="w-4 h-4"></i> Pengeluaran</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Jumlah (Rp)</label>
+            <div class="mt-1 w-full border rounded-xl px-3 h-11 text-sm flex items-center gap-2"><span class="text-slate-400 font-semibold">Rp</span><span class="font-bold text-ink">2.450.000</span></div>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Deskripsi</label>
+            <textarea class="mt-1 w-full border rounded-xl px-3 py-2 text-sm h-20" placeholder="Mis. Infaq kotak amal Jumat pekan ke-3…"></textarea>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-500">Upload bukti</label>
+            <div class="mt-1 w-full border-2 border-dashed rounded-xl px-3 py-5 text-center text-slate-400"><i data-lucide="upload-cloud" class="w-7 h-7 mx-auto mb-1"></i><p class="text-xs">Seret nota/foto ke sini atau <span class="text-brand-600 font-semibold">pilih file</span></p></div>
+          </div>
+          <button class="w-full h-11 rounded-full bg-brand-600 text-white font-bold flex items-center justify-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan Transaksi</button>
+        </div>
+      </div>
+
+      <!-- side: summary + recent -->
+      <div class="lg:col-span-3 space-y-5">
+        <!-- summary -->
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-surface rounded-2xl shadow-card p-4"><div class="flex items-center justify-between"><i data-lucide="arrow-down-left" class="w-5 h-5 text-green-600"></i></div><p class="text-lg font-extrabold mt-2 text-green-700">Rp 31,2jt</p><p class="text-xs text-slate-500">Pemasukan (bln ini)</p></div>
+          <div class="bg-surface rounded-2xl shadow-card p-4"><div class="flex items-center justify-between"><i data-lucide="arrow-up-right" class="w-5 h-5 text-red-500"></i></div><p class="text-lg font-extrabold mt-2 text-red-600">Rp 6,9jt</p><p class="text-xs text-slate-500">Pengeluaran (bln ini)</p></div>
+          <div class="bg-brand-700 text-white rounded-2xl shadow-card p-4"><div class="flex items-center justify-between"><i data-lucide="wallet" class="w-5 h-5 text-gold-light"></i></div><p class="text-lg font-extrabold mt-2">Rp 24.350.000</p><p class="text-xs text-white/70">Saldo Kas</p></div>
+        </div>
+        <!-- recent transactions -->
+        <div class="bg-surface rounded-2xl shadow-pop border overflow-hidden">
+          <div class="px-5 py-4 border-b flex items-center justify-between">
+            <h4 class="font-bold flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-brand-600"></i> Transaksi Terakhir</h4>
+            <button class="px-3.5 h-9 rounded-full bg-gold text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="file-down" class="w-4 h-4"></i> Generate Laporan PDF</button>
+          </div>
+          <table class="w-full text-sm">
+            <thead class="bg-cream text-slate-500 text-xs uppercase"><tr><th class="text-left font-bold px-5 py-2.5">Tanggal</th><th class="text-left font-bold px-5 py-2.5">Keterangan</th><th class="text-left font-bold px-5 py-2.5">Scope</th><th class="text-right font-bold px-5 py-2.5">Jumlah</th></tr></thead>
+            <tbody class="divide-y">
+              <tr><td class="px-5 py-2.5 text-slate-500">18 Mei</td><td class="px-5 py-2.5 font-semibold">Infaq Jumat</td><td class="px-5 py-2.5 text-xs text-slate-500">Al-Falah</td><td class="px-5 py-2.5 text-right font-bold text-green-700">+ Rp 2.450.000</td></tr>
+              <tr><td class="px-5 py-2.5 text-slate-500">16 Mei</td><td class="px-5 py-2.5 font-semibold">Beli karpet shaf</td><td class="px-5 py-2.5 text-xs text-slate-500">An-Nur</td><td class="px-5 py-2.5 text-right font-bold text-red-600">− Rp 1.800.000</td></tr>
+              <tr><td class="px-5 py-2.5 text-slate-500">14 Mei</td><td class="px-5 py-2.5 font-semibold">Donasi hamba Allah</td><td class="px-5 py-2.5 text-xs text-slate-500">Global</td><td class="px-5 py-2.5 text-right font-bold text-green-700">+ Rp 5.000.000</td></tr>
+              <tr><td class="px-5 py-2.5 text-slate-500">12 Mei</td><td class="px-5 py-2.5 font-semibold">Honor pemateri</td><td class="px-5 py-2.5 text-xs text-slate-500">Masjid Agung</td><td class="px-5 py-2.5 text-right font-bold text-red-600">− Rp 1.000.000</td></tr>
+              <tr><td class="px-5 py-2.5 text-slate-500">10 Mei</td><td class="px-5 py-2.5 font-semibold">Kotak amal harian</td><td class="px-5 py-2.5 text-xs text-slate-500">Al-Falah</td><td class="px-5 py-2.5 text-right font-bold text-green-700">+ Rp 1.350.000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Scope = pemisah kas. Saldo dihitung per scope; laporan PDF dapat difilter Global atau per titik. Setiap pengeluaran wajib lampirkan bukti.</p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 5 — MANAJEMEN DONASI                                            -->
+  <!-- ===================================================================== -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2 display"><i data-lucide="hand-heart" class="w-5 h-5 text-brand-600"></i> 5. Manajemen Donasi</h2>
+    <p class="text-sm text-slate-500 mb-4">Campaign donasi per titik dengan progress bar gold, plus form & timeline laporan penggunaan dana agar transparan.</p>
+
+    <div data-theme="teduh" class="grid lg:grid-cols-5 gap-5">
+      <!-- campaigns list -->
+      <div class="lg:col-span-3 bg-surface rounded-2xl shadow-pop border overflow-hidden">
+        <div class="px-5 py-4 border-b flex items-center justify-between">
+          <h4 class="font-bold flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4 text-brand-600"></i> Campaign Donasi</h4>
+          <button class="px-4 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Buat Campaign</button>
+        </div>
+        <div class="p-5 space-y-4">
+          <!-- campaign 1 -->
+          <div class="border rounded-2xl p-4">
+            <div class="flex items-start gap-3">
+              <div class="ph2 w-14 h-14 rounded-xl grid place-items-center shrink-0"><i data-lucide="hand-heart" class="w-6 h-6 text-white"></i></div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2"><p class="font-bold text-sm leading-tight">Renovasi Tempat Wudhu &amp; MCK</p><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold shrink-0">● Aktif</span></div>
+                <p class="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> Masjid Al-Falah · Kepanjenkidul</p>
+                <div class="mt-2.5">
+                  <div class="flex justify-between text-xs mb-1"><span class="font-bold text-brand-700">Rp 18.500.000</span><span class="text-slate-400">dari Rp 30.000.000</span></div>
+                  <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-gold" style="width:62%"></div></div>
+                  <div class="flex justify-between text-[11px] text-slate-400 mt-1"><span>62% tercapai · 132 donatur</span><span>sisa 18 hari</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- campaign 2 -->
+          <div class="border rounded-2xl p-4">
+            <div class="flex items-start gap-3">
+              <div class="ph w-14 h-14 rounded-xl grid place-items-center shrink-0"><i data-lucide="book-open" class="w-6 h-6 text-white"></i></div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2"><p class="font-bold text-sm leading-tight">Pengadaan Al-Qur'an &amp; Iqro</p><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold shrink-0">● Aktif</span></div>
+                <p class="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> Mushola An-Nur · Sananwetan</p>
+                <div class="mt-2.5">
+                  <div class="flex justify-between text-xs mb-1"><span class="font-bold text-brand-700">Rp 4.200.000</span><span class="text-slate-400">dari Rp 6.000.000</span></div>
+                  <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-gold" style="width:70%"></div></div>
+                  <div class="flex justify-between text-[11px] text-slate-400 mt-1"><span>70% tercapai · 58 donatur</span><span>sisa 9 hari</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- campaign 3 done -->
+          <div class="border rounded-2xl p-4 opacity-90">
+            <div class="flex items-start gap-3">
+              <div class="ph3 w-14 h-14 rounded-xl grid place-items-center shrink-0"><i data-lucide="lightbulb" class="w-6 h-6 text-white"></i></div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2"><p class="font-bold text-sm leading-tight">Sound System &amp; Lampu Masjid</p><span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold shrink-0">✓ Selesai</span></div>
+                <p class="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3"></i> Masjid Agung · Sukorejo</p>
+                <div class="mt-2.5">
+                  <div class="flex justify-between text-xs mb-1"><span class="font-bold text-brand-700">Rp 12.000.000</span><span class="text-slate-400">dari Rp 12.000.000</span></div>
+                  <div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-gold" style="width:100%"></div></div>
+                  <div class="flex justify-between text-[11px] text-slate-400 mt-1"><span>100% tercapai · 204 donatur</span><span>tuntas</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- laporan penggunaan dana -->
+      <div class="lg:col-span-2 space-y-5">
+        <div class="bg-surface rounded-2xl shadow-pop border p-5">
+          <h4 class="font-bold mb-3 flex items-center gap-2"><i data-lucide="receipt-text" class="w-4 h-4 text-brand-600"></i> Tambah Laporan Penggunaan Dana</h4>
+          <div class="space-y-3">
+            <div><label class="text-xs font-bold text-slate-500">Campaign</label><div class="mt-1 w-full border rounded-xl px-3 h-11 text-sm flex items-center justify-between text-slate-600">Renovasi Tempat Wudhu &amp; MCK <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></div></div>
+            <div><label class="text-xs font-bold text-slate-500">Judul</label><input class="mt-1 w-full border rounded-xl px-3 h-11 text-sm" placeholder="Mis. Pembelian keramik & semen" /></div>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="text-xs font-bold text-slate-500">Jumlah dipakai</label><div class="mt-1 w-full border rounded-xl px-3 h-11 text-sm flex items-center gap-2"><span class="text-slate-400 font-semibold">Rp</span><span class="font-bold">7.200.000</span></div></div>
+              <div><label class="text-xs font-bold text-slate-500">Tanggal</label><div class="mt-1 w-full border rounded-xl px-3 h-11 text-sm flex items-center justify-between text-slate-600">12 Mei <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i></div></div>
+            </div>
+            <div><label class="text-xs font-bold text-slate-500">Lampiran nota</label><div class="mt-1 w-full border-2 border-dashed rounded-xl px-3 py-4 text-center text-slate-400"><i data-lucide="paperclip" class="w-6 h-6 mx-auto mb-1"></i><p class="text-xs">Lampirkan foto/PDF nota</p></div></div>
+            <button class="w-full h-11 rounded-full bg-gold text-white font-bold flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Laporan</button>
+          </div>
+        </div>
+        <!-- timeline -->
+        <div class="bg-surface rounded-2xl shadow-pop border p-5">
+          <h4 class="font-bold mb-3 flex items-center gap-2"><i data-lucide="list-checks" class="w-4 h-4 text-brand-600"></i> Timeline Laporan</h4>
+          <div class="space-y-3">
+            <div class="flex gap-3">
+              <div class="flex flex-col items-center"><div class="w-2.5 h-2.5 rounded-full bg-brand-600"></div><div class="w-px flex-1 bg-slate-200"></div></div>
+              <div class="bg-cream rounded-xl p-3 flex-1 -mt-1"><div class="flex justify-between"><p class="font-semibold text-xs">Pembelian keramik &amp; semen</p><span class="text-xs font-bold text-red-500">− Rp 7.200.000</span></div><p class="text-[11px] text-slate-400 mt-0.5">12 Mei 2026 · 📎 nota terlampir</p></div>
+            </div>
+            <div class="flex gap-3">
+              <div class="flex flex-col items-center"><div class="w-2.5 h-2.5 rounded-full bg-brand-600"></div><div class="w-px flex-1 bg-slate-200"></div></div>
+              <div class="bg-cream rounded-xl p-3 flex-1 -mt-1"><div class="flex justify-between"><p class="font-semibold text-xs">Upah tukang (termin 1)</p><span class="text-xs font-bold text-red-500">− Rp 3.000.000</span></div><p class="text-[11px] text-slate-400 mt-0.5">8 Mei 2026 · 📎 nota terlampir</p></div>
+            </div>
+            <div class="flex gap-3">
+              <div class="flex flex-col items-center"><div class="w-2.5 h-2.5 rounded-full bg-brand-600"></div></div>
+              <div class="bg-cream rounded-xl p-3 flex-1 -mt-1"><div class="flex justify-between"><p class="font-semibold text-xs">Pipa &amp; instalasi air</p><span class="text-xs font-bold text-red-500">− Rp 1.500.000</span></div><p class="text-[11px] text-slate-400 mt-0.5">3 Mei 2026 · 📎 nota terlampir</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Progress bar memakai warna gold (aksen donasi). Laporan penggunaan dana = publik di sisi jamaah agar transparan; tiap entri idealnya berlampiran nota.</p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- PANEL 6 — VERIFIKASI AKUN ENTITAS                                     -->
+  <!-- ===================================================================== -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2 display"><i data-lucide="user-check" class="w-5 h-5 text-brand-600"></i> 6. Verifikasi Akun Entitas</h2>
+    <p class="text-sm text-slate-500 mb-4">Pengajuan Titik Dakwah, Media Partner, Partner Usaha, dan Ustadz menunggu persetujuan admin sebelum tampil publik.</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface overflow-hidden">
+      <div class="px-5 py-4 border-b flex flex-wrap items-center gap-3 justify-between">
+        <h4 class="font-bold flex items-center gap-2"><i data-lucide="shield-question" class="w-4 h-4 text-brand-600"></i> Pengajuan Menunggu Verifikasi <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">4 baru</span></h4>
+        <div class="flex gap-2">
+          <span class="px-3 py-1.5 rounded-full bg-brand-600 text-white text-xs font-semibold">Semua</span>
+          <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold text-slate-600">Titik Dakwah</span>
+          <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold text-slate-600">Media</span>
+          <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold text-slate-600">Usaha</span>
+          <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold text-slate-600">Ustadz</span>
+        </div>
+      </div>
+      <div class="divide-y">
+        <!-- pengajuan 1 -->
+        <div class="px-5 py-4 flex items-center gap-4 hover:bg-cream/50">
+          <div class="ph w-12 h-12 rounded-xl grid place-items-center shrink-0"><i data-lucide="map-pin" class="w-5 h-5 text-white"></i></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2"><p class="font-bold text-sm">Mushola Baiturrahman</p><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Titik Dakwah</span><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">⏳ Menunggu</span></div>
+            <p class="text-xs text-slate-500 mt-0.5">Pemohon: <b>H. Sulaiman</b> · Sukorejo, Kota Blitar · diajukan 2 jam lalu</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button class="px-3 h-9 rounded-lg text-slate-500 text-sm font-semibold border flex items-center gap-1.5"><i data-lucide="file-search" class="w-4 h-4"></i> Detail</button>
+            <button class="px-3.5 h-9 rounded-lg bg-brand-600 text-white text-sm font-semibold flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> Verifikasi</button>
+            <button class="px-3.5 h-9 rounded-lg bg-red-50 text-red-600 border border-red-200 text-sm font-semibold flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4"></i> Tolak</button>
+          </div>
+        </div>
+        <!-- pengajuan 2 -->
+        <div class="px-5 py-4 flex items-center gap-4 hover:bg-cream/50">
+          <div class="ph3 w-12 h-12 rounded-xl grid place-items-center shrink-0"><i data-lucide="radio" class="w-5 h-5 text-white"></i></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2"><p class="font-bold text-sm">Blitar Hijrah Channel</p><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Media Partner</span><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">⏳ Menunggu</span></div>
+            <p class="text-xs text-slate-500 mt-0.5">Pemohon: <b>Rizal Aditya</b> · YouTube + IG dakwah · diajukan 6 jam lalu</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button class="px-3 h-9 rounded-lg text-slate-500 text-sm font-semibold border flex items-center gap-1.5"><i data-lucide="file-search" class="w-4 h-4"></i> Detail</button>
+            <button class="px-3.5 h-9 rounded-lg bg-brand-600 text-white text-sm font-semibold flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> Verifikasi</button>
+            <button class="px-3.5 h-9 rounded-lg bg-red-50 text-red-600 border border-red-200 text-sm font-semibold flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4"></i> Tolak</button>
+          </div>
+        </div>
+        <!-- pengajuan 3 -->
+        <div class="px-5 py-4 flex items-center gap-4 hover:bg-cream/50">
+          <div class="ph2 w-12 h-12 rounded-xl grid place-items-center shrink-0"><i data-lucide="store" class="w-5 h-5 text-white"></i></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2"><p class="font-bold text-sm">Toko Barokah (Kurma &amp; Madu)</p><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Partner Usaha</span><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">⏳ Menunggu</span></div>
+            <p class="text-xs text-slate-500 mt-0.5">Pemohon: <b>Ny. Aisyah</b> · Kepanjenkidul · 3 produk diajukan · diajukan 1 hari lalu</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button class="px-3 h-9 rounded-lg text-slate-500 text-sm font-semibold border flex items-center gap-1.5"><i data-lucide="file-search" class="w-4 h-4"></i> Detail</button>
+            <button class="px-3.5 h-9 rounded-lg bg-brand-600 text-white text-sm font-semibold flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> Verifikasi</button>
+            <button class="px-3.5 h-9 rounded-lg bg-red-50 text-red-600 border border-red-200 text-sm font-semibold flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4"></i> Tolak</button>
+          </div>
+        </div>
+        <!-- pengajuan 4 -->
+        <div class="px-5 py-4 flex items-center gap-4 hover:bg-cream/50">
+          <div class="ph w-12 h-12 rounded-xl grid place-items-center shrink-0"><i data-lucide="user-round" class="w-5 h-5 text-white"></i></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2"><p class="font-bold text-sm">Ust. Abdul Hamid, Lc.</p><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Ustadz</span><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">⏳ Menunggu</span></div>
+            <p class="text-xs text-slate-500 mt-0.5">Pemohon: <b>Abdul Hamid</b> · alumni LIPIA · melampirkan ijazah &amp; sanad · diajukan 1 hari lalu</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button class="px-3 h-9 rounded-lg text-slate-500 text-sm font-semibold border flex items-center gap-1.5"><i data-lucide="file-search" class="w-4 h-4"></i> Detail</button>
+            <button class="px-3.5 h-9 rounded-lg bg-brand-600 text-white text-sm font-semibold flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> Verifikasi</button>
+            <button class="px-3.5 h-9 rounded-lg bg-red-50 text-red-600 border border-red-200 text-sm font-semibold flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4"></i> Tolak</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Setelah "Verifikasi", entitas otomatis dapat badge "✓ Terverifikasi" & role terkait (mis. Pengelola Titik / Media Partner). "Tolak" mengirim notifikasi alasan ke pemohon.</p>
+  </section>
+
+  <footer class="text-center text-xs text-slate-400 pt-6">
+    Blitar Mengaji · Prototype UI/UX — Admin &amp; RBAC · dibuat untuk brainstorming sebelum eksekusi · 2026-05-20
+  </footer>
+</main>
+
+<script>lucide.createIcons();</script>
+<script src="theme-switcher.js" defer></script>
+</body>
+</html>

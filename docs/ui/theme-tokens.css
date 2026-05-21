@@ -1,0 +1,86 @@
+/* ============================================================
+   Blitar Mengaji — Theme Tokens (shared)
+   Dipakai bersama oleh semua file prototype.
+   Cara pakai:
+     1) <link rel="stylesheet" href="theme-tokens.css">
+     2) tailwind.config warna -> var(--c-*) (lihat snippet di prompt/dok)
+     3) set data-theme="teduh" pada kontainer app (mis. .screen / wrapper konten)
+     4) <script src="theme-switcher.js" defer></script>
+   Variabel cascade: definisikan di [data-theme]; :root = default (Teduh).
+   ============================================================ */
+
+:root,
+[data-theme="teduh"] {
+  /* Teduh (craft) — emerald hangat + parchment, identitas utama */
+  --c-brand-50:#EAF1EC; --c-brand-100:#CFE1D5; --c-brand-200:#A6C7B2; --c-brand-300:#6FA588;
+  --c-brand-400:#3F8568; --c-brand-500:#1C6B50; --c-brand-600:#0E5C46; --c-brand-700:#0B4A39;
+  --c-brand-800:#07382B; --c-brand-900:#06291F;
+  --c-gold:#C9A227; --c-gold-light:#E6CC8A; --c-gold-dark:#9A7A1E;
+  --c-cream:#F4EEE1; --c-surface:#FBF7EE; --c-ink:#23241E;
+}
+
+/* Modern — Teal + Amber */
+[data-theme="modern"] {
+  --c-brand-50:#F0FDFA; --c-brand-100:#CCFBF1; --c-brand-200:#99F6E4; --c-brand-300:#5EEAD4;
+  --c-brand-400:#2DD4BF; --c-brand-500:#14B8A6; --c-brand-600:#0F766E; --c-brand-700:#0E5F58;
+  --c-brand-800:#0B4A45; --c-brand-900:#08332F;
+  --c-gold:#F59E0B; --c-gold-light:#FBBF24; --c-gold-dark:#B45309;
+  --c-cream:#F8FAFC; --c-surface:#FFFFFF; --c-ink:#0F172A;
+}
+
+/* Earthy — Hijau tua + Terakota */
+[data-theme="earthy"] {
+  --c-brand-50:#ECF1EA; --c-brand-100:#D6E1D2; --c-brand-200:#AEC4A6; --c-brand-300:#84A578;
+  --c-brand-400:#5C8550; --c-brand-500:#3C6A33; --c-brand-600:#14532D; --c-brand-700:#103F23;
+  --c-brand-800:#0C2F1A; --c-brand-900:#082011;
+  --c-gold:#B45309; --c-gold-light:#D97706; --c-gold-dark:#7C3A06;
+  --c-cream:#FAF6EF; --c-surface:#FFFBF4; --c-ink:#292524;
+}
+
+/* Elegan — Navy + Emas */
+[data-theme="elegan"] {
+  --c-brand-50:#EDF1F6; --c-brand-100:#D6E0EC; --c-brand-200:#AEC1D8; --c-brand-300:#7E9CC0;
+  --c-brand-400:#4F77A6; --c-brand-500:#2E5586; --c-brand-600:#1E3A5F; --c-brand-700:#182F4D;
+  --c-brand-800:#12233A; --c-brand-900:#0C1828;
+  --c-gold:#C9A227; --c-gold-light:#E3C766; --c-gold-dark:#A8851A;
+  --c-cream:#F5F3EE; --c-surface:#FFFFFF; --c-ink:#0F172A;
+}
+
+/* Minimalis — Ink + Emerald accent */
+[data-theme="minimalis"] {
+  --c-brand-50:#F3F4F6; --c-brand-100:#E5E7EB; --c-brand-200:#D1D5DB; --c-brand-300:#9CA3AF;
+  --c-brand-400:#6B7280; --c-brand-500:#374151; --c-brand-600:#111827; --c-brand-700:#0B0F1A;
+  --c-brand-800:#060911; --c-brand-900:#000000;
+  --c-gold:#10B981; --c-gold-light:#34D399; --c-gold-dark:#059669;
+  --c-cream:#FFFFFF; --c-surface:#FFFFFF; --c-ink:#111827;
+}
+
+/* Samudra — Biru + Cyan */
+[data-theme="samudra"] {
+  --c-brand-50:#EFF6FF; --c-brand-100:#DBEAFE; --c-brand-200:#BFDBFE; --c-brand-300:#93C5FD;
+  --c-brand-400:#60A5FA; --c-brand-500:#3B82F6; --c-brand-600:#2563EB; --c-brand-700:#1D4ED8;
+  --c-brand-800:#1E40AF; --c-brand-900:#1E3A8A;
+  --c-gold:#06B6D4; --c-gold-light:#22D3EE; --c-gold-dark:#0E7490;
+  --c-cream:#F0F9FF; --c-surface:#FFFFFF; --c-ink:#0F172A;
+}
+
+/* Klasik — Parchment + Maroon */
+[data-theme="klasik"] {
+  --c-brand-50:#F7EDEC; --c-brand-100:#ECD6D3; --c-brand-200:#D9ABA6; --c-brand-300:#C27E76;
+  --c-brand-400:#A85248; --c-brand-500:#8B3A30; --c-brand-600:#7B2D24; --c-brand-700:#63231C;
+  --c-brand-800:#4A1A15; --c-brand-900:#33110D;
+  --c-gold:#B8860B; --c-gold-light:#D4AF37; --c-gold-dark:#8B6508;
+  --c-cream:#F5EFE3; --c-surface:#FBF6EA; --c-ink:#2B2118;
+}
+
+/* Senja — Dark mode */
+[data-theme="senja"] {
+  --c-brand-50:#16241F; --c-brand-100:#1B2E27; --c-brand-200:#244039; --c-brand-300:#2F5A4D;
+  --c-brand-400:#3C9E84; --c-brand-500:#18816A; --c-brand-600:#0E6E55; --c-brand-700:#0B5947;
+  --c-brand-800:#094736; --c-brand-900:#073A2D;
+  --c-gold:#FBBF24; --c-gold-light:#FDE68A; --c-gold-dark:#D97706;
+  --c-cream:#0F172A; --c-surface:#1E293B; --c-ink:#E2E8F0;
+}
+
+/* halus saat ganti tema */
+[data-theme] { transition: background-color .35s ease, color .35s ease, border-color .35s ease; }

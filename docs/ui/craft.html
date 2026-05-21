@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Arah Visual (Craft)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&family=Amiri:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="ornaments.css" />
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:var(--ink); background:var(--paper); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+  .display{ font-family:'Fraunces',Georgia,serif; font-weight:600; line-height:1.05; letter-spacing:-.01em; }
+  .arabic{ font-family:'Amiri',serif; }
+  .kufi{ font-family:'Reem Kufi',serif; }
+  .eyebrow{ font-size:12px; letter-spacing:.28em; text-transform:uppercase; font-weight:700; }
+  a{ text-decoration:none; color:inherit; }
+
+  /* prototype mini-nav */
+  .protonav{ background:#1b1c17; color:#cfcabd; font-size:12px; }
+  .protonav .wrap{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding-top:7px; padding-bottom:7px; }
+  .protonav a{ padding:3px 9px; border-radius:6px; color:#cfcabd; }
+  .protonav a:hover{ background:rgba(255,255,255,.08); }
+  .protonav a.on{ background:var(--gold); color:#231f12; font-weight:700; }
+  .protonav b{ color:#fff; margin-right:8px; }
+
+  /* header */
+  header.site{ position:sticky; top:0; z-index:40; background:rgba(244,238,225,.86); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); }
+  header.site .wrap{ display:flex; align-items:center; gap:24px; height:74px; }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .brand .name{ line-height:1; }
+  .brand .name b{ font-family:'Reem Kufi',serif; font-size:19px; letter-spacing:.02em; color:var(--emerald); display:block; }
+  .brand .name span{ font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  nav.main{ margin-left:auto; display:flex; gap:28px; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:#4a463c; }
+  nav.main a{ position:relative; padding:4px 0; }
+  nav.main a:hover{ color:var(--emerald); }
+  nav.main a::after{ content:""; position:absolute; left:0; bottom:-3px; width:0; height:2px; background:var(--gold); transition:.25s; }
+  nav.main a:hover::after{ width:100%; }
+  .btn{ font-family:inherit; font-weight:700; font-size:13px; border-radius:2px; cursor:pointer; display:inline-flex; align-items:center; gap:9px; letter-spacing:.03em; transition:.2s; }
+  .btn-gold{ background:var(--gold); color:#241f10; padding:13px 26px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.06); }
+  .btn-gold:hover{ background:var(--gold-l); }
+  .btn-ghost{ background:transparent; color:#fff; padding:12px 24px; box-shadow:inset 0 0 0 1.5px rgba(230,204,138,.6); }
+  .btn-ghost:hover{ background:rgba(230,204,138,.12); }
+  .btn-emerald{ background:var(--emerald); color:#fff; padding:11px 22px; }
+  .btn-emerald:hover{ background:var(--emerald-700); }
+  .btn-sm{ padding:9px 18px; font-size:12px; }
+
+  /* HERO */
+  .hero{ position:relative; background:var(--emerald); color:#f4ecd8; overflow:hidden; }
+  .hero .pat{ position:absolute; inset:0; opacity:1; }
+  .hero .arch{ position:absolute; left:50%; top:46px; transform:translateX(-50%); width:560px; height:560px; opacity:.5; pointer-events:none; }
+  .hero .wrap{ position:relative; z-index:2; text-align:center; padding:74px 28px 0; }
+  .hero .bismillah{ font-size:30px; color:var(--gold-l); margin-bottom:18px; }
+  .hero .eyebrow{ color:rgba(230,204,138,.85); }
+  .hero h1{ font-size:64px; color:#FBF4E2; margin:16px auto 0; max-width:14ch; }
+  .hero h1 em{ font-style:italic; color:var(--gold-l); }
+  .hero p.lead{ max-width:54ch; margin:22px auto 0; color:rgba(244,236,216,.82); font-size:17px; line-height:1.7; }
+  .hero .cta{ display:flex; gap:14px; justify-content:center; margin-top:34px; }
+  .hero .meta{ display:flex; gap:40px; justify-content:center; margin-top:48px; padding-bottom:18px; }
+  .hero .meta .m{ text-align:center; }
+  .hero .meta .m .n{ font-family:'Fraunces',serif; font-size:30px; font-weight:600; color:#fff; }
+  .hero .meta .m .l{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:rgba(230,204,138,.8); margin-top:2px; }
+  .skyline{ display:block; width:100%; height:84px; color:var(--emerald-900); position:relative; z-index:2; margin-top:6px; }
+
+  /* divider */
+  .divider{ display:flex; align-items:center; gap:18px; max-width:520px; margin:64px auto 0; color:var(--gold); }
+  .divider .ln{ flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(201,162,39,.6)); }
+  .divider .ln.r{ background:linear-gradient(90deg,rgba(201,162,39,.6),transparent); }
+  .divider svg{ width:30px; height:30px; }
+
+  /* section heading */
+  .sec{ padding:18px 0; }
+  .sec-head{ text-align:center; margin-bottom:42px; }
+  .sec-head .eyebrow{ color:var(--gold-d); }
+  .sec-head h2{ font-size:40px; margin-top:10px; color:var(--emerald); }
+  .sec-head p{ color:var(--muted); margin-top:10px; max-width:52ch; margin-left:auto; margin-right:auto; line-height:1.7; }
+
+  /* pillars */
+  .pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .card{ position:relative; background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:34px 28px 30px; overflow:hidden; transition:.25s; }
+  .card:hover{ transform:translateY(-4px); border-color:rgba(201,162,39,.5); box-shadow:0 18px 40px rgba(35,36,30,.08); }
+  .card .corner{ position:absolute; top:0; right:0; width:64px; height:64px; color:var(--gold); opacity:.5; }
+  .card .ico{ width:52px; height:52px; color:var(--emerald); margin-bottom:18px; }
+  .card h3{ font-family:'Fraunces',serif; font-size:22px; font-weight:600; color:var(--ink); }
+  .card p{ color:var(--muted); font-size:14.5px; line-height:1.65; margin-top:8px; }
+  .card .more{ margin-top:16px; font-size:12px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--gold-d); display:inline-flex; gap:6px; align-items:center; }
+
+  /* AYAT — original touch */
+  .ayah{ position:relative; margin-top:72px; background:var(--emerald); color:#f3ead4; border-radius:4px; overflow:hidden; }
+  .ayah .pat{ position:absolute; inset:0; }
+  .ayah .inner{ position:relative; z-index:2; padding:64px 28px 70px; text-align:center; }
+  .ayah .archtop{ width:120px; height:64px; margin:0 auto 14px; color:var(--gold-l); }
+  .ayah .ar{ font-family:'Amiri',serif; font-size:46px; line-height:1.9; color:var(--gold-l); direction:rtl; }
+  .ayah .tr{ font-family:'Fraunces',serif; font-style:italic; font-size:20px; max-width:46ch; margin:18px auto 0; color:#f6efde; line-height:1.6; }
+  .ayah .src{ font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:rgba(230,204,138,.8); margin-top:18px; }
+
+  /* footer */
+  footer.site{ position:relative; background:var(--emerald-900); color:#cfc8b4; margin-top:76px; overflow:hidden; }
+  footer .pat{ position:absolute; inset:0; }
+  footer .wrap{ position:relative; z-index:2; padding:54px 28px 30px; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:30px; }
+  footer h4{ font-family:'Reem Kufi',serif; color:#fff; font-size:15px; margin-bottom:14px; }
+  footer a{ display:block; color:#b9b2a0; font-size:13px; padding:4px 0; }
+  footer a:hover{ color:var(--gold-l); }
+  footer .brand .name b{ color:#fff; }
+  footer .copy{ position:relative; z-index:2; border-top:1px solid rgba(255,255,255,.1); text-align:center; padding:16px; font-size:12px; color:#9b9483; }
+
+  @media(max-width:880px){
+    .hero h1{ font-size:42px; } .hero .arch{ width:360px; height:360px; }
+    .sec-head h2{ font-size:30px; } .pillars{ grid-template-columns:1fr; }
+    nav.main{ display:none; } footer .wrap{ grid-template-columns:1fr 1fr; }
+    .ayah .ar{ font-size:32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- mini prototype nav (pembanding) -->
+<div class="protonav"><div class="wrap">
+  <b>Prototype</b>
+  <a href="index.html">Core</a><a href="04-desktop.html">Desktop lama</a>
+  <a href="craft.html" class="on">★ Craft (arah baru)</a>
+  <a href="themes.html">Tema</a><a href="11-pdf-masjid.html">PDF Masjid</a>
+  <span style="margin-left:auto;opacity:.6">Eksperimen arah visual — bukan AI generik</span>
+</div></div>
+
+<!-- HEADER -->
+<header class="site"><div class="wrap">
+  <a class="brand" href="#">
+    <!-- LOGO: mihrab + bintang 8 (buatan sendiri) -->
+    <svg width="46" height="46" viewBox="0 0 56 56" aria-label="Logo">
+      <rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/>
+      <rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/>
+      <path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M23.5 44 L23.5 31 M32.5 44 L32.5 31" stroke="#E6CC8A" stroke-width="1.3" stroke-opacity=".6" stroke-linecap="round"/>
+      <g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.4" y="-3.4" width="6.8" height="6.8"/><rect x="-3.4" y="-3.4" width="6.8" height="6.8" transform="rotate(45)"/></g>
+    </svg>
+    <span class="name"><b>Blitar Mengaji</b><span>Majelis Ilmu Kota Blitar</span></span>
+  </a>
+  <nav class="main">
+    <a href="#">Beranda</a><a href="#">Kajian</a><a href="#">Peta</a><a href="#">Catatan</a><a href="#">Donasi</a><a href="#">Pustaka</a>
+  </nav>
+  <a class="btn btn-emerald btn-sm" href="#">Masuk</a>
+</div></header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="pat pat-girih-light"></div>
+  <!-- mihrab arch outline -->
+  <svg class="arch" viewBox="0 0 480 560" fill="none" preserveAspectRatio="xMidYMin meet">
+    <path d="M40 560 L40 210 C40 96 150 44 240 32 C330 44 440 96 440 210 L440 560" stroke="#E6CC8A" stroke-width="1.4" stroke-opacity=".7"/>
+    <path d="M70 560 L70 214 C70 116 162 72 240 62 C318 72 410 116 410 214 L410 560" stroke="#E6CC8A" stroke-width="1" stroke-opacity=".4"/>
+  </svg>
+  <div class="wrap">
+    <div class="bismillah arabic">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+    <div class="eyebrow">Assalamu'alaikum · Kota Blitar</div>
+    <h1 class="display">Menyalakan <em>Cahaya Ilmu</em><br>di Blitar Raya</h1>
+    <p class="lead">Satu pintu untuk menemukan majelis ilmu terdekat, mengikuti kajian, membaca catatan, dan melihat amanah keuangan umat — terbuka & transparan untuk semua.</p>
+    <div class="cta">
+      <a class="btn btn-gold" href="#">Temukan Kajian Terdekat</a>
+      <a class="btn btn-ghost" href="#">Lihat Peta Dakwah</a>
+    </div>
+    <div class="meta">
+      <div class="m"><div class="n">48</div><div class="l">Titik Dakwah</div></div>
+      <div class="m"><div class="n">156</div><div class="l">Kajian Aktif</div></div>
+      <div class="m"><div class="n">2.340</div><div class="l">Jamaah</div></div>
+    </div>
+  </div>
+  <!-- siluet masjid -->
+  <svg class="skyline" viewBox="0 0 1200 84" preserveAspectRatio="none" fill="currentColor">
+    <rect x="0" y="64" width="1200" height="20"/>
+    <rect x="150" y="20" width="12" height="46"/><circle cx="156" cy="18" r="9"/>
+    <rect x="250" y="40" width="120" height="26"/><path d="M250 40 Q310 4 370 40 Z"/>
+    <rect x="540" y="30" width="160" height="36"/><path d="M540 30 Q620 -28 700 30 Z"/><rect x="616" y="-6" width="7" height="16"/><circle cx="619.5" cy="-9" r="5"/>
+    <rect x="860" y="44" width="110" height="22"/><path d="M860 44 Q915 8 970 44 Z"/>
+    <rect x="1040" y="22" width="12" height="44"/><circle cx="1046" cy="20" r="9"/>
+  </svg>
+</section>
+
+<!-- DIVIDER -->
+<div class="divider">
+  <span class="ln"></span>
+  <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="6" y="6" width="16" height="16"/><rect x="6" y="6" width="16" height="16" transform="rotate(45 14 14)"/></svg>
+  <span class="ln r"></span>
+</div>
+
+<!-- PILLARS -->
+<section class="sec wrap" style="padding-top:50px">
+  <div class="sec-head">
+    <div class="eyebrow">Yang Kami Rawat</div>
+    <h2 class="display">Ilmu, Amanah, & Ukhuwah</h2>
+    <p>Tiga pilar yang menjaga ruh platform ini — bukan sekadar aplikasi, tapi khidmat untuk umat.</p>
+  </div>
+  <div class="pillars">
+    <article class="card">
+      <svg class="corner" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M64 6 C36 6 6 36 6 64 M64 20 C44 20 20 44 20 64 M64 34 C52 34 34 52 34 64"/></svg>
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14 C8 11 11 9 24 9 C37 9 40 11 40 14 L40 38 C40 35 37 33 24 33 C11 33 8 35 8 38 Z"/><path d="M24 9 L24 33"/></svg>
+      <h3>Majelis &amp; Kajian</h3>
+      <p>Jadwal kajian rutin tiap titik dakwah, peta lokasi, rekaman & live streaming — temukan ilmu paling dekat denganmu.</p>
+      <span class="more">Jelajahi kajian ›</span>
+    </article>
+    <article class="card">
+      <svg class="corner" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M64 6 C36 6 6 36 6 64 M64 20 C44 20 20 44 20 64 M64 34 C52 34 34 52 34 64"/></svg>
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6 L40 13 L24 20 L8 13 Z"/><path d="M12 16 L12 30 C12 33 17 36 24 36 C31 36 36 33 36 30 L36 16"/><path d="M42 14 L42 26"/></svg>
+      <h3>Amanah &amp; Transparan</h3>
+      <p>Laporan keuangan tiap masjid bisa diunduh PDF, donasi dengan progres & laporan penggunaan dana — setiap rupiah tertelusur.</p>
+      <span class="more">Lihat keuangan ›</span>
+    </article>
+    <article class="card">
+      <svg class="corner" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M64 6 C36 6 6 36 6 64 M64 20 C44 20 20 44 20 64 M64 34 C52 34 34 52 34 64"/></svg>
+      <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 40 C24 40 8 30 8 18 C8 12 12 8 17 8 C20 8 23 10 24 13 C25 10 28 8 31 8 C36 8 40 12 40 18 C40 30 24 40 24 40 Z"/></svg>
+      <h3>Tanya &amp; Ukhuwah</h3>
+      <p>Tanya ustadz (boleh sebagai Hamba Allah), belajar di kelas online, dukung UMKM jamaah lewat lapak — tumbuh bersama.</p>
+      <span class="more">Mulai bertanya ›</span>
+    </article>
+  </div>
+
+  <!-- AYAT (original touch) -->
+  <section class="ayah">
+    <div class="pat pat-trellis-light"></div>
+    <div class="inner">
+      <svg class="archtop" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 64 L6 34 C6 14 38 6 60 4 C82 6 114 14 114 34 L114 64"/></svg>
+      <p class="ar">وَقُل رَّبِّ زِدْنِي عِلْمًا</p>
+      <p class="tr">“Dan katakanlah: Ya Rabb-ku, tambahkanlah kepadaku ilmu.”</p>
+      <div class="src">— QS. Thaha : 114</div>
+    </div>
+  </section>
+</section>
+
+<!-- FOOTER -->
+<footer class="site">
+  <div class="pat pat-trellis-light"></div>
+  <div class="wrap">
+    <div class="brand" style="display:block">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="40" height="40" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0B4A39"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg>
+        <span class="name"><b style="font-family:'Reem Kufi',serif;font-size:17px">Blitar Mengaji</b></span>
+      </div>
+      <p style="font-size:13px;color:#a9a18e;margin-top:14px;max-width:30ch;line-height:1.7">Khidmat digital untuk menghidupkan majelis ilmu di Kota Blitar. Gratis, terbuka, amanah.</p>
+    </div>
+    <div><h4>Jelajahi</h4><a href="#">Kajian</a><a href="#">Peta Dakwah</a><a href="#">Catatan</a><a href="#">Perpustakaan</a></div>
+    <div><h4>Umat</h4><a href="#">Tanya Ustadz</a><a href="#">Kelas Online</a><a href="#">Donasi</a><a href="#">Lapak UMKM</a></div>
+    <div><h4>Tentang</h4><a href="#">Profil</a><a href="#">Partner & Media</a><a href="#">Keuangan</a><a href="#">Kontak</a></div>
+  </div>
+  <div class="copy">© 2026 Blitar Mengaji · Dibuat dengan ﷽ untuk umat — bukan template generik.</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Dashboard Entitas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="theme-tokens.css">
+<link rel="stylesheet" href="craft.css">
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand:{50:'var(--c-brand-50)',100:'var(--c-brand-100)',200:'var(--c-brand-200)',300:'var(--c-brand-300)',400:'var(--c-brand-400)',500:'var(--c-brand-500)',600:'var(--c-brand-600)',700:'var(--c-brand-700)',800:'var(--c-brand-800)',900:'var(--c-brand-900)'},
+      gold:{DEFAULT:'var(--c-gold)',light:'var(--c-gold-light)',dark:'var(--c-gold-dark)'},
+      cream:'var(--c-cream)', surface:'var(--c-surface)', ink:'var(--c-ink)'
+    },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], arabic:['Amiri','serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .device { width:370px; border:9px solid #0f172a; border-radius:2.4rem; background:#0f172a; box-shadow:0 20px 45px rgba(15,23,42,.25); overflow:hidden; position:relative; }
+  .device .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#0f172a; border-radius:0 0 14px 14px; z-index:50; }
+  .screen { height:760px; overflow-y:auto; background:var(--c-cream); position:relative; }
+  .screen::-webkit-scrollbar { width:0; }
+  .statusbar { height:34px; }
+  .ph { background:linear-gradient(135deg,#0E6E55,#3C9E84); }
+  .ph2 { background:linear-gradient(135deg,#A8851A,#E3C766); }
+  .ph3 { background:linear-gradient(135deg,#0B5947,#18816A); }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+  .annot { font-size:11px; color:#64748b; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2">ﷺ Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin &amp; RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="bg-brand-600 text-white">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<header class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+  <h1 class="text-2xl font-extrabold display">Dashboard Pemilik Entitas</h1>
+  <p class="text-sm text-slate-500">Tiga persona self-service: <b>Pengelola Titik Dakwah</b>, <b>Media Partner</b>, dan <b>Partner Usaha</b>. Tiap entitas mengelola kontennya sendiri (permission <code>manage_own</code>) — hanya melihat &amp; mengubah data miliknya, bukan milik entitas lain.</p>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24 space-y-14">
+
+  <!-- ===================================================================== -->
+  <!-- PERSONA 1 — PENGELOLA TITIK DAKWAH                                     -->
+  <!-- ===================================================================== -->
+  <section>
+    <div class="flex items-center gap-3 mb-1">
+      <span class="w-9 h-9 rounded-xl bg-brand-600 text-white grid place-items-center"><i data-lucide="map-pin" class="w-5 h-5"></i></span>
+      <h2 class="text-xl font-extrabold display">Persona 1 — Pengelola Titik Dakwah</h2>
+    </div>
+    <p class="text-sm text-slate-500 mb-5">Dashboard desktop bagi takmir/pengurus titik. Semua aksi hanya berlaku untuk titik miliknya sendiri (<code>manage_own</code>): jadwal, galeri, video, donasi, dan kas titik.</p>
+
+    <!-- ---- 1A. Ringkasan Titik (desktop dashboard ala admin) ---- -->
+    <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="layout-dashboard" class="w-4 h-4 text-brand-600"></i> 1A · Ringkasan Titik &amp; Statistik</h3>
+    <div data-theme="teduh" class="rounded-2xl overflow-hidden shadow-pop border bg-surface mb-3">
+      <div class="flex">
+        <!-- sidebar konteks entitas (menu sudah terfilter manage_own) -->
+        <aside class="w-56 bg-ink text-white p-4 shrink-0 hidden md:block relative overflow-hidden">
+          <div class="orn-overlay pat-girih-light"></div>
+          <div class="relative z-10">
+          <div class="flex items-center gap-2 mb-6"><div class="w-9 h-9 rounded-xl grid place-items-center overflow-hidden"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div><div><p class="font-bold text-sm leading-none">Panel Titik</p><p class="text-[10px] text-white/50">Masjid Al-Falah</p></div></div>
+          <nav class="space-y-1 text-sm">
+            <p class="text-[10px] uppercase text-white/30 font-bold px-3 mb-1">Kelola Milik Saya</p>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-600 font-semibold"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Ringkasan</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="calendar-days" class="w-4 h-4"></i> Jadwal Kajian</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="images" class="w-4 h-4"></i> Galeri</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="video" class="w-4 h-4"></i> Video / Livestream</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="hand-heart" class="w-4 h-4"></i> Donasi</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="wallet" class="w-4 h-4"></i> Kas Titik</a>
+            <p class="text-[10px] uppercase text-white/30 font-bold px-3 mb-1 mt-3">Akun</p>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="settings" class="w-4 h-4"></i> Profil Titik</a>
+          </nav>
+          </div>
+        </aside>
+        <!-- main -->
+        <div class="flex-1 bg-cream min-w-0">
+          <!-- topbar -->
+          <div class="bg-surface border-b px-6 py-3 flex items-center justify-between">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-lg font-extrabold display">Masjid Al-Falah</h3>
+                <span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold inline-flex items-center gap-1"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> Terverifikasi</span>
+                <span class="px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold">Pengelola Titik</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">Jl. Merdeka No. 12, Kepanjenkidul · Kota Blitar</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative"><i data-lucide="bell" class="w-5 h-5 text-slate-500"></i><span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gold rounded-full"></span></div>
+              <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full ph"></div><div class="leading-none hidden sm:block"><p class="text-sm font-semibold">Ust. Ahmad Fauzi</p><p class="text-[10px] text-slate-400">Takmir</p></div></div>
+            </div>
+          </div>
+          <!-- content -->
+          <div class="p-6">
+            <!-- stat cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <div class="flex items-center justify-between"><span class="w-9 h-9 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="calendar-check" class="w-4 h-4 text-brand-600"></i></span><span class="text-[11px] text-green-600 font-bold">+2</span></div>
+                <p class="text-2xl font-extrabold mt-2">12</p><p class="text-xs text-slate-500">Jadwal aktif</p>
+              </div>
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <div class="flex items-center justify-between"><span class="w-9 h-9 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="users" class="w-4 h-4 text-brand-600"></i></span><span class="text-[11px] text-green-600 font-bold">+38</span></div>
+                <p class="text-2xl font-extrabold mt-2">1.246</p><p class="text-xs text-slate-500">Jamaah follow</p>
+              </div>
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <div class="flex items-center justify-between"><span class="w-9 h-9 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="video" class="w-4 h-4 text-brand-600"></i></span><span class="text-[11px] text-slate-400 font-bold">●</span></div>
+                <p class="text-2xl font-extrabold mt-2">34</p><p class="text-xs text-slate-500">Video terpublikasi</p>
+              </div>
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <div class="flex items-center justify-between"><span class="w-9 h-9 rounded-xl bg-gold/15 grid place-items-center"><i data-lucide="hand-heart" class="w-4 h-4 text-gold-dark"></i></span><span class="text-[11px] text-brand-600 font-bold">2 aktif</span></div>
+                <p class="text-2xl font-extrabold mt-2">Rp 48jt</p><p class="text-xs text-slate-500">Donasi terkumpul</p>
+              </div>
+            </div>
+            <!-- info verifikasi -->
+            <div class="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-3 text-sm">
+              <i data-lucide="shield-check" class="w-5 h-5 text-green-600 shrink-0"></i>
+              <p class="text-green-800">Titik Anda <b>sudah terverifikasi</b> admin. Semua konten yang Anda terbitkan langsung tampil di aplikasi jamaah tanpa moderasi ulang.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mb-6">Sidebar entitas hanya berisi modul yang punya permission <code>manage_own</code> untuk titik miliknya. Statistik dihitung dari data milik titik ini saja.</p>
+
+    <!-- ---- 1B. Kelola Jadwal Kajian (tabel CRUD) ---- -->
+    <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="calendar-days" class="w-4 h-4 text-brand-600"></i> 1B · Kelola Jadwal Kajian</h3>
+    <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface overflow-hidden mb-3">
+      <div class="px-5 py-4 border-b flex flex-wrap items-center gap-3 justify-between">
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 bg-cream rounded-lg px-3 h-9 w-56"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400">Cari jadwal…</span></div>
+          <div class="relative"><span class="text-sm border rounded-lg pl-3 pr-8 h-9 flex items-center font-semibold text-slate-600 bg-white">Status: Semua</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2"></i></div>
+        </div>
+        <button class="px-4 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Jadwal</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm min-w-[720px]">
+          <thead class="bg-cream text-slate-500 text-xs uppercase">
+            <tr><th class="text-left font-bold px-5 py-3">Kajian</th><th class="text-left font-bold px-5 py-3">Pemateri</th><th class="text-left font-bold px-5 py-3">Jadwal</th><th class="text-left font-bold px-5 py-3">Status</th><th class="text-right font-bold px-5 py-3">Aksi</th></tr>
+          </thead>
+          <tbody class="divide-y">
+            <tr class="hover:bg-cream/60">
+              <td class="px-5 py-3 font-semibold">Kajian Tafsir Ba'da Subuh</td>
+              <td class="px-5 py-3 text-slate-600">Ust. Ahmad Fauzi, Lc.</td>
+              <td class="px-5 py-3 text-slate-500">Setiap Ahad · 05.00 WIB</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">Terbit</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+            <tr class="hover:bg-cream/60">
+              <td class="px-5 py-3 font-semibold">Pengajian Rutin Fiqih Wanita</td>
+              <td class="px-5 py-3 text-slate-600">Ustadzah Maryam</td>
+              <td class="px-5 py-3 text-slate-500">Setiap Kamis · 15.30 WIB</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">Terbit</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+            <tr class="bg-brand-50/60">
+              <td class="px-5 py-3 font-semibold">Tabligh Akbar Isra Mi'raj <span class="ml-1 text-[10px] text-brand-600 font-bold">← sedang diedit</span></td>
+              <td class="px-5 py-3 text-slate-600">KH. Abdul Hamid</td>
+              <td class="px-5 py-3 text-slate-500">30 Mei 2026 · 19.30 WIB</td>
+              <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">Draft</span></td>
+              <td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="pencil" class="w-4 h-4 text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- inline form tambah/edit -->
+      <div class="px-5 py-4 border-t bg-brand-50/40">
+        <p class="font-bold text-sm flex items-center gap-2 mb-3"><i data-lucide="calendar-plus" class="w-4 h-4 text-brand-600"></i> Tambah / Edit Jadwal</p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div><label class="text-xs font-bold text-slate-500">Judul kajian</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="Mis. Kajian Tafsir…" /></div>
+          <div><label class="text-xs font-bold text-slate-500">Pemateri</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="Nama ustadz" /></div>
+          <div><label class="text-xs font-bold text-slate-500">Hari / Tanggal</label><div class="mt-1 w-full border rounded-xl px-3 h-10 text-sm flex items-center justify-between text-slate-500 bg-white">Setiap Ahad <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i></div></div>
+          <div><label class="text-xs font-bold text-slate-500">Jam</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="05.00 WIB" /></div>
+        </div>
+        <div class="flex justify-end gap-2 mt-3">
+          <button class="px-3 h-9 rounded-full border text-sm font-semibold text-slate-600">Batal</button>
+          <button class="px-4 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan Jadwal</button>
+        </div>
+      </div>
+    </div>
+    <p class="annot mb-6">Pola tabel CRUD + form inline. Tombol simpan menulis ke jadwal milik titik ini (<code>jadwal.manage_own</code>) — pengelola tak bisa menyentuh jadwal titik lain.</p>
+
+    <!-- ---- 1C. Galeri + 1D. Video/Livestream (dua kolom) ---- -->
+    <div class="grid lg:grid-cols-2 gap-6 mb-3">
+      <!-- Galeri -->
+      <div>
+        <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="images" class="w-4 h-4 text-brand-600"></i> 1C · Kelola Galeri</h3>
+        <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface p-5">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-sm text-slate-500">28 foto · dokumentasi kegiatan titik</p>
+            <button class="px-3 h-9 rounded-full bg-brand-600 text-white text-xs font-semibold flex items-center gap-1.5"><i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload Foto</button>
+          </div>
+          <div class="grid grid-cols-3 gap-2.5">
+            <!-- dropzone -->
+            <label class="aspect-square rounded-xl border-2 border-dashed border-brand-300 bg-brand-50/40 grid place-items-center text-center cursor-pointer">
+              <span><i data-lucide="image-plus" class="w-6 h-6 text-brand-500 mx-auto"></i><span class="block text-[10px] text-brand-700 font-bold mt-1">Tarik / pilih</span></span>
+            </label>
+            <div class="aspect-square rounded-xl ph grid place-items-center relative group"><i data-lucide="image" class="w-7 h-7 text-white/80"></i><span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 grid place-items-center transition"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></span></div>
+            <div class="aspect-square rounded-xl ph2 grid place-items-center relative group"><i data-lucide="image" class="w-7 h-7 text-white/80"></i><span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 grid place-items-center transition"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></span></div>
+            <div class="aspect-square rounded-xl ph3 grid place-items-center relative group"><i data-lucide="image" class="w-7 h-7 text-white/80"></i><span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 grid place-items-center transition"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></span></div>
+            <div class="aspect-square rounded-xl ph2 grid place-items-center relative group"><i data-lucide="image" class="w-7 h-7 text-white/80"></i><span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 grid place-items-center transition"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></span></div>
+            <div class="aspect-square rounded-xl ph grid place-items-center relative group"><i data-lucide="image" class="w-7 h-7 text-white/80"></i><span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 grid place-items-center transition"><i data-lucide="trash-2" class="w-5 h-5 text-white"></i></span></div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-3">Format JPG/PNG · maks 5 MB/foto. Hover untuk hapus.</p>
+        </div>
+      </div>
+      <!-- Video / Livestream -->
+      <div>
+        <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="video" class="w-4 h-4 text-brand-600"></i> 1D · Kelola Video / Livestream</h3>
+        <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface p-5">
+          <!-- tempel URL -->
+          <label class="text-xs font-bold text-slate-500">Tempel URL YouTube / Facebook</label>
+          <div class="mt-1 flex gap-2">
+            <div class="flex-1 flex items-center gap-2 border rounded-xl px-3 h-10 bg-white"><i data-lucide="link" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400 truncate">https://youtu.be/…</span></div>
+            <button class="px-4 h-10 rounded-xl bg-brand-600 text-white text-sm font-semibold shrink-0">Sematkan</button>
+          </div>
+          <div class="flex items-center gap-2 mt-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
+            <span class="text-xs font-bold text-red-600">Tandai sebagai LIVE sekarang</span>
+            <span class="ml-auto w-9 h-5 rounded-full bg-red-500 relative"><span class="absolute right-0.5 top-0.5 w-4 h-4 rounded-full bg-white"></span></span>
+          </div>
+          <!-- daftar embed -->
+          <div class="mt-4 space-y-2.5">
+            <div class="flex items-center gap-3 bg-cream/60 rounded-xl p-2.5">
+              <div class="ph w-16 h-10 rounded-lg grid place-items-center shrink-0 relative"><i data-lucide="play" class="w-4 h-4 text-white"></i><span class="absolute top-0.5 left-0.5 px-1 rounded bg-red-600 text-white text-[8px] font-bold">● LIVE</span></div>
+              <div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">Kajian Subuh — Live YouTube</p><p class="text-[11px] text-slate-400">YouTube · 312 menonton</p></div>
+              <i data-lucide="trash-2" class="w-4 h-4 text-slate-400 hover:text-red-600 shrink-0"></i>
+            </div>
+            <div class="flex items-center gap-3 bg-cream/60 rounded-xl p-2.5">
+              <div class="ph3 w-16 h-10 rounded-lg grid place-items-center shrink-0"><i data-lucide="play" class="w-4 h-4 text-white"></i></div>
+              <div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">Rekaman Tabligh Akbar 1446 H</p><p class="text-[11px] text-slate-400">Facebook · 1.4rb tayangan</p></div>
+              <i data-lucide="trash-2" class="w-4 h-4 text-slate-400 hover:text-red-600 shrink-0"></i>
+            </div>
+            <div class="flex items-center gap-3 bg-cream/60 rounded-xl p-2.5">
+              <div class="ph2 w-16 h-10 rounded-lg grid place-items-center shrink-0"><i data-lucide="play" class="w-4 h-4 text-white"></i></div>
+              <div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">Tausiyah Singkat Jelang Maghrib</p><p class="text-[11px] text-slate-400">YouTube · 890 tayangan</p></div>
+              <i data-lucide="trash-2" class="w-4 h-4 text-slate-400 hover:text-red-600 shrink-0"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mb-6">Video disimpan sebagai <i>embed URL</i> (tanpa upload berat). Toggle "LIVE" memunculkan badge merah berkedip di aplikasi jamaah secara real-time.</p>
+
+    <!-- ---- 1E. Donasi titik + 1F. Kas titik ---- -->
+    <div class="grid lg:grid-cols-2 gap-6">
+      <!-- Donasi -->
+      <div>
+        <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="hand-heart" class="w-4 h-4 text-brand-600"></i> 1E · Kelola Donasi Titik</h3>
+        <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface p-5 h-full">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-sm text-slate-500">2 campaign aktif</p>
+            <button class="px-3 h-9 rounded-full bg-brand-600 text-white text-xs font-semibold flex items-center gap-1.5"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Buat Campaign</button>
+          </div>
+          <!-- campaign card -->
+          <div class="bg-cream/60 rounded-2xl p-4 mb-3">
+            <div class="flex items-start gap-3">
+              <div class="ph2 w-12 h-12 rounded-xl grid place-items-center shrink-0"><i data-lucide="hammer" class="w-5 h-5 text-white"></i></div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm">Renovasi Tempat Wudhu</p>
+                <p class="text-[11px] text-slate-500">Target Rp 50.000.000 · tenggat 30 Jun 2026</p>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold shrink-0">Aktif</span>
+            </div>
+            <div class="mt-3 h-2 rounded-full bg-slate-200 overflow-hidden"><div class="h-full bg-brand-500" style="width:72%"></div></div>
+            <div class="flex justify-between text-[11px] mt-1"><span class="text-brand-700 font-bold">Rp 36.000.000 (72%)</span><span class="text-slate-400">214 donatur</span></div>
+            <button class="mt-3 w-full h-9 rounded-full border border-brand-200 text-brand-700 text-xs font-bold flex items-center justify-center gap-1.5"><i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i> Tambah Laporan Penggunaan Dana</button>
+          </div>
+          <!-- laporan dana -->
+          <p class="text-xs font-bold text-slate-500 mb-2">Laporan penggunaan dana</p>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center gap-2"><i data-lucide="receipt" class="w-4 h-4 text-slate-400 shrink-0"></i><span class="flex-1">Beli keramik &amp; semen</span><span class="font-semibold text-red-600">- Rp 8,2jt</span></div>
+            <div class="flex items-center gap-2"><i data-lucide="receipt" class="w-4 h-4 text-slate-400 shrink-0"></i><span class="flex-1">Upah tukang termin 1</span><span class="font-semibold text-red-600">- Rp 5,0jt</span></div>
+            <p class="text-[11px] text-slate-400 pt-1">Laporan tampil transparan ke donatur di halaman campaign.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Kas titik -->
+      <div>
+        <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4 text-brand-600"></i> 1F · Kas Titik (Pemasukan / Pengeluaran)</h3>
+        <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface p-5 h-full">
+          <div class="bg-brand-600 text-white rounded-2xl p-4 mb-4">
+            <p class="text-xs text-white/70">Saldo kas saat ini</p>
+            <p class="text-2xl font-extrabold">Rp 12.480.000</p>
+          </div>
+          <!-- form input sederhana -->
+          <div class="flex gap-2 mb-3">
+            <button class="flex-1 h-9 rounded-full bg-green-50 text-green-700 border border-green-200 text-xs font-bold flex items-center justify-center gap-1.5"><i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> Pemasukan</button>
+            <button class="flex-1 h-9 rounded-full bg-slate-50 text-slate-500 border text-xs font-bold flex items-center justify-center gap-1.5"><i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Pengeluaran</button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <input class="border rounded-xl px-3 h-10 text-sm bg-white" placeholder="Keterangan" />
+            <input class="border rounded-xl px-3 h-10 text-sm bg-white" placeholder="Rp 0" />
+          </div>
+          <button class="w-full h-10 rounded-xl bg-brand-600 text-white text-sm font-semibold flex items-center justify-center gap-2 mb-4"><i data-lucide="plus" class="w-4 h-4"></i> Catat Transaksi Kas</button>
+          <!-- mutasi -->
+          <div class="divide-y text-sm">
+            <div class="flex items-center gap-2 py-2"><span class="w-7 h-7 rounded-lg bg-green-50 grid place-items-center shrink-0"><i data-lucide="arrow-down-left" class="w-3.5 h-3.5 text-green-600"></i></span><div class="flex-1"><p class="font-medium leading-tight">Infaq Jumat</p><p class="text-[11px] text-slate-400">17 Mei 2026</p></div><span class="font-semibold text-green-600">+ Rp 2,1jt</span></div>
+            <div class="flex items-center gap-2 py-2"><span class="w-7 h-7 rounded-lg bg-red-50 grid place-items-center shrink-0"><i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-red-600"></i></span><div class="flex-1"><p class="font-medium leading-tight">Bayar listrik</p><p class="text-[11px] text-slate-400">15 Mei 2026</p></div><span class="font-semibold text-red-600">- Rp 480rb</span></div>
+            <div class="flex items-center gap-2 py-2"><span class="w-7 h-7 rounded-lg bg-green-50 grid place-items-center shrink-0"><i data-lucide="arrow-down-left" class="w-3.5 h-3.5 text-green-600"></i></span><div class="flex-1"><p class="font-medium leading-tight">Kotak amal harian</p><p class="text-[11px] text-slate-400">14 Mei 2026</p></div><span class="font-semibold text-green-600">+ Rp 650rb</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Kas titik terpisah dari Kas Pusat (admin). Pengelola hanya melihat &amp; mencatat mutasi kas titiknya sendiri.</p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- PERSONA 2 — MEDIA PARTNER                                              -->
+  <!-- ===================================================================== -->
+  <section>
+    <div class="flex items-center gap-3 mb-1">
+      <span class="w-9 h-9 rounded-xl bg-brand-600 text-white grid place-items-center"><i data-lucide="radio" class="w-5 h-5"></i></span>
+      <h2 class="text-xl font-extrabold display">Persona 2 — Media Partner</h2>
+    </div>
+    <p class="text-sm text-slate-500 mb-5">Dashboard bagi TV/radio/media dakwah. Fokus pada video &amp; livestream, jadwal liputan, dan statistik tayangan. Tampilan campur: panel desktop + pratinjau HP.</p>
+
+    <div class="grid lg:grid-cols-[1fr_380px] gap-6 items-start">
+      <!-- panel desktop media -->
+      <div class="space-y-6">
+        <!-- profil + status -->
+        <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface p-5">
+          <div class="flex items-center gap-4">
+            <div class="ph w-16 h-16 rounded-2xl grid place-items-center shrink-0"><i data-lucide="radio" class="w-7 h-7 text-white"></i></div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-lg font-extrabold display">Blitar Dakwah TV</h3>
+                <span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold inline-flex items-center gap-1"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> Terverifikasi</span>
+                <span class="px-2.5 py-1 rounded-full bg-red-100 text-red-600 text-xs font-bold inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Sedang LIVE</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">Streaming kajian harian · Kanal YouTube &amp; Facebook · Kota Blitar</p>
+            </div>
+            <button class="px-3 h-9 rounded-full border text-slate-600 text-sm font-semibold flex items-center gap-1.5 shrink-0"><i data-lucide="pencil" class="w-4 h-4"></i> Edit Profil</button>
+          </div>
+          <!-- statistik tayangan -->
+          <div class="grid grid-cols-3 gap-3 mt-4">
+            <div class="bg-cream/60 rounded-xl p-3"><p class="text-xl font-extrabold">86rb</p><p class="text-[11px] text-slate-500">Total tayangan bln ini</p></div>
+            <div class="bg-cream/60 rounded-xl p-3"><p class="text-xl font-extrabold">312</p><p class="text-[11px] text-slate-500">Penonton live (kini)</p></div>
+            <div class="bg-cream/60 rounded-xl p-3"><p class="text-xl font-extrabold">3.2rb</p><p class="text-[11px] text-slate-500">Pengikut kanal</p></div>
+          </div>
+        </div>
+
+        <!-- kelola video / livestream -->
+        <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface overflow-hidden">
+          <div class="px-5 py-4 border-b flex items-center justify-between bg-brand-50/40">
+            <p class="font-bold text-sm flex items-center gap-2"><i data-lucide="video" class="w-4 h-4 text-brand-600"></i> Kelola Video &amp; Livestream</p>
+            <button class="px-3 h-9 rounded-full bg-brand-600 text-white text-xs font-semibold flex items-center gap-1.5"><i data-lucide="link" class="w-3.5 h-3.5"></i> Sematkan URL</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[640px]">
+              <thead class="bg-cream text-slate-500 text-xs uppercase">
+                <tr><th class="text-left font-bold px-5 py-3">Judul Tayangan</th><th class="text-left font-bold px-5 py-3">Platform</th><th class="text-left font-bold px-5 py-3">Tayangan</th><th class="text-left font-bold px-5 py-3">Status</th><th class="text-right font-bold px-5 py-3">Aksi</th></tr>
+              </thead>
+              <tbody class="divide-y">
+                <tr class="hover:bg-cream/60"><td class="px-5 py-3 font-semibold">Live Kajian Subuh Hari Ini</td><td class="px-5 py-3 text-slate-500">YouTube</td><td class="px-5 py-3 text-slate-600">312</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-bold inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> LIVE</span></td><td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td></tr>
+                <tr class="hover:bg-cream/60"><td class="px-5 py-3 font-semibold">Liputan Tabligh Akbar Alun-alun</td><td class="px-5 py-3 text-slate-500">Facebook</td><td class="px-5 py-3 text-slate-600">4.1rb</td><td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">Terbit</span></td><td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td></tr>
+                <tr class="hover:bg-cream/60"><td class="px-5 py-3 font-semibold">Cuplikan Khutbah Jumat</td><td class="px-5 py-3 text-slate-500">YouTube</td><td class="px-5 py-3 text-slate-600">2.0rb</td><td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-bold">Draft</span></td><td class="px-5 py-3 text-right"><span class="inline-flex gap-3 text-slate-400"><i data-lucide="pencil" class="w-4 h-4 hover:text-brand-600"></i><i data-lucide="trash-2" class="w-4 h-4 hover:text-red-600"></i></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- jadwal liputan -->
+        <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface p-5">
+          <div class="flex items-center justify-between mb-3">
+            <p class="font-bold text-sm flex items-center gap-2"><i data-lucide="calendar-clock" class="w-4 h-4 text-brand-600"></i> Jadwal Liputan</p>
+            <button class="px-3 h-9 rounded-full bg-brand-600 text-white text-xs font-semibold flex items-center gap-1.5"><i data-lucide="plus" class="w-3.5 h-3.5"></i> Tambah Liputan</button>
+          </div>
+          <div class="space-y-2.5">
+            <div class="flex items-center gap-3 bg-cream/60 rounded-xl p-3">
+              <div class="bg-surface rounded-lg px-2.5 py-1 text-center leading-none shrink-0 border"><p class="text-brand-700 font-extrabold text-sm">24</p><p class="text-[9px] text-slate-500">MEI</p></div>
+              <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Liputan Seminar Parenting Islami</p><p class="text-[11px] text-slate-400">09.00 WIB · Gedung Dakwah · streaming + rekaman</p></div>
+              <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold shrink-0">Terjadwal</span>
+            </div>
+            <div class="flex items-center gap-3 bg-cream/60 rounded-xl p-3">
+              <div class="bg-surface rounded-lg px-2.5 py-1 text-center leading-none shrink-0 border"><p class="text-brand-700 font-extrabold text-sm">31</p><p class="text-[9px] text-slate-500">MEI</p></div>
+              <div class="flex-1 min-w-0"><p class="font-semibold text-sm">Tabligh Akbar Akhir Bulan</p><p class="text-[11px] text-slate-400">19.30 WIB · Alun-alun Blitar · live</p></div>
+              <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold shrink-0">Menunggu izin</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- pratinjau HP: tampilan jamaah -->
+      <div>
+        <div class="device mx-auto"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3"><p class="font-bold text-lg">Blitar Dakwah TV</p><p class="text-xs text-white/70">Pratinjau di aplikasi jamaah</p></div>
+            <div class="p-4 space-y-3">
+              <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+                <div class="ph h-40 relative grid place-items-center"><i data-lucide="play-circle" class="w-12 h-12 text-white/90"></i><span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-white"></span> LIVE</span><span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-black/50 text-white text-[10px] font-bold">312 menonton</span></div>
+                <div class="p-3"><p class="font-bold text-sm">Live Kajian Subuh Hari Ini</p><p class="text-[11px] text-slate-500">oleh Blitar Dakwah TV · sekarang</p></div>
+              </div>
+              <div class="bg-surface rounded-2xl shadow-card p-3 flex gap-3">
+                <div class="ph3 w-20 h-14 rounded-lg grid place-items-center shrink-0"><i data-lucide="play" class="w-5 h-5 text-white"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm leading-tight">Liputan Tabligh Akbar Alun-alun</p><p class="text-[11px] text-slate-400 mt-1">4.1rb tayangan</p></div>
+              </div>
+              <div class="bg-surface rounded-2xl shadow-card p-3 flex gap-3">
+                <div class="ph2 w-20 h-14 rounded-lg grid place-items-center shrink-0"><i data-lucide="play" class="w-5 h-5 text-white"></i></div>
+                <div class="flex-1 min-w-0"><p class="font-semibold text-sm leading-tight">Cuplikan Khutbah Jumat</p><p class="text-[11px] text-slate-400 mt-1">2.0rb tayangan</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Pratinjau Jamaah</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Apa yang dikelola media partner langsung muncul seperti ini di aplikasi jamaah.</p>
+      </div>
+    </div>
+    <p class="annot mt-3">Media partner memegang <code>video.manage_own</code> + <code>media.manage_own</code>: kelola tayangan &amp; liputan miliknya, tanpa akses modul keuangan/donasi.</p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- PERSONA 3 — PARTNER USAHA                                              -->
+  <!-- ===================================================================== -->
+  <section>
+    <div class="flex items-center gap-3 mb-1">
+      <span class="w-9 h-9 rounded-xl bg-brand-600 text-white grid place-items-center"><i data-lucide="store" class="w-5 h-5"></i></span>
+      <h2 class="text-xl font-extrabold display">Persona 3 — Partner Usaha (UMKM)</h2>
+    </div>
+    <p class="text-sm text-slate-500 mb-5">Dashboard bagi pelaku usaha jamaah. Kelola lapak (maks 3 produk aktif), dan adakan event/webinar dengan pendaftaran peserta.</p>
+
+    <!-- profil usaha + status (catatan: contoh entitas BELUM terverifikasi) -->
+    <div data-theme="teduh" class="rounded-2xl shadow-pop border bg-surface p-5 mb-3">
+      <div class="flex items-center gap-4">
+        <div class="ph2 w-16 h-16 rounded-2xl grid place-items-center shrink-0"><i data-lucide="store" class="w-7 h-7 text-white"></i></div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-lg font-extrabold display">Toko Barokah</h3>
+            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold inline-flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> Menunggu verifikasi</span>
+            <span class="px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold">Partner Usaha</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">Kurma, madu &amp; oleh-oleh haji · Kepanjenkidul · Kota Blitar</p>
+        </div>
+        <button class="px-3 h-9 rounded-full border text-slate-600 text-sm font-semibold flex items-center gap-1.5 shrink-0"><i data-lucide="pencil" class="w-4 h-4"></i> Edit Profil</button>
+      </div>
+      <div class="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-start gap-3 text-sm">
+        <i data-lucide="hourglass" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <p class="text-amber-800">Pengajuan usaha Anda <b>sedang ditinjau admin</b>. Anda tetap bisa menyiapkan produk &amp; event sebagai draft — semuanya akan otomatis tayang setelah disetujui (estimasi 1×24 jam).</p>
+      </div>
+    </div>
+
+    <!-- lapak: indikator limit + form -->
+    <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="shopping-bag" class="w-4 h-4 text-brand-600"></i> 3A · Kelola Lapak (maks 3 produk aktif)</h3>
+    <div data-theme="teduh" class="grid lg:grid-cols-[1fr_360px] gap-6 mb-3">
+      <!-- daftar produk + indikator -->
+      <div class="bg-surface rounded-2xl shadow-pop border p-5">
+        <!-- indikator batas -->
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-sm font-bold">Produk aktif</p>
+          <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">2/3 produk terpakai</span>
+        </div>
+        <div class="flex gap-1.5 mb-4">
+          <span class="flex-1 h-2 rounded-full bg-brand-500"></span>
+          <span class="flex-1 h-2 rounded-full bg-brand-500"></span>
+          <span class="flex-1 h-2 rounded-full bg-slate-200"></span>
+        </div>
+        <!-- grid produk -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div class="bg-cream/60 rounded-2xl overflow-hidden border">
+            <div class="ph2 h-24 grid place-items-center"><i data-lucide="image" class="w-7 h-7 text-white/80"></i></div>
+            <div class="p-2.5"><p class="font-semibold text-xs leading-tight">Kurma Premium Ajwa</p><p class="text-brand-700 font-extrabold text-sm mt-0.5">Rp 95.000</p><div class="flex items-center justify-between mt-1.5"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[9px] font-bold">Aktif</span><span class="inline-flex gap-2 text-slate-400"><i data-lucide="pencil" class="w-3.5 h-3.5"></i><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></span></div></div>
+          </div>
+          <div class="bg-cream/60 rounded-2xl overflow-hidden border">
+            <div class="ph3 h-24 grid place-items-center"><i data-lucide="image" class="w-7 h-7 text-white/80"></i></div>
+            <div class="p-2.5"><p class="font-semibold text-xs leading-tight">Madu Hutan Asli</p><p class="text-brand-700 font-extrabold text-sm mt-0.5">Rp 75.000</p><div class="flex items-center justify-between mt-1.5"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[9px] font-bold">Aktif</span><span class="inline-flex gap-2 text-slate-400"><i data-lucide="pencil" class="w-3.5 h-3.5"></i><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></span></div></div>
+          </div>
+          <!-- slot kosong -->
+          <div class="rounded-2xl border-2 border-dashed border-brand-300 bg-brand-50/40 grid place-items-center min-h-[150px] text-center p-3">
+            <span><i data-lucide="plus-circle" class="w-7 h-7 text-brand-500 mx-auto"></i><span class="block text-[11px] text-brand-700 font-bold mt-1">1 slot tersisa</span><span class="block text-[10px] text-slate-400">Isi form di samping</span></span>
+          </div>
+        </div>
+      </div>
+      <!-- form tambah produk -->
+      <div class="bg-surface rounded-2xl shadow-pop border p-5">
+        <p class="font-bold text-sm flex items-center gap-2 mb-3"><i data-lucide="plus-square" class="w-4 h-4 text-brand-600"></i> Tambah Produk</p>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs font-bold text-slate-500">Poster produk</label>
+            <label class="mt-1 h-24 rounded-xl border-2 border-dashed border-slate-300 bg-cream/40 grid place-items-center cursor-pointer text-center">
+              <span><i data-lucide="image-plus" class="w-6 h-6 text-slate-400 mx-auto"></i><span class="block text-[10px] text-slate-500 font-semibold mt-1">Unggah poster (JPG/PNG)</span></span>
+            </label>
+          </div>
+          <div><label class="text-xs font-bold text-slate-500">Nama produk</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="Mis. Oleh-oleh Haji" /></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-bold text-slate-500">Harga (Rp)</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="0" /></div>
+            <div><label class="text-xs font-bold text-slate-500">Kategori</label><div class="mt-1 w-full border rounded-xl px-3 h-10 text-sm flex items-center justify-between text-slate-500 bg-white">Makanan <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></div></div>
+          </div>
+          <div><label class="text-xs font-bold text-slate-500">Kontak WhatsApp</label><div class="mt-1 flex items-center gap-2 border rounded-xl px-3 h-10 bg-white"><i data-lucide="message-circle" class="w-4 h-4 text-green-600"></i><input class="text-sm flex-1 outline-none bg-transparent" placeholder="08xx xxxx xxxx" /></div></div>
+          <button class="w-full h-10 rounded-xl bg-brand-600 text-white text-sm font-semibold flex items-center justify-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan Produk</button>
+          <p class="text-[11px] text-amber-600 flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5"></i> Sisa 1 slot. Setelah penuh, nonaktifkan produk lama untuk menambah baru.</p>
+        </div>
+      </div>
+    </div>
+    <p class="annot mb-6">Batas 3 produk dipaksakan di server (<code>lapak.manage_own</code> + cek kuota). Indikator "2/3 produk terpakai" mencegah partner melebihi limit.</p>
+
+    <!-- event / webinar -->
+    <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="presentation" class="w-4 h-4 text-brand-600"></i> 3B · Kelola Event / Webinar &amp; Peserta</h3>
+    <div data-theme="teduh" class="grid lg:grid-cols-2 gap-6">
+      <!-- buat acara -->
+      <div class="bg-surface rounded-2xl shadow-pop border p-5">
+        <p class="font-bold text-sm flex items-center gap-2 mb-3"><i data-lucide="calendar-plus" class="w-4 h-4 text-brand-600"></i> Buat Acara</p>
+        <div class="space-y-3">
+          <div><label class="text-xs font-bold text-slate-500">Judul acara</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="Mis. Webinar Bisnis Berkah" /></div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-bold text-slate-500">Tanggal</label><div class="mt-1 w-full border rounded-xl px-3 h-10 text-sm flex items-center justify-between text-slate-500 bg-white">24 Mei 2026 <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i></div></div>
+            <div><label class="text-xs font-bold text-slate-500">Tipe</label><div class="mt-1 w-full border rounded-xl px-3 h-10 text-sm flex items-center justify-between text-slate-500 bg-white">Webinar (online) <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i></div></div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-bold text-slate-500">Jam</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="09.00 WIB" /></div>
+            <div><label class="text-xs font-bold text-slate-500">Kuota peserta</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="100" /></div>
+          </div>
+          <div><label class="text-xs font-bold text-slate-500">Lokasi / Link</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" placeholder="Zoom / alamat" /></div>
+          <button class="w-full h-10 rounded-xl bg-brand-600 text-white text-sm font-semibold flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Terbitkan Acara</button>
+        </div>
+      </div>
+      <!-- daftar peserta -->
+      <div class="bg-surface rounded-2xl shadow-pop border overflow-hidden">
+        <div class="px-5 py-4 border-b bg-brand-50/40">
+          <p class="font-bold text-sm">Seminar Parenting Islami</p>
+          <p class="text-[11px] text-slate-500">24 Mei 2026 · Webinar · <span class="font-bold text-brand-700">86/100 terdaftar</span></p>
+          <div class="mt-2 h-1.5 rounded-full bg-slate-200 overflow-hidden"><div class="h-full bg-brand-500" style="width:86%"></div></div>
+        </div>
+        <div class="px-5 py-3 flex items-center justify-between border-b">
+          <p class="text-xs font-bold text-slate-500">Daftar peserta</p>
+          <button class="px-3 h-8 rounded-full border text-slate-600 text-xs font-semibold flex items-center gap-1.5"><i data-lucide="download" class="w-3.5 h-3.5"></i> Ekspor CSV</button>
+        </div>
+        <div class="divide-y text-sm max-h-72 overflow-y-auto">
+          <div class="flex items-center gap-3 px-5 py-2.5"><div class="ph w-8 h-8 rounded-full shrink-0"></div><div class="flex-1 min-w-0"><p class="font-semibold leading-tight">Budi Santoso</p><p class="text-[11px] text-slate-400">budi@email.com</p></div><span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">Hadir</span></div>
+          <div class="flex items-center gap-3 px-5 py-2.5"><div class="ph2 w-8 h-8 rounded-full shrink-0"></div><div class="flex-1 min-w-0"><p class="font-semibold leading-tight">Siti Aisyah</p><p class="text-[11px] text-slate-400">aisyah@email.com</p></div><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Terdaftar</span></div>
+          <div class="flex items-center gap-3 px-5 py-2.5"><div class="ph3 w-8 h-8 rounded-full shrink-0"></div><div class="flex-1 min-w-0"><p class="font-semibold leading-tight">Ahmad Dahlan</p><p class="text-[11px] text-slate-400">dahlan@email.com</p></div><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Terdaftar</span></div>
+          <div class="flex items-center gap-3 px-5 py-2.5"><div class="ph w-8 h-8 rounded-full shrink-0"></div><div class="flex-1 min-w-0"><p class="font-semibold leading-tight">Nur Hidayah</p><p class="text-[11px] text-slate-400">nur@email.com</p></div><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Terdaftar</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Partner usaha memegang <code>event.manage_own</code> + <code>lapak.manage_own</code>. Daftar peserta &amp; ekspor hanya untuk acara miliknya sendiri.</p>
+  </section>
+
+  <footer class="text-center text-xs text-slate-400 pt-6">
+    Blitar Mengaji · Prototype UI/UX — Dashboard Entitas (manage_own) · dibuat untuk brainstorming sebelum eksekusi · 2026-05-20
+  </footer>
+</main>
+
+<script>lucide.createIcons();</script>
+<script src="theme-switcher.js" defer></script>
+</body>
+</html>

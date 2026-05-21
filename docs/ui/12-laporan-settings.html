@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Pengaturan Laporan Keuangan</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="theme-tokens.css">
+<link rel="stylesheet" href="craft.css">
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand:{50:'var(--c-brand-50)',100:'var(--c-brand-100)',200:'var(--c-brand-200)',300:'var(--c-brand-300)',400:'var(--c-brand-400)',500:'var(--c-brand-500)',600:'var(--c-brand-600)',700:'var(--c-brand-700)',800:'var(--c-brand-800)',900:'var(--c-brand-900)'},
+      gold:{DEFAULT:'var(--c-gold)',light:'var(--c-gold-light)',dark:'var(--c-gold-dark)'},
+      cream:'var(--c-cream)', surface:'var(--c-surface)', ink:'var(--c-ink)'
+    },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], arabic:['Amiri','serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .device { width:370px; border:9px solid #0f172a; border-radius:2.4rem; background:#0f172a; box-shadow:0 20px 45px rgba(15,23,42,.25); overflow:hidden; position:relative; }
+  .device .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#0f172a; border-radius:0 0 14px 14px; z-index:50; }
+  .screen { height:760px; overflow-y:auto; background:var(--c-cream); position:relative; }
+  .screen::-webkit-scrollbar { width:0; }
+  .statusbar { height:34px; }
+  .ph { background:linear-gradient(135deg,#0E6E55,#3C9E84); }
+  .ph2 { background:linear-gradient(135deg,#A8851A,#E3C766); }
+  .ph3 { background:linear-gradient(135deg,#0B5947,#18816A); }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+  .annot { font-size:11px; color:#64748b; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+
+  /* mini A4 preview accent (driven oleh swatch warna aksen) */
+  .prev { --pacc:#0E6E55; --pacc-d:#0B5947; --pacc-soft:#E9F5F1; }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV (disalin dari 09-entity-dash.html; tandai Entitas aktif) -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2 inline-flex items-center gap-1.5"><span class="w-5 h-5 inline-block align-middle"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span> Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin &amp; RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="bg-brand-600 text-white">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<header class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+  <div class="flex items-start justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-extrabold display">Pengaturan Laporan Keuangan</h1>
+      <p class="text-sm text-slate-500">Bagian dari <b>Dashboard Pengelola Titik</b>. Tiap masjid memilih template laporan, mengunggah logo, memilih warna aksen, dan mengisi identitas penanda tangan — semua otomatis dipakai saat membuat PDF laporan kas.</p>
+    </div>
+    <a href="11-pdf-masjid.html" class="shrink-0 mt-1 text-sm font-bold text-rose-600 hover:underline inline-flex items-center gap-1.5"><i data-lucide="file-text" class="w-4 h-4"></i> Lihat semua contoh template</a>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24 space-y-8">
+
+  <!-- ===================================================================== -->
+  <!-- DASHBOARD DESKTOP: sidebar entitas + topbar + konten pengaturan        -->
+  <!-- ===================================================================== -->
+  <section>
+    <div data-theme="teduh" class="rounded-2xl overflow-hidden shadow-pop border bg-surface">
+      <div class="flex">
+        <!-- sidebar konteks entitas (manage_own) -->
+        <aside class="w-56 bg-ink text-white p-4 shrink-0 hidden md:block relative overflow-hidden">
+          <div class="orn-overlay pat-girih-light"></div>
+          <div class="relative z-10">
+          <div class="flex items-center gap-2 mb-6"><div class="w-9 h-9 rounded-xl overflow-hidden"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div><div><p class="font-bold text-sm leading-none">Panel Titik</p><p class="text-[10px] text-white/50">Masjid Al-Falah</p></div></div>
+          <nav class="space-y-1 text-sm">
+            <p class="text-[10px] uppercase text-white/30 font-bold px-3 mb-1">Kelola Milik Saya</p>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Ringkasan</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="calendar-days" class="w-4 h-4"></i> Jadwal Kajian</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="images" class="w-4 h-4"></i> Galeri</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="video" class="w-4 h-4"></i> Video / Livestream</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="hand-heart" class="w-4 h-4"></i> Donasi</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="wallet" class="w-4 h-4"></i> Kas Titik</a>
+            <p class="text-[10px] uppercase text-white/30 font-bold px-3 mb-1 mt-3">Akun</p>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 text-white/70"><i data-lucide="settings" class="w-4 h-4"></i> Profil Titik</a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-600 font-semibold"><i data-lucide="file-cog" class="w-4 h-4"></i> Pengaturan Laporan</a>
+          </nav>
+          </div>
+        </aside>
+
+        <!-- main -->
+        <div class="flex-1 bg-cream min-w-0">
+          <!-- topbar -->
+          <div class="bg-surface border-b px-6 py-3 flex items-center justify-between">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-lg font-extrabold">Masjid Al-Falah</h3>
+                <span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold inline-flex items-center gap-1"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> Terverifikasi</span>
+                <span class="px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold">Pengelola Titik</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">Jl. Mastrip No. 12, Kepanjenkidul · Kota Blitar</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative"><i data-lucide="bell" class="w-5 h-5 text-slate-500"></i><span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gold rounded-full"></span></div>
+              <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full ph"></div><div class="leading-none hidden sm:block"><p class="text-sm font-semibold">Ust. Ahmad Fauzi</p><p class="text-[10px] text-slate-400">Takmir</p></div></div>
+            </div>
+          </div>
+
+          <!-- content header -->
+          <div class="px-6 pt-6 pb-2">
+            <div class="flex items-start justify-between flex-wrap gap-3">
+              <div>
+                <h2 class="text-xl font-extrabold flex items-center gap-2 display"><i data-lucide="file-cog" class="w-5 h-5 text-brand-600"></i> Pengaturan Laporan Keuangan — Masjid Al-Falah</h2>
+                <p class="text-sm text-slate-500 mt-0.5">Setelan ini menjadi default untuk setiap laporan PDF yang Anda terbitkan dari modul Kas Titik.</p>
+              </div>
+              <a href="11-pdf-masjid.html" class="shrink-0 text-xs font-bold text-rose-600 hover:underline inline-flex items-center gap-1.5"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Lihat semua contoh template</a>
+            </div>
+          </div>
+
+          <!-- 2 KOLOM: kiri form, kanan preview sticky -->
+          <div class="px-6 pb-6 grid lg:grid-cols-[1fr_360px] gap-6 items-start">
+
+            <!-- ============ KIRI: FORM PENGATURAN ============ -->
+            <div class="space-y-5 min-w-0">
+
+              <!-- 1. PILIH TEMPLATE -->
+              <div class="bg-surface rounded-2xl shadow-card p-5">
+                <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+                  <p class="font-bold text-sm flex items-center gap-2"><span class="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 grid place-items-center text-xs font-extrabold">1</span> Pilih Template</p>
+                  <a href="11-pdf-masjid.html" class="text-xs font-bold text-brand-700 hover:underline inline-flex items-center gap-1"><i data-lucide="eye" class="w-3.5 h-3.5"></i> Lihat contoh besar</a>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+
+                  <!-- TPL terpilih -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-brand-500 bg-brand-50/40 p-2 block">
+                    <span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-brand-600 text-white text-[9px] font-bold inline-flex items-center gap-0.5"><i data-lucide="check" class="w-2.5 h-2.5"></i> Dipilih</span>
+                    <div class="bg-white rounded-lg border p-2 aspect-[3/4] flex flex-col gap-1.5">
+                      <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-brand-500"></span><span class="flex-1 h-2 rounded bg-brand-500/70"></span></div>
+                      <span class="h-px bg-brand-500"></span>
+                      <span class="h-1 rounded bg-slate-200 w-3/4 mx-auto"></span>
+                      <div class="grid grid-cols-2 gap-1 mt-1"><span class="h-3 rounded bg-slate-100"></span><span class="h-3 rounded bg-brand-200"></span></div>
+                      <span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200 w-5/6"></span><span class="h-1 rounded bg-slate-200 w-4/6"></span>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Kop Surat Resmi</p>
+                    <input type="radio" name="tpl" checked class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Modern Minimal -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border p-2 aspect-[3/4] flex flex-col gap-1.5">
+                      <div class="flex items-center justify-between"><span class="w-3 h-3 rounded bg-slate-300"></span><span class="h-2 rounded bg-brand-400 w-1/2"></span></div>
+                      <span class="h-1 rounded bg-brand-400 w-8 mt-1"></span>
+                      <div class="grid grid-cols-2 gap-1 mt-1"><span class="h-4 rounded bg-slate-100"></span><span class="h-4 rounded bg-slate-100"></span></div>
+                      <span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200 w-5/6"></span>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Modern Minimal</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Sidebar Aksen -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border overflow-hidden aspect-[3/4] flex">
+                      <span class="w-1/3 bg-brand-500"></span>
+                      <div class="flex-1 p-1.5 flex flex-col gap-1"><span class="h-1 rounded bg-slate-300 w-2/3"></span><span class="h-3 rounded bg-slate-100 mt-1"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200 w-5/6"></span></div>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Sidebar Aksen</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Infografis -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border overflow-hidden aspect-[3/4] flex flex-col">
+                      <span class="h-4 bg-brand-500"></span>
+                      <div class="p-1.5 flex flex-col gap-1"><div class="grid grid-cols-3 gap-1"><span class="h-3 rounded bg-green-300"></span><span class="h-3 rounded bg-red-300"></span><span class="h-3 rounded bg-brand-300"></span></div><span class="w-6 h-6 rounded-full bg-brand-200 mx-auto mt-1"></span></div>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Infografis</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Ringkas -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border p-2 aspect-[3/4] flex flex-col gap-1">
+                      <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-300"></span><span class="flex-1 h-1.5 rounded bg-slate-300"></span></div>
+                      <span class="h-1 rounded bg-slate-200 mt-1"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-brand-300 mt-0.5"></span>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Ringkas</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Buletin 2 Kolom -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border p-2 aspect-[3/4] flex flex-col gap-1">
+                      <span class="h-3 rounded bg-brand-100 border-l-2 border-brand-500"></span>
+                      <div class="grid grid-cols-2 gap-1 mt-1"><div class="flex flex-col gap-0.5"><span class="h-1 rounded bg-green-300"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200"></span></div><div class="flex flex-col gap-0.5"><span class="h-1 rounded bg-red-300"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200"></span></div></div>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Buletin 2 Kolom</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Premium Emas -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border p-2 aspect-[3/4] flex flex-col gap-1.5">
+                      <span class="w-6 h-6 rounded-full bg-gold/30 border-2 border-gold mx-auto"></span>
+                      <span class="h-1.5 rounded bg-gold-dark/60 w-2/3 mx-auto"></span>
+                      <span class="h-px bg-gold"></span>
+                      <span class="h-1 rounded bg-slate-200 mt-1"></span><span class="h-1 rounded bg-slate-200 w-5/6"></span><span class="h-1 rounded bg-slate-200 w-4/6"></span>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Premium Emas</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Audit Tabel Penuh -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border p-2 aspect-[3/4] flex flex-col gap-0.5">
+                      <span class="h-2 rounded bg-brand-500"></span>
+                      <span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-100"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-100"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-100"></span><span class="h-1 rounded bg-slate-200"></span>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Audit Tabel Penuh</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Kartu Grid -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border p-2 aspect-[3/4] flex flex-col gap-1">
+                      <span class="h-1.5 rounded bg-slate-300 w-2/3"></span>
+                      <div class="grid grid-cols-2 gap-1 mt-1"><span class="h-5 rounded-md bg-brand-100"></span><span class="h-5 rounded-md bg-brand-100"></span><span class="h-5 rounded-md bg-brand-100"></span><span class="h-5 rounded-md bg-brand-200"></span></div>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Kartu Grid</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                  <!-- Surat Edaran -->
+                  <label class="relative cursor-pointer rounded-xl border-2 border-transparent hover:border-brand-200 bg-cream/40 p-2 block">
+                    <div class="bg-white rounded-lg border p-2 aspect-[3/4] flex flex-col gap-1">
+                      <span class="h-1.5 rounded bg-slate-300 w-1/2 mx-auto"></span>
+                      <span class="h-px bg-slate-300 mt-0.5"></span>
+                      <span class="h-1 rounded bg-slate-200 mt-1"></span><span class="h-1 rounded bg-slate-200 w-11/12"></span><span class="h-1 rounded bg-slate-200 w-10/12"></span>
+                      <span class="h-1 rounded bg-slate-200 w-2/5 self-end mt-2"></span>
+                    </div>
+                    <p class="text-[11px] font-bold mt-1.5 leading-tight">Surat Edaran</p>
+                    <input type="radio" name="tpl" class="accent-brand-600 mt-1 scale-90" />
+                  </label>
+
+                </div>
+                <p class="annot mt-3">10 template tersimpan di <code>titik_dakwah.report_template</code>. Template terpilih jadi default semua laporan PDF.</p>
+              </div>
+
+              <!-- 2. LOGO MASJID -->
+              <div class="bg-surface rounded-2xl shadow-card p-5">
+                <p class="font-bold text-sm flex items-center gap-2 mb-3"><span class="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 grid place-items-center text-xs font-extrabold">2</span> Logo Masjid</p>
+                <div class="flex items-center gap-4 flex-wrap">
+                  <!-- preview logo saat ini -->
+                  <div class="text-center shrink-0">
+                    <div class="w-16 h-16 rounded-full ph grid place-items-center"><i data-lucide="building" class="w-7 h-7 text-white"></i></div>
+                    <p class="text-[10px] text-slate-400 mt-1">Logo saat ini</p>
+                  </div>
+                  <!-- dropzone -->
+                  <label class="flex-1 min-w-[200px] h-24 rounded-xl border-2 border-dashed border-brand-300 bg-brand-50/40 grid place-items-center cursor-pointer text-center">
+                    <span><i data-lucide="upload-cloud" class="w-6 h-6 text-brand-500 mx-auto"></i><span class="block text-[11px] text-brand-700 font-bold mt-1">Tarik &amp; lepas, atau klik untuk unggah</span><span class="block text-[10px] text-slate-400">PNG/JPG transparan · maks 2 MB · disarankan 1:1</span></span>
+                  </label>
+                </div>
+                <div class="flex gap-2 mt-3">
+                  <button class="px-3 h-9 rounded-full bg-brand-600 text-white text-xs font-semibold flex items-center gap-1.5"><i data-lucide="image-plus" class="w-3.5 h-3.5"></i> Unggah / Ganti Logo</button>
+                  <button class="px-3 h-9 rounded-full border text-slate-600 text-xs font-semibold flex items-center gap-1.5"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Hapus</button>
+                </div>
+                <p class="annot mt-3">Tersimpan sebagai <code>titik_dakwah.logo_url</code>; muncul di slot logo tiap template.</p>
+              </div>
+
+              <!-- 3. WARNA AKSEN -->
+              <div class="bg-surface rounded-2xl shadow-card p-5">
+                <p class="font-bold text-sm flex items-center gap-2 mb-3"><span class="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 grid place-items-center text-xs font-extrabold">3</span> Warna Aksen</p>
+                <div class="flex items-center gap-3 flex-wrap" id="accentRow">
+                  <button class="acc-sw active w-10 h-10 rounded-full grid place-items-center text-white" data-acc="#0E6E55" data-d="#0B5947" data-soft="#E9F5F1" style="background:#0E6E55" title="Hijau"><i data-lucide="check" class="w-4 h-4"></i></button>
+                  <button class="acc-sw w-10 h-10 rounded-full grid place-items-center text-white" data-acc="#2563EB" data-d="#1D4ED8" data-soft="#DBEAFE" style="background:#2563EB" title="Biru"></button>
+                  <button class="acc-sw w-10 h-10 rounded-full grid place-items-center text-white" data-acc="#0F766E" data-d="#115E59" data-soft="#CCFBF1" style="background:#0F766E" title="Teal"></button>
+                  <button class="acc-sw w-10 h-10 rounded-full grid place-items-center text-white" data-acc="#7B2D24" data-d="#63231C" data-soft="#ECD6D3" style="background:#7B2D24" title="Maroon"></button>
+                  <button class="acc-sw w-10 h-10 rounded-full grid place-items-center text-white" data-acc="#1E3A5F" data-d="#162C47" data-soft="#E4EAF1" style="background:#1E3A5F" title="Navy"></button>
+                  <button class="acc-sw w-10 h-10 rounded-full grid place-items-center text-white" data-acc="#6D28D9" data-d="#5B21B6" data-soft="#EDE9FE" style="background:#6D28D9" title="Ungu"></button>
+                  <button class="acc-sw w-10 h-10 rounded-full grid place-items-center text-white" data-acc="#A8851A" data-d="#7C3A06" data-soft="#FBF3D9" style="background:#A8851A" title="Emas"></button>
+                  <span class="text-xs text-slate-400 ml-1">Aktif: <b id="accName" class="text-slate-600">Hijau</b></span>
+                </div>
+                <p class="annot mt-3">Tersimpan sebagai <code>titik_dakwah.report_accent</code>; mengatur warna kop, tabel &amp; ringkasan di PDF.</p>
+              </div>
+
+              <!-- 4. IDENTITAS & TANDA TANGAN -->
+              <div class="bg-surface rounded-2xl shadow-card p-5">
+                <p class="font-bold text-sm flex items-center gap-2 mb-3"><span class="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 grid place-items-center text-xs font-extrabold">4</span> Identitas &amp; Tanda Tangan</p>
+                <div class="grid sm:grid-cols-2 gap-3">
+                  <div class="sm:col-span-2"><label class="text-xs font-bold text-slate-500">Nama Masjid</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" value="Masjid Al-Falah" /></div>
+                  <div class="sm:col-span-2"><label class="text-xs font-bold text-slate-500">Alamat</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" value="Jl. Mastrip No. 12, Kepanjenkidul, Kota Blitar, Jawa Timur" /></div>
+                  <div><label class="text-xs font-bold text-slate-500">Telp / Email</label><input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" value="0342-123456 · masjidalfalah@email.com" /></div>
+                  <div><label class="text-xs font-bold text-slate-500">Kota (untuk "Blitar, &lt;tgl&gt;")</label><input id="inCity" class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" value="Blitar" /></div>
+                  <div><label class="text-xs font-bold text-slate-500">Nama Ketua Takmir</label><input id="inKetua" class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" value="KH. Abdul Ghani" /></div>
+                  <div><label class="text-xs font-bold text-slate-500">Nama Bendahara</label><input id="inBendahara" class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" value="H. Sulaiman" /></div>
+                </div>
+                <p class="annot mt-3">Nama penanda tangan tersimpan di <code>titik_dakwah.ketua_name</code> &amp; <code>titik_dakwah.bendahara_name</code>, otomatis tercetak di blok tanda tangan.</p>
+              </div>
+
+              <!-- 5. OPSI -->
+              <div class="bg-surface rounded-2xl shadow-card p-5">
+                <p class="font-bold text-sm flex items-center gap-2 mb-3"><span class="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 grid place-items-center text-xs font-extrabold">5</span> Opsi</p>
+                <div class="space-y-2.5">
+                  <!-- toggle: grafik (ON) -->
+                  <label class="flex items-center justify-between gap-3 bg-cream/60 rounded-xl px-4 py-3 cursor-pointer">
+                    <span class="flex items-center gap-2.5 text-sm"><i data-lucide="bar-chart-3" class="w-4 h-4 text-brand-600"></i> Tampilkan grafik arus kas &amp; komposisi</span>
+                    <span class="w-10 h-6 rounded-full bg-brand-600 relative shrink-0"><span class="absolute right-0.5 top-0.5 w-5 h-5 rounded-full bg-white"></span></span>
+                  </label>
+                  <!-- toggle: QR (ON) -->
+                  <label class="flex items-center justify-between gap-3 bg-cream/60 rounded-xl px-4 py-3 cursor-pointer">
+                    <span class="flex items-center gap-2.5 text-sm"><i data-lucide="qr-code" class="w-4 h-4 text-brand-600"></i> Sertakan QR verifikasi online</span>
+                    <span class="w-10 h-6 rounded-full bg-brand-600 relative shrink-0"><span class="absolute right-0.5 top-0.5 w-5 h-5 rounded-full bg-white"></span></span>
+                  </label>
+                  <!-- format angka -->
+                  <div class="bg-cream/60 rounded-xl px-4 py-3">
+                    <p class="text-sm flex items-center gap-2.5 mb-2"><i data-lucide="hash" class="w-4 h-4 text-brand-600"></i> Format angka</p>
+                    <div class="flex gap-2">
+                      <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="numfmt" class="peer hidden" checked />
+                        <span class="block text-center text-xs font-bold rounded-lg border-2 border-slate-200 bg-white py-2 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:text-brand-700">Rp penuh<br><span class="font-normal text-slate-400">Rp 24.350.000</span></span>
+                      </label>
+                      <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="numfmt" class="peer hidden" />
+                        <span class="block text-center text-xs font-bold rounded-lg border-2 border-slate-200 bg-white py-2 peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:text-brand-700">Ringkas (jt)<br><span class="font-normal text-slate-400">Rp 24,35jt</span></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 6. TOMBOL AKSI -->
+              <div class="flex flex-wrap gap-3 pt-1">
+                <button class="px-5 h-11 rounded-full bg-brand-600 text-white text-sm font-bold flex items-center gap-2 shadow-card"><i data-lucide="save" class="w-4 h-4"></i> Simpan Pengaturan</button>
+                <button class="px-5 h-11 rounded-full border-2 border-brand-300 text-brand-700 text-sm font-bold flex items-center gap-2"><i data-lucide="file-search" class="w-4 h-4"></i> Pratinjau PDF</button>
+                <button class="px-5 h-11 rounded-full border text-slate-600 text-sm font-bold flex items-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Unduh Contoh</button>
+              </div>
+
+            </div>
+
+            <!-- ============ KANAN: LIVE PREVIEW MINI (STICKY) ============ -->
+            <div class="lg:sticky lg:top-24">
+              <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-1.5"><i data-lucide="eye" class="w-3.5 h-3.5"></i> Live Preview</p>
+              <!-- kartu mini A4 -->
+              <div class="prev bg-white rounded-xl shadow-pop border overflow-hidden" style="--pacc:#0E6E55;--pacc-d:#0B5947;--pacc-soft:#E9F5F1">
+                <!-- kop -->
+                <div class="p-4" style="border-bottom:3px solid var(--pacc)">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full grid place-items-center text-white shrink-0" style="background:var(--pacc)"><i data-lucide="building" class="w-5 h-5"></i></div>
+                    <div class="flex-1 text-center">
+                      <p class="font-extrabold text-sm leading-tight" id="pvName" style="color:var(--pacc-d)">MASJID AL-FALAH</p>
+                      <p class="text-[9px] text-slate-400 leading-tight">Kepanjenkidul, Kota Blitar</p>
+                    </div>
+                    <div class="w-10 shrink-0"></div>
+                  </div>
+                </div>
+                <div class="px-4 pt-3 text-center">
+                  <p class="text-[11px] font-extrabold underline">LAPORAN KEUANGAN BULANAN</p>
+                  <p class="text-[9px] text-slate-400">Periode: April 2026</p>
+                </div>
+                <!-- ringkasan saldo -->
+                <div class="px-4 mt-3 grid grid-cols-3 gap-1.5">
+                  <div class="rounded-md p-1.5" style="background:var(--pacc-soft)"><p class="text-[7px] uppercase font-bold text-slate-500">Masuk</p><p class="text-[10px] font-extrabold" style="color:#16A34A">+12,45jt</p></div>
+                  <div class="rounded-md p-1.5" style="background:var(--pacc-soft)"><p class="text-[7px] uppercase font-bold text-slate-500">Keluar</p><p class="text-[10px] font-extrabold" style="color:#DC2626">−7,2jt</p></div>
+                  <div class="rounded-md p-1.5 text-white" style="background:var(--pacc)"><p class="text-[7px] uppercase font-bold opacity-80">Saldo</p><p class="text-[10px] font-extrabold">24,35jt</p></div>
+                </div>
+                <!-- mini grafik -->
+                <div class="px-4 mt-3 flex items-end gap-1.5 h-12">
+                  <span class="flex-1 rounded-t" style="height:80%;background:#16A34A"></span>
+                  <span class="flex-1 rounded-t" style="height:46%;background:#DC2626"></span>
+                  <span class="flex-1 rounded-t" style="height:90%;background:var(--pacc)"></span>
+                  <span class="flex-1 rounded-t bg-slate-200" style="height:60%"></span>
+                  <span class="flex-1 rounded-t bg-slate-200" style="height:38%"></span>
+                </div>
+                <!-- mini tabel -->
+                <div class="px-4 mt-3 space-y-1">
+                  <div class="flex justify-between text-[8px] text-white px-2 py-1 rounded" style="background:var(--pacc)"><span>Uraian</span><span>Jumlah</span></div>
+                  <div class="flex justify-between text-[9px] px-2"><span class="text-slate-500">Infaq Jumat</span><b>3.250.000</b></div>
+                  <div class="flex justify-between text-[9px] px-2"><span class="text-slate-500">Donasi</span><b>5.000.000</b></div>
+                  <div class="flex justify-between text-[9px] px-2"><span class="text-slate-500">Honor ustadz</span><b>3.000.000</b></div>
+                </div>
+                <!-- tanda tangan + QR -->
+                <div class="px-4 mt-4 pb-4 flex items-end justify-between">
+                  <div class="text-center text-[8px] w-2/5">
+                    <p class="text-slate-500">Bendahara,</p>
+                    <p class="mt-5 border-t border-slate-400 pt-0.5 font-bold" id="pvBendahara">( H. Sulaiman )</p>
+                  </div>
+                  <div class="w-7 h-7 rounded bg-slate-100 grid place-items-center shrink-0"><i data-lucide="qr-code" class="w-4 h-4 text-slate-400"></i></div>
+                  <div class="text-center text-[8px] w-2/5">
+                    <p class="text-slate-500" id="pvCity">Blitar, 1 Mei 2026</p>
+                    <p class="text-slate-500">Ketua Takmir,</p>
+                    <p class="mt-1 border-t border-slate-400 pt-0.5 font-bold" id="pvKetua">( KH. Abdul Ghani )</p>
+                  </div>
+                </div>
+              </div>
+              <p class="annot mt-2 flex items-start gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5 shrink-0 mt-px"></i> Pratinjau — hasil akhir PDF mengikuti template terpilih.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Sidebar entitas hanya menampilkan modul ber-permission <code>manage_own</code>. Semua setelan laporan berlaku khusus untuk titik milik pengelola ini.</p>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- DEVICE HP PREVIEW: setelan di aplikasi mobile takmir                    -->
+  <!-- ===================================================================== -->
+  <section>
+    <div class="grid lg:grid-cols-[380px_1fr] gap-6 items-start">
+      <div>
+        <div class="device mx-auto"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-600"></div>
+            <div class="bg-brand-600 text-white px-4 py-3 flex items-center gap-2 relative overflow-hidden">
+              <div class="orn-overlay pat-girih-light"></div>
+              <i data-lucide="chevron-left" class="w-5 h-5 relative z-10"></i>
+              <div class="relative z-10"><p class="font-bold text-base leading-none">Pengaturan Laporan</p><p class="text-xs text-white/70">Masjid Al-Falah</p></div>
+            </div>
+            <div class="p-4 space-y-3">
+              <!-- template terpilih -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <p class="text-xs font-bold text-slate-500 mb-2">Template aktif</p>
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-16 rounded-lg border bg-cream/60 flex flex-col gap-1 p-1.5 shrink-0"><span class="h-1.5 rounded bg-brand-500"></span><span class="h-px bg-brand-500"></span><span class="h-1 rounded bg-slate-200"></span><span class="h-1 rounded bg-slate-200 w-5/6"></span></div>
+                  <div class="flex-1"><p class="font-bold text-sm">Kop Surat Resmi</p><p class="text-[11px] text-slate-400">Formal / klasik</p></div>
+                  <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Ganti</span>
+                </div>
+              </div>
+              <!-- logo + warna -->
+              <div class="bg-surface rounded-2xl shadow-card p-4 flex items-center gap-4">
+                <div class="text-center"><div class="w-12 h-12 rounded-full ph grid place-items-center mx-auto"><i data-lucide="building" class="w-5 h-5 text-white"></i></div><p class="text-[10px] text-slate-400 mt-1">Logo</p></div>
+                <div class="flex-1">
+                  <p class="text-xs font-bold text-slate-500 mb-1.5">Warna aksen</p>
+                  <div class="flex gap-1.5">
+                    <span class="w-6 h-6 rounded-full ring-2 ring-offset-1 ring-brand-600" style="background:#0E6E55"></span>
+                    <span class="w-6 h-6 rounded-full" style="background:#2563EB"></span>
+                    <span class="w-6 h-6 rounded-full" style="background:#7B2D24"></span>
+                    <span class="w-6 h-6 rounded-full" style="background:#1E3A5F"></span>
+                    <span class="w-6 h-6 rounded-full" style="background:#A8851A"></span>
+                  </div>
+                </div>
+              </div>
+              <!-- opsi ringkas -->
+              <div class="bg-surface rounded-2xl shadow-card p-4 space-y-3">
+                <div class="flex items-center justify-between"><span class="text-sm flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4 text-brand-600"></i> Tampilkan grafik</span><span class="w-9 h-5 rounded-full bg-brand-600 relative"><span class="absolute right-0.5 top-0.5 w-4 h-4 rounded-full bg-white"></span></span></div>
+                <div class="flex items-center justify-between"><span class="text-sm flex items-center gap-2"><i data-lucide="qr-code" class="w-4 h-4 text-brand-600"></i> QR verifikasi</span><span class="w-9 h-5 rounded-full bg-brand-600 relative"><span class="absolute right-0.5 top-0.5 w-4 h-4 rounded-full bg-white"></span></span></div>
+              </div>
+              <button class="w-full h-11 rounded-xl bg-brand-600 text-white text-sm font-bold flex items-center justify-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan Pengaturan</button>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3">Pratinjau HP — Takmir</p>
+        <p class="annot text-center max-w-[340px] mx-auto">Setelan yang sama bisa diatur takmir langsung dari aplikasi di lapangan.</p>
+      </div>
+
+      <!-- catatan teknis -->
+      <div class="bg-surface rounded-2xl shadow-card border p-6 self-start">
+        <h3 class="font-extrabold text-lg flex items-center gap-2 mb-2 display"><i data-lucide="database" class="w-5 h-5 text-brand-600"></i> Tempat setelan tersimpan</h3>
+        <p class="text-sm text-slate-500 mb-4">Seluruh pilihan di layar ini ditulis ke baris titik pada tabel <code class="bg-cream px-1.5 py-0.5 rounded">titik_dakwah</code>. Saat membuat PDF, generator membaca kolom-kolom ini sebagai default.</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-start gap-3"><i data-lucide="layout-template" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><div><b>report_template</b> <span class="text-slate-400">— template terpilih (mis. "kop_resmi")</span></div></div>
+          <div class="flex items-start gap-3"><i data-lucide="image" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><div><b>logo_url</b> <span class="text-slate-400">— berkas logo yang diunggah</span></div></div>
+          <div class="flex items-start gap-3"><i data-lucide="palette" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><div><b>report_accent</b> <span class="text-slate-400">— kode warna aksen (mis. "#0E6E55")</span></div></div>
+          <div class="flex items-start gap-3"><i data-lucide="user-check" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><div><b>ketua_name</b> <span class="text-slate-400">— nama Ketua Takmir penanda tangan</span></div></div>
+          <div class="flex items-start gap-3"><i data-lucide="user-check" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><div><b>bendahara_name</b> <span class="text-slate-400">— nama Bendahara penanda tangan</span></div></div>
+        </div>
+        <div class="mt-4 p-3 rounded-xl bg-brand-50 text-brand-800 text-xs flex items-start gap-2">
+          <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
+          <p>Identitas, telp/email, kota, opsi grafik/QR, dan format angka disimpan di kolom/JSON setelan terkait pada baris titik yang sama — semuanya bisa diubah kapan saja tanpa memengaruhi laporan yang sudah dicetak.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-center text-xs text-slate-400 pt-6">
+    Blitar Mengaji · Prototype UI/UX — Pengaturan Laporan Keuangan (Dashboard Pengelola Titik) · dibuat untuk brainstorming sebelum eksekusi · 2026-05-20
+  </footer>
+</main>
+
+<script>
+  lucide.createIcons();
+
+  // Warna aksen -> sinkron ke kartu live preview (.prev)
+  const prev = document.querySelector('.prev');
+  const accName = document.getElementById('accName');
+  document.querySelectorAll('#accentRow .acc-sw').forEach(btn => {
+    btn.addEventListener('click', () => {
+      prev.style.setProperty('--pacc', btn.dataset.acc);
+      prev.style.setProperty('--pacc-d', btn.dataset.d);
+      prev.style.setProperty('--pacc-soft', btn.dataset.soft);
+      document.querySelectorAll('#accentRow .acc-sw').forEach(x => { x.classList.remove('active'); x.innerHTML = ''; });
+      btn.classList.add('active');
+      btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+      accName.textContent = btn.getAttribute('title');
+      lucide.createIcons();
+    });
+  });
+
+  // Identitas -> sinkron ke live preview
+  const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('input', fn); };
+  bind('inKetua', e => document.getElementById('pvKetua').textContent = '( ' + (e.target.value || '—') + ' )');
+  bind('inBendahara', e => document.getElementById('pvBendahara').textContent = '( ' + (e.target.value || '—') + ' )');
+  bind('inCity', e => document.getElementById('pvCity').textContent = (e.target.value || 'Blitar') + ', 1 Mei 2026');
+</script>
+<script src="theme-switcher.js" defer></script>
+</body>
+</html>

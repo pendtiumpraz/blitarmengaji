@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Tema / Template UI Dinamis</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Lora:wght@500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { brand:{50:'#E9F5F1',100:'#CDEAE1',200:'#9FD6C6',300:'#6BBEA8',400:'#3C9E84',500:'#18816A',600:'#0E6E55',700:'#0B5947',800:'#094736',900:'#073A2D'}, gold:{DEFAULT:'#C9A227',light:'#E3C766',dark:'#A8851A'}, cream:'#F7F5EF', ink:'#1F2A37' },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+  .annot { font-size:11px; color:#64748b; }
+  .device { width:360px; border:9px solid #0f172a; border-radius:2.4rem; background:#0f172a; box-shadow:0 20px 45px rgba(15,23,42,.25); overflow:hidden; position:relative; }
+  .device .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#0f172a; border-radius:0 0 14px 14px; z-index:50; }
+  .screen { height:720px; overflow-y:auto; position:relative; transition:background .35s, color .35s; }
+  .screen::-webkit-scrollbar { width:0; }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+
+  /* ============ THEME TOKENS (CSS variables) ============ */
+  /* Default = Teduh. data-theme on the previewer swaps these live. */
+  [data-theme]{ --on:#fff; transition:all .35s; }
+  [data-theme="teduh"]{ --primary:#0E6E55; --primary-d:#0B5947; --soft:#E9F5F1; --accent:#C9A227; --accent-soft:#FBF3D9; --bg:#F7F5EF; --surface:#ffffff; --ink:#1F2A37; --muted:#6B7280; --border:#ece9e0; --radius:1rem; --font:'Plus Jakarta Sans'; --head:'Plus Jakarta Sans'; --on:#fff; --on-accent:#fff; }
+  [data-theme="modern"]{ --primary:#0F766E; --primary-d:#115E59; --soft:#CCFBF1; --accent:#F59E0B; --accent-soft:#FEF3C7; --bg:#F8FAFC; --surface:#ffffff; --ink:#0F172A; --muted:#64748B; --border:#e2e8f0; --radius:0.85rem; --font:'Poppins'; --head:'Poppins'; --on:#fff; --on-accent:#fff; }
+  [data-theme="earthy"]{ --primary:#14532D; --primary-d:#0f3d22; --soft:#DCE7DA; --accent:#B45309; --accent-soft:#F5E2CE; --bg:#FAF6EF; --surface:#FFFBF4; --ink:#292524; --muted:#78716C; --border:#ece1d0; --radius:1.3rem; --font:'Plus Jakarta Sans'; --head:'Lora'; --on:#fff; --on-accent:#fff; }
+  [data-theme="elegan"]{ --primary:#1E3A5F; --primary-d:#162c47; --soft:#E4EAF1; --accent:#C9A227; --accent-soft:#F5ECCF; --bg:#F5F3EE; --surface:#ffffff; --ink:#0F172A; --muted:#64748B; --border:#e5e7eb; --radius:0.5rem; --font:'Plus Jakarta Sans'; --head:'Lora'; --on:#fff; --on-accent:#fff; }
+  [data-theme="minimalis"]{ --primary:#111827; --primary-d:#000000; --soft:#F3F4F6; --accent:#10B981; --accent-soft:#D1FAE5; --bg:#FFFFFF; --surface:#FFFFFF; --ink:#111827; --muted:#9CA3AF; --border:#eceef1; --radius:0.6rem; --font:'Plus Jakarta Sans'; --head:'Plus Jakarta Sans'; --on:#fff; --on-accent:#fff; }
+  [data-theme="samudra"]{ --primary:#2563EB; --primary-d:#1D4ED8; --soft:#DBEAFE; --accent:#06B6D4; --accent-soft:#CFFAFE; --bg:#F0F9FF; --surface:#ffffff; --ink:#0F172A; --muted:#64748B; --border:#dbe6f0; --radius:0.9rem; --font:'Plus Jakarta Sans'; --head:'Plus Jakarta Sans'; --on:#fff; --on-accent:#063543; }
+  [data-theme="klasik"]{ --primary:#7B2D24; --primary-d:#63231C; --soft:#ECD6D3; --accent:#B8860B; --accent-soft:#F3E6C4; --bg:#F5EFE3; --surface:#FBF6EA; --ink:#2B2118; --muted:#7C6F5F; --border:#e6dac4; --radius:0.7rem; --font:'Plus Jakarta Sans'; --head:'Lora'; --on:#fff; --on-accent:#3a2a05; }
+  [data-theme="senja"]{ --primary:#34D399; --primary-d:#10B981; --soft:#173a31; --accent:#FBBF24; --accent-soft:#3a3214; --bg:#0F172A; --surface:#1E293B; --ink:#E2E8F0; --muted:#94A3B8; --border:#334155; --radius:1rem; --font:'Plus Jakarta Sans'; --head:'Plus Jakarta Sans'; --on:#06231a; --on-accent:#1c1606; }
+
+  /* ============ THEMED COMPONENTS (use the variables) ============ */
+  .t-screen{ background:var(--bg); color:var(--ink); font-family:var(--font),sans-serif; }
+  .t-head{ font-family:var(--head),sans-serif; font-weight:800; }
+  .t-topbar{ background:var(--primary); color:var(--on); }
+  [data-theme="senja"] .t-topbar{ background:var(--surface); color:var(--ink); border-bottom:1px solid var(--border); }
+  [data-theme="minimalis"] .t-topbar{ background:var(--surface); color:var(--ink); border-bottom:1px solid var(--border); }
+  .t-card{ background:var(--surface); border-radius:var(--radius); box-shadow:0 2px 12px rgba(15,23,42,.07); border:1px solid var(--border); }
+  .t-btn{ background:var(--primary); color:var(--on); border-radius:999px; font-weight:700; }
+  .t-btn-accent{ background:var(--accent); color:var(--on-accent); border-radius:999px; font-weight:700; }
+  .t-btn-outline{ background:transparent; color:var(--primary); border:2px solid var(--primary); border-radius:999px; font-weight:700; }
+  .t-chip{ background:var(--soft); color:var(--primary); border-radius:999px; font-weight:600; }
+  [data-theme="senja"] .t-chip{ color:var(--ink); }
+  .t-chip-accent{ background:var(--accent-soft); color:var(--accent); border-radius:999px; font-weight:700; }
+  [data-theme="senja"] .t-chip-accent{ color:var(--accent); }
+  .t-soft{ background:var(--soft); border-radius:var(--radius); }
+  .t-ico{ background:var(--soft); color:var(--primary); border-radius:calc(var(--radius) * .8); }
+  [data-theme="senja"] .t-ico{ color:var(--primary); }
+  .t-muted{ color:var(--muted); }
+  .t-accent{ color:var(--accent); }
+  .t-input{ background:var(--surface); border:1px solid var(--border); border-radius:calc(var(--radius) * .8); color:var(--muted); }
+  [data-theme="senja"] .t-input{ background:rgba(255,255,255,.05); }
+  .t-nav{ background:var(--surface); border-top:1px solid var(--border); }
+  .t-progress{ background:var(--accent); }
+  .t-progress-track{ background:var(--soft); }
+
+  /* theme chip selector */
+  .theme-pick{ cursor:pointer; border:2px solid transparent; transition:.2s; }
+  .theme-pick.active{ border-color:#0f172a; }
+  .theme-pick:hover{ transform:translateY(-2px); }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2">ﷺ Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin & RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="text-slate-500 hover:bg-slate-100">Entitas</a>
+    <a href="themes.html" class="bg-brand-600 text-white">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<header class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+  <h1 class="text-2xl font-extrabold">🎨 Tema / Template UI Dinamis</h1>
+  <p class="text-sm text-slate-500 max-w-2xl">Pilih tema di bawah — preview berganti <b>seketika</b>. Di aplikasi nanti, tema disimpan per-user (preferensi) & ada default global yang diatur admin. Implementasi via <b>CSS variables + <code>data-theme</code></b>, jadi nambah tema baru = nambah 1 blok variabel.</p>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24">
+
+  <!-- THEME PICKER -->
+  <div class="bg-white rounded-3xl shadow-card p-5 mb-8">
+    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Pilih Tema</p>
+    <div class="flex flex-wrap gap-3" id="picker">
+      <div class="theme-pick active rounded-2xl p-3 w-32" data-set="teduh" style="background:#F7F5EF">
+        <div class="flex gap-1 mb-2"><span class="w-6 h-6 rounded-full" style="background:#0E6E55"></span><span class="w-6 h-6 rounded-full" style="background:#C9A227"></span></div>
+        <p class="text-sm font-bold text-ink">Teduh</p><p class="text-[11px] text-slate-500">Hijau + Emas</p>
+      </div>
+      <div class="theme-pick rounded-2xl p-3 w-32" data-set="modern" style="background:#F8FAFC">
+        <div class="flex gap-1 mb-2"><span class="w-6 h-6 rounded-full" style="background:#0F766E"></span><span class="w-6 h-6 rounded-full" style="background:#F59E0B"></span></div>
+        <p class="text-sm font-bold text-ink">Modern</p><p class="text-[11px] text-slate-500">Teal + Amber</p>
+      </div>
+      <div class="theme-pick rounded-2xl p-3 w-32" data-set="earthy" style="background:#FAF6EF">
+        <div class="flex gap-1 mb-2"><span class="w-6 h-6 rounded-full" style="background:#14532D"></span><span class="w-6 h-6 rounded-full" style="background:#B45309"></span></div>
+        <p class="text-sm font-bold text-ink">Earthy</p><p class="text-[11px] text-slate-500">Hangat & alami</p>
+      </div>
+      <div class="theme-pick rounded-2xl p-3 w-32" data-set="elegan" style="background:#F5F3EE">
+        <div class="flex gap-1 mb-2"><span class="w-6 h-6 rounded-full" style="background:#1E3A5F"></span><span class="w-6 h-6 rounded-full" style="background:#C9A227"></span></div>
+        <p class="text-sm font-bold text-ink">Elegan</p><p class="text-[11px] text-slate-500">Navy + serif</p>
+      </div>
+      <div class="theme-pick rounded-2xl p-3 w-32" data-set="minimalis" style="background:#FFFFFF;border-color:#eee">
+        <div class="flex gap-1 mb-2"><span class="w-6 h-6 rounded-full" style="background:#111827"></span><span class="w-6 h-6 rounded-full" style="background:#10B981"></span></div>
+        <p class="text-sm font-bold text-ink">Minimalis</p><p class="text-[11px] text-slate-500">Bersih & putih</p>
+      </div>
+      <div class="theme-pick rounded-2xl p-3 w-32" data-set="samudra" style="background:#F0F9FF">
+        <div class="flex gap-1 mb-2"><span class="w-6 h-6 rounded-full" style="background:#2563EB"></span><span class="w-6 h-6 rounded-full" style="background:#06B6D4"></span></div>
+        <p class="text-sm font-bold text-ink">Samudra</p><p class="text-[11px] text-slate-500">Biru + Cyan</p>
+      </div>
+      <div class="theme-pick rounded-2xl p-3 w-32" data-set="klasik" style="background:#F5EFE3">
+        <div class="flex gap-1 mb-2"><span class="w-6 h-6 rounded-full" style="background:#7B2D24"></span><span class="w-6 h-6 rounded-full" style="background:#B8860B"></span></div>
+        <p class="text-sm font-bold text-ink">Klasik</p><p class="text-[11px] text-slate-500">Parchment + Maroon</p>
+      </div>
+      <div class="theme-pick rounded-2xl p-3 w-32" data-set="senja" style="background:#0F172A">
+        <div class="flex gap-1 mb-2"><span class="w-6 h-6 rounded-full" style="background:#34D399"></span><span class="w-6 h-6 rounded-full" style="background:#FBBF24"></span></div>
+        <p class="text-sm font-bold text-white">Senja 🌙</p><p class="text-[11px] text-slate-400">Mode gelap</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-10 items-start">
+
+    <!-- LIVE PHONE PREVIEW -->
+    <div class="flex justify-center">
+      <div>
+        <div class="device"><div class="notch"></div>
+          <div class="screen t-screen" id="preview" data-theme="teduh">
+            <div style="height:34px" class="t-topbar"></div>
+            <!-- topbar -->
+            <div class="t-topbar px-4 pb-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div class="w-9 h-9 rounded-xl grid place-items-center font-extrabold" style="background:rgba(255,255,255,.18)">ﷺ</div>
+                  <div><p class="text-[11px] opacity-70 leading-none">Assalamu'alaikum 👋</p><p class="font-bold leading-tight t-head">Blitar Mengaji</p></div>
+                </div>
+                <i data-lucide="bell" class="w-6 h-6"></i>
+              </div>
+              <div class="t-input mt-3 flex items-center gap-2 px-3 h-11">
+                <i data-lucide="search" class="w-4 h-4"></i><span class="text-sm">Cari kajian, ustadz, kitab…</span>
+              </div>
+            </div>
+            <!-- quick actions -->
+            <div class="grid grid-cols-4 gap-2 px-4 mt-4 text-center text-[11px] font-semibold">
+              <div><div class="t-ico w-12 h-12 mx-auto grid place-items-center mb-1"><i data-lucide="map-pin" class="w-5 h-5"></i></div>Peta</div>
+              <div><div class="t-ico w-12 h-12 mx-auto grid place-items-center mb-1"><i data-lucide="calendar-days" class="w-5 h-5"></i></div>Jadwal</div>
+              <div><div class="t-ico w-12 h-12 mx-auto grid place-items-center mb-1"><i data-lucide="hand-heart" class="w-5 h-5"></i></div>Donasi</div>
+              <div><div class="t-ico w-12 h-12 mx-auto grid place-items-center mb-1"><i data-lucide="book-open" class="w-5 h-5"></i></div>Catatan</div>
+            </div>
+            <!-- today schedule -->
+            <div class="px-4 mt-5">
+              <h3 class="font-bold text-[15px] mb-2 t-head">📅 Jadwal Hari Ini</h3>
+              <div class="space-y-2">
+                <div class="t-card p-3 flex items-center gap-3">
+                  <div class="text-center"><p class="font-extrabold leading-none t-accent">18.00</p><p class="text-[10px] t-muted">WIB</p></div>
+                  <div class="flex-1"><p class="font-semibold text-sm leading-tight">Tafsir Al-Baqarah</p><p class="text-xs t-muted">Ust. Ahmad · Masjid Al-Falah</p></div>
+                  <span class="t-chip px-2 py-0.5 text-[10px]">Offline</span>
+                </div>
+                <div class="t-card p-3 flex items-center gap-3">
+                  <div class="text-center"><p class="font-extrabold leading-none t-accent">20.00</p><p class="text-[10px] t-muted">WIB</p></div>
+                  <div class="flex-1"><p class="font-semibold text-sm leading-tight">Fiqih Thaharah</p><p class="text-xs t-muted">Ust. Yusuf · Mushola An-Nur</p></div>
+                  <span class="t-chip-accent px-2 py-0.5 text-[10px]">LIVE</span>
+                </div>
+              </div>
+            </div>
+            <!-- donation card -->
+            <div class="px-4 mt-5">
+              <h3 class="font-bold text-[15px] mb-2 t-head">🤲 Donasi Aktif</h3>
+              <div class="t-card overflow-hidden">
+                <div class="p-3">
+                  <p class="font-bold text-sm">Renovasi Tempat Wudhu</p>
+                  <p class="text-[11px] t-muted">Masjid Al-Falah</p>
+                  <div class="mt-2 h-2.5 rounded-full t-progress-track overflow-hidden"><div class="h-full t-progress" style="width:62%"></div></div>
+                  <div class="flex justify-between text-[11px] t-muted mt-1"><span class="font-bold t-accent">Rp 18,5jt</span><span>62% · sisa 18 hari</span></div>
+                  <button class="t-btn-accent w-full h-9 text-xs mt-3">Donasi Sekarang</button>
+                </div>
+              </div>
+            </div>
+            <!-- cta -->
+            <div class="px-4 mt-4 mb-24">
+              <button class="t-btn w-full h-11 text-sm flex items-center justify-center gap-2"><i data-lucide="bot" class="w-4 h-4"></i> Tanya Asisten Kajian</button>
+            </div>
+            <!-- bottom nav -->
+            <div class="absolute bottom-0 inset-x-0 t-nav flex justify-around py-2 text-[10px] font-semibold">
+              <div class="flex flex-col items-center gap-0.5" style="color:var(--primary)"><i data-lucide="home" class="w-5 h-5"></i>Beranda</div>
+              <div class="flex flex-col items-center gap-0.5 t-muted"><i data-lucide="map" class="w-5 h-5"></i>Peta</div>
+              <div class="flex flex-col items-center gap-0.5 t-muted"><i data-lucide="calendar-days" class="w-5 h-5"></i>Jadwal</div>
+              <div class="flex flex-col items-center gap-0.5 t-muted"><i data-lucide="message-circle" class="w-5 h-5"></i>Tanya</div>
+              <div class="flex flex-col items-center gap-0.5 t-muted"><i data-lucide="user" class="w-5 h-5"></i>Akun</div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center font-bold mt-3" id="themeName">Tema: Teduh</p>
+      </div>
+    </div>
+
+    <!-- RIGHT: COMPONENTS + EXPLANATION -->
+    <div class="space-y-6">
+      <!-- live component showcase -->
+      <div class="t-screen rounded-3xl p-6 shadow-card border" data-theme="teduh" id="kit" style="border-color:var(--border)">
+        <p class="text-xs font-bold uppercase tracking-wide t-muted mb-3">Komponen ikut berganti</p>
+        <h3 class="t-head text-2xl mb-1">Menyalakan Majelis Ilmu</h3>
+        <p class="text-sm t-muted mb-4">Heading & body memakai font tema. Earthy/Elegan pakai serif (Lora), Modern pakai Poppins.</p>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <button class="t-btn px-4 h-10 text-sm">Tombol Utama</button>
+          <button class="t-btn-accent px-4 h-10 text-sm">CTA Aksen</button>
+          <button class="t-btn-outline px-4 h-10 text-sm">Outline</button>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="t-chip px-3 py-1 text-xs">Fiqih</span>
+          <span class="t-chip px-3 py-1 text-xs">Aqidah</span>
+          <span class="t-chip-accent px-3 py-1 text-xs">● LIVE</span>
+        </div>
+        <div class="t-card p-4">
+          <p class="font-bold">Kartu Kajian</p>
+          <p class="text-sm t-muted">Sudut, bayangan, & border mengikuti token tema (radius bisa beda tiap tema).</p>
+          <div class="mt-3 h-2 rounded-full t-progress-track overflow-hidden"><div class="h-full t-progress" style="width:75%"></div></div>
+        </div>
+      </div>
+
+      <!-- product concept -->
+      <div class="bg-white rounded-3xl shadow-card p-6">
+        <h3 class="font-bold text-lg mb-3 flex items-center gap-2"><i data-lucide="settings-2" class="w-5 h-5 text-brand-600"></i> Cara kerja di aplikasi nanti</h3>
+        <ul class="space-y-3 text-sm text-slate-600">
+          <li class="flex gap-2"><i data-lucide="user-cog" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><span><b>Per-user:</b> tiap jamaah pilih tema favorit di <i>Akun → Tampilan</i>. Disimpan di <code>users.theme_pref</code>.</span></li>
+          <li class="flex gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><span><b>Default global:</b> admin set tema bawaan platform di <i>Pengaturan</i> (<code>settings.default_theme</code>), butuh permission <code>theme.manage</code>.</span></li>
+          <li class="flex gap-2"><i data-lucide="code" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><span><b>Implementasi:</b> <code>data-theme</code> di <code>&lt;html&gt;</code> + CSS variables. SSR baca cookie/preferensi → tanpa "kedip" saat load.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><span><b>Tambah tema = murah:</b> cukup 1 blok variabel baru. Bisa juga tema custom tersimpan di tabel <code>ui_themes</code> (tokens JSON) untuk admin bikin tema sendiri.</span></li>
+          <li class="flex gap-2"><i data-lucide="moon" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i><span><b>Dark mode</b> = salah satu tema (Senja), plus opsi "ikuti sistem".</span></li>
+        </ul>
+        <p class="annot mt-4">Catatan: warna brand resmi (Teduh: Hijau+Emas) tetap jadi <b>default</b> & identitas utama. Tema lain = opsi personalisasi "biar gak bosen".</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  lucide.createIcons();
+  const names = { teduh:'Teduh (Hijau + Emas)', modern:'Modern (Teal + Amber)', earthy:'Earthy (Hangat)', elegan:'Elegan (Navy + Serif)', minimalis:'Minimalis (Bersih)', samudra:'Samudra (Biru + Cyan)', klasik:'Klasik (Parchment + Maroon)', senja:'Senja (Mode Gelap)' };
+  const preview = document.getElementById('preview');
+  const kit = document.getElementById('kit');
+  const label = document.getElementById('themeName');
+  document.querySelectorAll('.theme-pick').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const t = el.dataset.set;
+      preview.dataset.theme = t; kit.dataset.theme = t;
+      kit.style.borderColor = 'var(--border)';
+      label.textContent = 'Tema: ' + names[t].split(' (')[0];
+      document.querySelectorAll('.theme-pick').forEach(x=>x.classList.remove('active'));
+      el.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

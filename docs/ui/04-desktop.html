@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Desktop / Web</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="theme-tokens.css">
+<link rel="stylesheet" href="craft.css">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand:{50:'var(--c-brand-50)',100:'var(--c-brand-100)',200:'var(--c-brand-200)',300:'var(--c-brand-300)',400:'var(--c-brand-400)',500:'var(--c-brand-500)',600:'var(--c-brand-600)',700:'var(--c-brand-700)',800:'var(--c-brand-800)',900:'var(--c-brand-900)'},
+      gold:{DEFAULT:'var(--c-gold)',light:'var(--c-gold-light)',dark:'var(--c-gold-dark)'},
+      cream:'var(--c-cream)', surface:'var(--c-surface)', ink:'var(--c-ink)'
+    },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], arabic:['Amiri','serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .map-bg { background:
+      radial-gradient(circle at 20% 30%, #d7ece4 0 8px, transparent 9px),
+      radial-gradient(circle at 70% 60%, #d7ece4 0 8px, transparent 9px),
+      linear-gradient(0deg,#e8efe9,#e8efe9);
+      background-color:#e8efe9;
+      background-image:
+        linear-gradient(#dfe7e1 1px, transparent 1px),
+        linear-gradient(90deg,#dfe7e1 1px, transparent 1px);
+      background-size:34px 34px; }
+  .ph { background:linear-gradient(135deg,#0E6E55,#3C9E84); }
+  .ph2 { background:linear-gradient(135deg,#A8851A,#E3C766); }
+  .ph3 { background:linear-gradient(135deg,#0B5947,#18816A); }
+  .blink { animation:blink 1.2s infinite; } @keyframes blink { 50%{opacity:.4} }
+  .paper { background:#fffdf7; background-image:linear-gradient(#eee 1px, transparent 1px); background-size:100% 32px; }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+  .annot { font-size:11px; color:#64748b; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+  /* mini browser bar */
+  .browserbar { background:#1e293b; }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2 flex items-center gap-1.5"><span class="inline-block w-6 h-6 align-middle"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span> Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin & RBAC</a>
+    <a href="04-desktop.html" class="bg-brand-600 text-white">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="text-slate-500 hover:bg-slate-100">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<header class="max-w-7xl mx-auto px-6 pt-8 pb-2">
+  <h1 class="text-2xl font-extrabold display">Tampilan Desktop / Web (Publik)</h1>
+  <p class="text-sm text-slate-500">Versi lebar penuh & responsif untuk halaman publik. Tiap "halaman" dibungkus kartu berbingkai + mini browser bar agar jelas ini tampilan web.</p>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24 space-y-16">
+
+  <!-- ============================================================= -->
+  <!-- 0. KOMPONEN GLOBAL: NAVBAR + FOOTER                            -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="panels-top-left" class="w-5 h-5 text-brand-600"></i> Navbar &amp; Footer Global</h2>
+    <p class="text-sm text-slate-500 mb-5">Dipakai konsisten di seluruh halaman publik desktop. Navbar putih sticky; footer hijau (brand-800).</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop overflow-hidden border bg-surface">
+      <!-- mini browser bar -->
+      <div class="browserbar px-4 py-2.5 flex items-center gap-3">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+        <div class="flex-1 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-300 flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i> blitarmengaji.id</div>
+        <i data-lucide="rotate-cw" class="w-4 h-4 text-slate-400"></i>
+      </div>
+
+      <!-- ===== GLOBAL NAVBAR ===== -->
+      <nav class="bg-surface border-b">
+        <div class="px-6 lg:px-10 h-16 flex items-center gap-6">
+          <a class="flex items-center gap-2 shrink-0">
+            <div class="w-10 h-10 rounded-xl overflow-hidden"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div>
+            <span class="font-extrabold text-lg leading-none">Blitar<span class="text-brand-600">Mengaji</span></span>
+          </a>
+          <div class="hidden lg:flex items-center gap-1 text-sm font-semibold text-slate-600 flex-1">
+            <a class="px-3 py-2 rounded-lg text-brand-700 bg-brand-50">Beranda</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Peta</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Jadwal</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Kajian</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Catatan</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Donasi</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Perpustakaan</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Partner</a>
+          </div>
+          <div class="flex items-center gap-3 ml-auto">
+            <div class="hidden md:flex items-center gap-2 bg-cream rounded-full px-3 h-10 w-44"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400">Cari…</span></div>
+            <button class="w-10 h-10 rounded-full hover:bg-slate-100 grid place-items-center relative"><i data-lucide="bell" class="w-5 h-5 text-slate-500"></i><span class="absolute top-2 right-2 w-2 h-2 bg-gold rounded-full"></span></button>
+            <button class="px-5 h-10 rounded-full bg-brand-600 text-white text-sm font-semibold">Masuk</button>
+            <button class="lg:hidden w-10 h-10 rounded-full hover:bg-slate-100 grid place-items-center"><i data-lucide="menu" class="w-5 h-5"></i></button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- placeholder konten singkat -->
+      <div class="px-6 lg:px-10 py-10 bg-cream text-center text-slate-400 text-sm">… konten halaman tampil di sini …</div>
+
+      <!-- ===== GLOBAL FOOTER ===== -->
+      <footer class="bg-brand-800 text-white relative overflow-hidden">
+        <div class="orn-overlay pat-girih-light"></div>
+        <div class="relative z-10 px-6 lg:px-10 py-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div>
+            <div class="flex items-center gap-2 mb-3"><div class="w-9 h-9 rounded-xl overflow-hidden"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div><span class="font-bold">Blitar Mengaji</span></div>
+            <p class="text-sm text-white/70 leading-relaxed">Menyalakan majelis ilmu di Blitar Raya. Peta dakwah, jadwal kajian, catatan, dan transparansi keuangan se-Blitar.</p>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm mb-3">Menu</h4>
+            <ul class="space-y-2 text-sm text-white/70">
+              <li><a class="hover:text-white">Peta Kajian</a></li>
+              <li><a class="hover:text-white">Jadwal</a></li>
+              <li><a class="hover:text-white">Catatan Kajian</a></li>
+              <li><a class="hover:text-white">Donasi</a></li>
+              <li><a class="hover:text-white">Perpustakaan</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm mb-3">Kontak</h4>
+            <ul class="space-y-2 text-sm text-white/70">
+              <li class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 shrink-0"></i> Kepanjenkidul, Kota Blitar</li>
+              <li class="flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 shrink-0"></i> halo@blitarmengaji.id</li>
+              <li class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 shrink-0"></i> +62 812-3456-7890</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm mb-3">Ikuti Kami</h4>
+            <div class="flex gap-2">
+              <a class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+              <a class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+              <a class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+              <a class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center"><i data-lucide="send" class="w-5 h-5"></i></a>
+            </div>
+            <p class="text-xs text-white/50 mt-4">Dapatkan info kajian terbaru langsung di kotak masukmu.</p>
+          </div>
+        </div>
+        <div class="relative z-10 border-t border-white/10 px-6 lg:px-10 py-4 text-xs text-white/50 flex flex-col sm:flex-row gap-2 justify-between">
+          <span>© 2026 Blitar Mengaji. Hak cipta dilindungi.</span>
+          <span class="flex gap-4"><a class="hover:text-white">Kebijakan Privasi</a><a class="hover:text-white">Syarat Layanan</a></span>
+        </div>
+      </footer>
+    </div>
+    <p class="annot mt-3">Navbar &amp; footer di atas dipakai (tersembunyikan untuk ringkas) di tiap halaman berikut. Menu publik: Beranda · Peta · Jadwal · Kajian · Catatan · Donasi · Perpustakaan · Partner.</p>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- 1. BERANDA DESKTOP                                             -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="home" class="w-5 h-5 text-brand-600"></i> 1. Beranda (Desktop)</h2>
+    <p class="text-sm text-slate-500 mb-5">Hero + statistik, kajian terdekat (peta + kartu), jadwal hari ini, live &amp; rekaman, catatan pilihan, donasi aktif.</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop overflow-hidden border bg-cream">
+      <!-- browser bar -->
+      <div class="browserbar px-4 py-2.5 flex items-center gap-3">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+        <div class="flex-1 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-300 flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i> blitarmengaji.id</div>
+      </div>
+
+      <!-- navbar (compact) -->
+      <nav class="bg-surface border-b sticky top-0">
+        <div class="px-6 lg:px-10 h-16 flex items-center gap-6">
+          <a class="flex items-center gap-2 shrink-0"><div class="w-10 h-10 rounded-xl overflow-hidden"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></div><span class="font-extrabold text-lg">Blitar<span class="text-brand-600">Mengaji</span></span></a>
+          <div class="hidden lg:flex items-center gap-1 text-sm font-semibold text-slate-600 flex-1">
+            <a class="px-3 py-2 rounded-lg text-brand-700 bg-brand-50">Beranda</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Peta</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Jadwal</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Kajian</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Catatan</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Donasi</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Perpustakaan</a>
+            <a class="px-3 py-2 rounded-lg hover:bg-slate-100">Partner</a>
+          </div>
+          <button class="px-5 h-10 rounded-full bg-brand-600 text-white text-sm font-semibold ml-auto">Masuk</button>
+        </div>
+      </nav>
+
+      <!-- HERO -->
+      <div class="ph relative overflow-hidden">
+        <div class="orn-overlay pat-girih-light"></div>
+        <div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 80% 20%, #fff 0 2px, transparent 3px); background-size:40px 40px;"></div>
+        <div class="relative z-10 px-6 lg:px-10 py-16 lg:py-20 max-w-3xl text-white">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold mb-4"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-gold-light"></i> Platform Dakwah Digital Kota &amp; Kabupaten Blitar</span>
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight display">Menyalakan Majelis Ilmu di Blitar Raya</h1>
+          <p class="mt-4 text-base md:text-lg text-white/85 max-w-2xl">Temukan kajian terdekat, ikuti jadwal, baca catatan, dan dukung dakwah melalui donasi yang transparan — semuanya dalam satu tempat.</p>
+          <!-- search besar -->
+          <div class="mt-6 bg-surface rounded-2xl shadow-pop p-2 flex flex-col sm:flex-row items-stretch gap-2 max-w-2xl">
+            <div class="flex items-center gap-2 px-3 flex-1"><i data-lucide="search" class="w-5 h-5 text-slate-400"></i><span class="text-sm text-slate-400">Cari kajian, ustadz, masjid, atau topik…</span></div>
+            <button class="h-11 px-6 rounded-xl bg-brand-600 text-white text-sm font-semibold">Cari</button>
+          </div>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <button class="px-6 h-12 rounded-full bg-gold text-white font-bold flex items-center gap-2"><i data-lucide="map" class="w-5 h-5"></i> Jelajahi Peta Kajian</button>
+            <button class="px-6 h-12 rounded-full border-2 border-white/70 text-white font-semibold flex items-center gap-2"><i data-lucide="calendar-days" class="w-5 h-5"></i> Lihat Jadwal Hari Ini</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAT STRIP -->
+      <div class="px-6 lg:px-10 -mt-8 relative">
+        <div class="bg-surface rounded-2xl shadow-pop grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 overflow-hidden">
+          <div class="p-5 flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="map-pin" class="w-5 h-5 text-brand-600"></i></div><div><p class="text-2xl font-extrabold">48</p><p class="text-xs text-slate-500">Titik Dakwah</p></div></div>
+          <div class="p-5 flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="calendar-days" class="w-5 h-5 text-brand-600"></i></div><div><p class="text-2xl font-extrabold">156</p><p class="text-xs text-slate-500">Kajian Aktif</p></div></div>
+          <div class="p-5 flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-brand-50 grid place-items-center"><i data-lucide="users" class="w-5 h-5 text-brand-600"></i></div><div><p class="text-2xl font-extrabold">2.340</p><p class="text-xs text-slate-500">Jamaah</p></div></div>
+          <div class="p-5 flex items-center gap-3 bg-brand-700 text-white"><div class="w-11 h-11 rounded-xl bg-white/15 grid place-items-center"><i data-lucide="wallet" class="w-5 h-5 text-gold-light"></i></div><div><p class="text-2xl font-extrabold">Rp 24,3jt</p><p class="text-xs text-white/70">Saldo Kas</p></div></div>
+        </div>
+      </div>
+
+      <!-- KAJIAN TERDEKAT: peta + kartu -->
+      <div class="px-6 lg:px-10 pt-12">
+        <div class="flex items-end justify-between mb-4"><h3 class="text-xl font-extrabold flex items-center gap-2">Kajian Terdekat</h3><a class="text-sm text-brand-600 font-semibold flex items-center gap-1">Buka peta lengkap <i data-lucide="arrow-right" class="w-4 h-4"></i></a></div>
+        <div class="grid lg:grid-cols-2 gap-5">
+          <!-- peta -->
+          <div class="map-bg rounded-2xl border relative overflow-hidden min-h-[320px]">
+            <div class="absolute" style="top:25%;left:22%"><i data-lucide="map-pin" class="w-9 h-9 text-brand-600 fill-brand-600"></i></div>
+            <div class="absolute" style="top:55%;left:55%"><i data-lucide="map-pin" class="w-9 h-9 text-gold fill-gold"></i></div>
+            <div class="absolute" style="top:40%;left:78%"><i data-lucide="map-pin" class="w-8 h-8 text-brand-600 fill-brand-600"></i></div>
+            <div class="absolute" style="top:68%;left:30%"><i data-lucide="map-pin" class="w-7 h-7 text-brand-600 fill-brand-600"></i></div>
+            <div class="absolute bottom-3 left-3 bg-white/90 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-card">12 titik aktif di sekitarmu</div>
+            <button class="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-surface shadow-pop grid place-items-center"><i data-lucide="locate-fixed" class="w-5 h-5 text-brand-600"></i></button>
+          </div>
+          <!-- kartu kajian -->
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+              <div class="ph h-24 relative"><span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 text-brand-700 text-[10px] font-bold">320 m</span></div>
+              <div class="p-3">
+                <p class="font-bold text-sm leading-tight">Tafsir Al-Baqarah</p>
+                <p class="text-xs text-slate-500 mt-0.5">Ust. Ahmad Fauzi · Masjid Al-Falah</p>
+                <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Hari ini 18.00 · Kepanjenkidul</p>
+              </div>
+            </div>
+            <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+              <div class="ph3 h-24 relative"><span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold blink">● LIVE</span></div>
+              <div class="p-3">
+                <p class="font-bold text-sm leading-tight">Fiqih Thaharah</p>
+                <p class="text-xs text-slate-500 mt-0.5">Ust. Yusuf · Mushola An-Nur</p>
+                <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Sedang berlangsung · Sananwetan</p>
+              </div>
+            </div>
+            <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+              <div class="ph2 h-24 relative"><span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 text-brand-700 text-[10px] font-bold">1.1 km</span></div>
+              <div class="p-3">
+                <p class="font-bold text-sm leading-tight">Hadits Arba'in #12</p>
+                <p class="text-xs text-slate-500 mt-0.5">Ust. Hamid · Masjid Agung</p>
+                <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Besok 04.30 · Sukorejo</p>
+              </div>
+            </div>
+            <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+              <div class="ph h-24 relative"><span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 text-brand-700 text-[10px] font-bold">2.0 km</span></div>
+              <div class="p-3">
+                <p class="font-bold text-sm leading-tight">Sirah Nabawiyah</p>
+                <p class="text-xs text-slate-500 mt-0.5">Ust. Ahmad · Masjid Al-Falah</p>
+                <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> Jumat 20.00 · Kepanjenkidul</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JADWAL HARI INI -->
+      <div class="px-6 lg:px-10 pt-12">
+        <div class="flex items-end justify-between mb-4"><h3 class="text-xl font-extrabold">Jadwal Hari Ini</h3><a class="text-sm text-brand-600 font-semibold">Selasa, 20 Mei 2026</a></div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-surface rounded-2xl shadow-card p-4">
+            <div class="flex items-center justify-between"><span class="text-brand-700 font-extrabold text-lg">04.30</span><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Offline</span></div>
+            <p class="font-semibold text-sm mt-2 leading-tight">Kajian Subuh: Tazkiyatun Nafs</p>
+            <p class="text-xs text-slate-500 mt-1">Ust. Ahmad · Masjid Agung</p>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card p-4">
+            <div class="flex items-center justify-between"><span class="text-brand-700 font-extrabold text-lg">18.00</span><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Offline</span></div>
+            <p class="font-semibold text-sm mt-2 leading-tight">Tafsir Al-Baqarah</p>
+            <p class="text-xs text-slate-500 mt-1">Ust. Fauzi · Masjid Al-Falah</p>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card p-4 ring-2 ring-red-200">
+            <div class="flex items-center justify-between"><span class="text-brand-700 font-extrabold text-lg">19.30</span><span class="px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-bold blink">● LIVE</span></div>
+            <p class="font-semibold text-sm mt-2 leading-tight">Fiqih Thaharah</p>
+            <p class="text-xs text-slate-500 mt-1">Ust. Yusuf · Mushola An-Nur</p>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card p-4">
+            <div class="flex items-center justify-between"><span class="text-brand-700 font-extrabold text-lg">20.00</span><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">Online</span></div>
+            <p class="font-semibold text-sm mt-2 leading-tight">Hadits Arba'in #12</p>
+            <p class="text-xs text-slate-500 mt-1">Ust. Hamid · Zoom</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE & REKAMAN -->
+      <div class="px-6 lg:px-10 pt-12">
+        <div class="flex items-end justify-between mb-4"><h3 class="text-xl font-extrabold">Live &amp; Rekaman</h3><a class="text-sm text-brand-600 font-semibold flex items-center gap-1">Semua video <i data-lucide="arrow-right" class="w-4 h-4"></i></a></div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph aspect-video relative grid place-items-center"><i data-lucide="play" class="w-10 h-10 text-white"></i><span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold blink">● LIVE</span></div>
+            <div class="p-3"><p class="font-semibold text-sm leading-tight">Kajian Subuh Masjid Agung</p><p class="text-xs text-slate-400 mt-1">Ust. Ahmad · 312 menonton</p></div>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph3 aspect-video relative grid place-items-center"><i data-lucide="play" class="w-10 h-10 text-white"></i><span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-1.5 rounded font-bold">42:15</span></div>
+            <div class="p-3"><p class="font-semibold text-sm leading-tight">Hadits Arba'in #12</p><p class="text-xs text-slate-400 mt-1">Ust. Hamid · 1.2rb tayang</p></div>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph2 aspect-video relative grid place-items-center"><i data-lucide="play" class="w-10 h-10 text-white"></i><span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-1.5 rounded font-bold">1:08:30</span></div>
+            <div class="p-3"><p class="font-semibold text-sm leading-tight">Sirah Nabawiyah</p><p class="text-xs text-slate-400 mt-1">Ust. Ahmad · 860 tayang</p></div>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph aspect-video relative grid place-items-center"><i data-lucide="play" class="w-10 h-10 text-white"></i><span class="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-1.5 rounded font-bold">28:44</span></div>
+            <div class="p-3"><p class="font-semibold text-sm leading-tight">Fiqih Thaharah (rekaman)</p><p class="text-xs text-slate-400 mt-1">Ust. Yusuf · 2.1rb tayang</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATATAN PILIHAN -->
+      <div class="px-6 lg:px-10 pt-12">
+        <div class="flex items-end justify-between mb-4"><h3 class="text-xl font-extrabold">Catatan Kajian Pilihan</h3><a class="text-sm text-brand-600 font-semibold flex items-center gap-1">Semua catatan <i data-lucide="arrow-right" class="w-4 h-4"></i></a></div>
+        <div class="grid md:grid-cols-3 gap-5">
+          <article class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph3 h-36"></div>
+            <div class="p-4">
+              <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Tafsir</span>
+              <h4 class="font-bold text-base leading-tight mt-2">Memahami Makna Sabar dalam Surat Al-Baqarah</h4>
+              <p class="text-xs text-slate-500 mt-2">Ust. Ahmad Fauzi, Lc. · 6 mnt baca</p>
+            </div>
+          </article>
+          <article class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph2 h-36"></div>
+            <div class="p-4">
+              <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Fiqih</span>
+              <h4 class="font-bold text-base leading-tight mt-2">Adab Bersuci: Ringkasan Bab Thaharah</h4>
+              <p class="text-xs text-slate-500 mt-2">Ust. Yusuf Abdullah · 4 mnt baca</p>
+            </div>
+          </article>
+          <article class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph h-36"></div>
+            <div class="p-4">
+              <span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold">Sirah</span>
+              <h4 class="font-bold text-base leading-tight mt-2">Pelajaran dari Hijrah Nabi ﷺ ke Madinah</h4>
+              <p class="text-xs text-slate-500 mt-2">Ust. Hamid · 8 mnt baca</p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- DONASI AKTIF -->
+      <div class="px-6 lg:px-10 pt-12 pb-14">
+        <div class="flex items-end justify-between mb-4"><h3 class="text-xl font-extrabold">Donasi Aktif</h3><a class="text-sm text-brand-600 font-semibold flex items-center gap-1">Semua campaign <i data-lucide="arrow-right" class="w-4 h-4"></i></a></div>
+        <div class="grid md:grid-cols-3 gap-5">
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph2 h-32 relative grid place-items-center"><i data-lucide="hand-heart" class="w-10 h-10 text-white"></i><span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 text-amber-700 text-[10px] font-bold">● Aktif</span></div>
+            <div class="p-4">
+              <p class="text-[11px] text-slate-400 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Masjid Al-Falah · Kepanjenkidul</p>
+              <h4 class="font-bold text-sm leading-tight mt-1">Renovasi Tempat Wudhu &amp; MCK</h4>
+              <div class="mt-3"><div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-gold" style="width:62%"></div></div><div class="flex justify-between text-[11px] text-slate-400 mt-1"><span class="font-bold text-brand-700">Rp 18,5jt</span><span>62% · sisa 18 hari</span></div></div>
+              <button class="mt-3 w-full h-10 rounded-full bg-gold text-white font-bold text-sm">Donasi Sekarang</button>
+            </div>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph3 h-32 relative grid place-items-center"><i data-lucide="book-open" class="w-10 h-10 text-white"></i><span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 text-amber-700 text-[10px] font-bold">● Aktif</span></div>
+            <div class="p-4">
+              <p class="text-[11px] text-slate-400 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Mushola An-Nur · Sananwetan</p>
+              <h4 class="font-bold text-sm leading-tight mt-1">Wakaf Al-Qur'an &amp; Buku Iqra</h4>
+              <div class="mt-3"><div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-gold" style="width:88%"></div></div><div class="flex justify-between text-[11px] text-slate-400 mt-1"><span class="font-bold text-brand-700">Rp 8,8jt</span><span>88% · sisa 5 hari</span></div></div>
+              <button class="mt-3 w-full h-10 rounded-full bg-gold text-white font-bold text-sm">Donasi Sekarang</button>
+            </div>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph h-32 relative grid place-items-center"><i data-lucide="utensils" class="w-10 h-10 text-white"></i><span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 text-amber-700 text-[10px] font-bold">● Aktif</span></div>
+            <div class="p-4">
+              <p class="text-[11px] text-slate-400 flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3"></i> Masjid Agung · Sukorejo</p>
+              <h4 class="font-bold text-sm leading-tight mt-1">Berbagi Nasi Jumat untuk Jamaah</h4>
+              <div class="mt-3"><div class="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-gold" style="width:35%"></div></div><div class="flex justify-between text-[11px] text-slate-400 mt-1"><span class="font-bold text-brand-700">Rp 3,5jt</span><span>35% · sisa 24 hari</span></div></div>
+              <button class="mt-3 w-full h-10 rounded-full bg-gold text-white font-bold text-sm">Donasi Sekarang</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Hero brand gradient + search besar + 2 CTA + strip statistik. Section bertumpuk full-width dengan grid responsif (sm:/md:/lg:).</p>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- 2. PETA DESKTOP                                                -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="map" class="w-5 h-5 text-brand-600"></i> 2. Peta Kajian (Desktop)</h2>
+    <p class="text-sm text-slate-500 mb-5">Dua kolom: peta besar (~65%) di kiri, sidebar daftar titik dakwah + filter chips di kanan.</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop overflow-hidden border bg-surface">
+      <div class="browserbar px-4 py-2.5 flex items-center gap-3">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+        <div class="flex-1 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-300 flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i> blitarmengaji.id/peta</div>
+      </div>
+      <nav class="bg-surface border-b"><div class="px-6 lg:px-10 h-14 flex items-center gap-4"><span class="font-extrabold inline-flex items-center gap-1.5"><span class="inline-block w-6 h-6"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span>Blitar<span class="text-brand-600">Mengaji</span></span><span class="text-sm font-semibold text-brand-700 ml-4 bg-brand-50 px-3 py-1.5 rounded-lg">Peta Kajian</span><button class="px-5 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold ml-auto">Masuk</button></div></nav>
+
+      <div class="grid lg:grid-cols-3 gap-0">
+        <!-- peta -->
+        <div class="lg:col-span-2 relative">
+          <div class="map-bg min-h-[520px] relative">
+            <!-- search overlay -->
+            <div class="absolute top-4 left-4 right-4 flex gap-2">
+              <div class="flex-1 bg-surface rounded-full shadow-pop px-4 h-11 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400">Cari lokasi / masjid / kecamatan…</span></div>
+              <button class="w-11 h-11 rounded-full bg-surface shadow-pop grid place-items-center"><i data-lucide="sliders-horizontal" class="w-5 h-5 text-brand-700"></i></button>
+            </div>
+            <!-- pins -->
+            <div class="absolute" style="top:28%;left:20%"><i data-lucide="map-pin" class="w-10 h-10 text-brand-600 fill-brand-600"></i></div>
+            <div class="absolute" style="top:48%;left:45%"><i data-lucide="map-pin" class="w-10 h-10 text-gold fill-gold"></i></div>
+            <div class="absolute" style="top:35%;left:70%"><i data-lucide="map-pin" class="w-9 h-9 text-brand-600 fill-brand-600"></i></div>
+            <div class="absolute" style="top:62%;left:30%"><i data-lucide="map-pin" class="w-9 h-9 text-brand-600 fill-brand-600"></i></div>
+            <div class="absolute" style="top:70%;left:62%"><i data-lucide="map-pin" class="w-8 h-8 text-brand-600 fill-brand-600"></i></div>
+            <div class="absolute" style="top:20%;left:55%"><i data-lucide="map-pin" class="w-8 h-8 text-brand-600 fill-brand-600"></i></div>
+            <!-- zoom controls -->
+            <div class="absolute bottom-4 right-4 flex flex-col gap-1 bg-surface rounded-xl shadow-pop overflow-hidden"><button class="w-10 h-10 grid place-items-center border-b"><i data-lucide="plus" class="w-5 h-5 text-slate-600"></i></button><button class="w-10 h-10 grid place-items-center"><i data-lucide="minus" class="w-5 h-5 text-slate-600"></i></button></div>
+            <button class="absolute bottom-4 left-4 px-4 h-10 rounded-full bg-surface shadow-pop grid place-items-center text-sm font-semibold text-brand-700 flex items-center gap-2"><i data-lucide="locate-fixed" class="w-4 h-4"></i> Lokasiku</button>
+          </div>
+        </div>
+        <!-- sidebar -->
+        <aside class="border-l flex flex-col max-h-[520px]">
+          <div class="p-4 border-b">
+            <div class="flex items-center justify-between mb-3"><p class="font-bold text-sm">48 Titik Dakwah</p><span class="text-xs text-slate-400">Urutkan: Terdekat</span></div>
+            <div class="flex gap-2 overflow-x-auto pb-1 scrollx">
+              <span class="px-3 py-1.5 rounded-full bg-brand-600 text-white text-xs font-semibold whitespace-nowrap">Semua</span>
+              <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold whitespace-nowrap">Kepanjenkidul</span>
+              <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold whitespace-nowrap">Sananwetan</span>
+              <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold whitespace-nowrap">Sukorejo</span>
+              <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold whitespace-nowrap">Fiqih</span>
+            </div>
+          </div>
+          <div class="overflow-y-auto p-4 space-y-3">
+            <div class="rounded-2xl border p-3 flex gap-3 hover:border-brand-300 cursor-pointer ring-2 ring-brand-100">
+              <div class="ph w-16 h-16 rounded-xl grid place-items-center shrink-0"><i data-lucide="building-2" class="w-6 h-6 text-white"></i></div>
+              <div class="flex-1"><div class="flex items-center justify-between"><p class="font-bold text-sm">Masjid Al-Falah</p><span class="text-xs text-slate-400">320 m</span></div><p class="text-xs text-slate-500">Kepanjenkidul · 4 jadwal rutin</p><span class="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">✓ Terverifikasi</span></div>
+            </div>
+            <div class="rounded-2xl border p-3 flex gap-3 hover:border-brand-300 cursor-pointer">
+              <div class="ph3 w-16 h-16 rounded-xl grid place-items-center shrink-0"><i data-lucide="building-2" class="w-6 h-6 text-white"></i></div>
+              <div class="flex-1"><div class="flex items-center justify-between"><p class="font-bold text-sm">Mushola An-Nur</p><span class="text-xs text-slate-400">680 m</span></div><p class="text-xs text-slate-500">Sananwetan · 2 jadwal rutin</p><span class="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-bold blink">● LIVE sekarang</span></div>
+            </div>
+            <div class="rounded-2xl border p-3 flex gap-3 hover:border-brand-300 cursor-pointer">
+              <div class="ph2 w-16 h-16 rounded-xl grid place-items-center shrink-0"><i data-lucide="building-2" class="w-6 h-6 text-white"></i></div>
+              <div class="flex-1"><div class="flex items-center justify-between"><p class="font-bold text-sm">Masjid Agung Blitar</p><span class="text-xs text-slate-400">1.1 km</span></div><p class="text-xs text-slate-500">Sukorejo · 6 jadwal rutin</p><span class="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">✓ Terverifikasi</span></div>
+            </div>
+            <div class="rounded-2xl border p-3 flex gap-3 hover:border-brand-300 cursor-pointer">
+              <div class="ph w-16 h-16 rounded-xl grid place-items-center shrink-0"><i data-lucide="building-2" class="w-6 h-6 text-white"></i></div>
+              <div class="flex-1"><div class="flex items-center justify-between"><p class="font-bold text-sm">Mushola Al-Hidayah</p><span class="text-xs text-slate-400">1.8 km</span></div><p class="text-xs text-slate-500">Kepanjenkidul · 1 jadwal rutin</p></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <p class="annot mt-3">Leaflet/OSM di kolom kiri · sidebar kanan daftar titik dengan filter kecamatan/topik · kartu titik klik = fokus pin.</p>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- 3. JADWAL DESKTOP                                              -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="calendar-days" class="w-5 h-5 text-brand-600"></i> 3. Jadwal (Desktop)</h2>
+    <p class="text-sm text-slate-500 mb-5">Grid kalender mingguan di kiri + daftar sesi terpilih di kanan, dengan filter.</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop overflow-hidden border bg-cream">
+      <div class="browserbar px-4 py-2.5 flex items-center gap-3">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+        <div class="flex-1 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-300 flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i> blitarmengaji.id/jadwal</div>
+      </div>
+      <nav class="bg-surface border-b"><div class="px-6 lg:px-10 h-14 flex items-center gap-4"><span class="font-extrabold inline-flex items-center gap-1.5"><span class="inline-block w-6 h-6"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span>Blitar<span class="text-brand-600">Mengaji</span></span><span class="text-sm font-semibold text-brand-700 ml-4 bg-brand-50 px-3 py-1.5 rounded-lg">Jadwal Kajian</span><button class="px-5 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold ml-auto">Masuk</button></div></nav>
+
+      <div class="p-6 lg:px-10">
+        <!-- toolbar -->
+        <div class="flex flex-wrap items-center gap-3 mb-5">
+          <div class="flex items-center gap-2 bg-surface rounded-full shadow-card px-2 py-1"><button class="w-8 h-8 rounded-full hover:bg-slate-100 grid place-items-center"><i data-lucide="chevron-left" class="w-4 h-4"></i></button><span class="text-sm font-bold px-2">19 – 25 Mei 2026</span><button class="w-8 h-8 rounded-full hover:bg-slate-100 grid place-items-center"><i data-lucide="chevron-right" class="w-4 h-4"></i></button></div>
+          <div class="flex gap-2 ml-auto flex-wrap">
+            <span class="px-3 py-1.5 rounded-full bg-brand-600 text-white text-xs font-semibold">Semua</span>
+            <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold">Offline</span>
+            <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold">Online</span>
+            <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold">Fiqih</span>
+            <span class="px-3 py-1.5 rounded-full bg-surface border text-xs font-semibold">Tafsir</span>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-5">
+          <!-- kalender mingguan -->
+          <div class="lg:col-span-2 bg-surface rounded-2xl shadow-card p-4 overflow-x-auto">
+            <div class="grid grid-cols-7 gap-2 min-w-[640px]">
+              <!-- header hari -->
+              <div class="text-center text-xs font-bold text-slate-400 pb-2">Sen 19</div>
+              <div class="text-center text-xs font-bold text-white bg-brand-600 rounded-lg py-1">Sel 20</div>
+              <div class="text-center text-xs font-bold text-slate-400 pb-2">Rab 21</div>
+              <div class="text-center text-xs font-bold text-slate-400 pb-2">Kam 22</div>
+              <div class="text-center text-xs font-bold text-slate-400 pb-2">Jum 23</div>
+              <div class="text-center text-xs font-bold text-slate-400 pb-2">Sab 24</div>
+              <div class="text-center text-xs font-bold text-slate-400 pb-2">Min 25</div>
+              <!-- kolom sesi -->
+              <div class="space-y-1.5">
+                <div class="bg-brand-50 border-l-2 border-brand-600 rounded-lg p-2 text-[11px]"><p class="font-bold text-brand-700">18.00</p><p class="leading-tight">Tafsir Al-Baqarah</p></div>
+              </div>
+              <div class="space-y-1.5">
+                <div class="bg-brand-50 border-l-2 border-brand-600 rounded-lg p-2 text-[11px]"><p class="font-bold text-brand-700">04.30</p><p class="leading-tight">Kajian Subuh</p></div>
+                <div class="bg-red-50 border-l-2 border-red-500 rounded-lg p-2 text-[11px]"><p class="font-bold text-red-600 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-red-500 rounded-full blink"></span>19.30</p><p class="leading-tight">Fiqih Thaharah</p></div>
+                <div class="bg-amber-50 border-l-2 border-gold rounded-lg p-2 text-[11px]"><p class="font-bold text-gold-dark">20.00</p><p class="leading-tight">Hadits Arba'in</p></div>
+              </div>
+              <div class="space-y-1.5"><div class="bg-brand-50 border-l-2 border-brand-600 rounded-lg p-2 text-[11px]"><p class="font-bold text-brand-700">18.30</p><p class="leading-tight">Aqidah Wasithiyah</p></div></div>
+              <div class="space-y-1.5"></div>
+              <div class="space-y-1.5">
+                <div class="bg-brand-50 border-l-2 border-brand-600 rounded-lg p-2 text-[11px]"><p class="font-bold text-brand-700">20.00</p><p class="leading-tight">Sirah Nabawiyah</p></div>
+                <div class="bg-amber-50 border-l-2 border-gold rounded-lg p-2 text-[11px]"><p class="font-bold text-gold-dark">04.30</p><p class="leading-tight">Tabligh Subuh</p></div>
+              </div>
+              <div class="space-y-1.5"><div class="bg-brand-50 border-l-2 border-brand-600 rounded-lg p-2 text-[11px]"><p class="font-bold text-brand-700">06.00</p><p class="leading-tight">Kajian Akhwat</p></div></div>
+              <div class="space-y-1.5"><div class="bg-brand-50 border-l-2 border-brand-600 rounded-lg p-2 text-[11px]"><p class="font-bold text-brand-700">08.00</p><p class="leading-tight">Tahsin Pekanan</p></div></div>
+            </div>
+          </div>
+
+          <!-- daftar sesi hari terpilih -->
+          <div class="bg-surface rounded-2xl shadow-card p-4">
+            <h4 class="font-bold text-sm mb-1">Selasa, 20 Mei 2026</h4>
+            <p class="text-xs text-slate-400 mb-3">4 sesi kajian</p>
+            <div class="space-y-3">
+              <div class="rounded-xl bg-cream p-3 flex items-center gap-3"><div class="text-center w-12"><p class="text-brand-700 font-extrabold text-sm">04.30</p><p class="text-[10px] text-slate-400">WIB</p></div><div class="flex-1"><p class="font-semibold text-sm leading-tight">Kajian Subuh: Tazkiyatun Nafs</p><p class="text-xs text-slate-500">Ust. Ahmad · Masjid Agung</p></div></div>
+              <div class="rounded-xl bg-cream p-3 flex items-center gap-3"><div class="text-center w-12"><p class="text-brand-700 font-extrabold text-sm">18.00</p><p class="text-[10px] text-slate-400">WIB</p></div><div class="flex-1"><p class="font-semibold text-sm leading-tight">Tafsir Al-Baqarah</p><p class="text-xs text-slate-500">Ust. Fauzi · Masjid Al-Falah</p></div></div>
+              <div class="rounded-xl bg-red-50 p-3 flex items-center gap-3 ring-1 ring-red-200"><div class="text-center w-12"><p class="text-red-600 font-extrabold text-sm">19.30</p><p class="text-[10px] text-red-500 font-bold blink">LIVE</p></div><div class="flex-1"><p class="font-semibold text-sm leading-tight">Fiqih Thaharah</p><p class="text-xs text-slate-500">Ust. Yusuf · Mushola An-Nur</p></div></div>
+              <div class="rounded-xl bg-cream p-3 flex items-center gap-3"><div class="text-center w-12"><p class="text-brand-700 font-extrabold text-sm">20.00</p><p class="text-[10px] text-slate-400">WIB</p></div><div class="flex-1"><p class="font-semibold text-sm leading-tight">Hadits Arba'in #12</p><p class="text-xs text-slate-500">Ust. Hamid · Zoom Online</p></div></div>
+            </div>
+            <button class="mt-4 w-full h-10 rounded-full border-2 border-brand-600 text-brand-700 font-semibold text-sm flex items-center justify-center gap-2"><i data-lucide="bell-plus" class="w-4 h-4"></i> Ingatkan Saya</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="annot mt-3">Grid mingguan 7 kolom (scroll-x di layar sempit) · klik hari = panel kanan menampilkan daftar sesi · filter online/offline/topik.</p>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- 4. DETAIL TITIK DAKWAH DESKTOP                                 -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="building-2" class="w-5 h-5 text-brand-600"></i> 4. Detail Titik Dakwah (Desktop)</h2>
+    <p class="text-sm text-slate-500 mb-5">Cover besar, kolom kiri info + tab (Jadwal/Galeri/Video/Donasi), kolom kanan kartu aksi (peta mini, jadwal rutin, hubungi).</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop overflow-hidden border bg-cream">
+      <div class="browserbar px-4 py-2.5 flex items-center gap-3">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+        <div class="flex-1 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-300 flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i> blitarmengaji.id/titik/masjid-al-falah</div>
+      </div>
+      <nav class="bg-surface border-b"><div class="px-6 lg:px-10 h-14 flex items-center gap-4"><span class="font-extrabold inline-flex items-center gap-1.5"><span class="inline-block w-6 h-6"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span>Blitar<span class="text-brand-600">Mengaji</span></span><span class="text-xs text-slate-400 ml-4 flex items-center gap-1"><a class="hover:text-brand-600">Peta</a> <i data-lucide="chevron-right" class="w-3 h-3"></i> Masjid Al-Falah</span><button class="px-5 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold ml-auto">Masuk</button></div></nav>
+
+      <!-- cover besar -->
+      <div class="ph relative overflow-hidden h-56 lg:h-64">
+        <div class="orn-overlay pat-girih-light"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div class="absolute bottom-5 left-6 lg:left-10 text-white">
+          <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-[11px] font-bold">✓ Terverifikasi</span>
+          <h2 class="text-2xl lg:text-3xl font-extrabold mt-2 display">Masjid Al-Falah</h2>
+          <p class="text-sm text-white/85 flex items-center gap-1.5 mt-1"><i data-lucide="map-pin" class="w-4 h-4"></i> Jl. Merdeka No. 12, Kepanjenkidul, Kota Blitar</p>
+        </div>
+        <div class="absolute top-4 right-6 lg:right-10 flex gap-2"><button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur grid place-items-center text-white"><i data-lucide="share-2" class="w-5 h-5"></i></button><button class="w-10 h-10 rounded-full bg-white/20 backdrop-blur grid place-items-center text-white"><i data-lucide="bookmark" class="w-5 h-5"></i></button></div>
+      </div>
+
+      <div class="px-6 lg:px-10 py-8 grid lg:grid-cols-3 gap-6">
+        <!-- kolom kiri info -->
+        <div class="lg:col-span-2 space-y-5">
+          <!-- tabs -->
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="flex border-b text-sm font-semibold text-slate-400 px-2">
+              <button class="px-4 py-3 text-brand-700 border-b-2 border-brand-600">Jadwal</button>
+              <button class="px-4 py-3 hover:text-brand-600">Galeri</button>
+              <button class="px-4 py-3 hover:text-brand-600">Video</button>
+              <button class="px-4 py-3 flex items-center gap-1 hover:text-brand-600">Donasi <span class="w-1.5 h-1.5 bg-gold rounded-full"></span></button>
+            </div>
+            <div class="p-5 space-y-3">
+              <p class="text-xs font-bold text-slate-400 uppercase">Senin</p>
+              <div class="rounded-xl bg-cream p-3 flex items-center gap-3"><div class="text-center w-12"><p class="text-brand-700 font-extrabold text-sm">18.00</p></div><div class="flex-1"><p class="font-semibold text-sm">Tafsir Al-Baqarah</p><p class="text-xs text-slate-500">Ust. Ahmad Fauzi, Lc.</p></div><button class="text-brand-600 flex items-center gap-1 text-xs font-semibold"><i data-lucide="bell-plus" class="w-4 h-4"></i> Ingatkan</button></div>
+              <p class="text-xs font-bold text-slate-400 uppercase pt-1">Jumat</p>
+              <div class="rounded-xl bg-cream p-3 flex items-center gap-3"><div class="text-center w-12"><p class="text-brand-700 font-extrabold text-sm">20.00</p></div><div class="flex-1"><p class="font-semibold text-sm">Hadits Arba'in</p><p class="text-xs text-slate-500">Ust. Yusuf Abdullah</p></div><button class="text-brand-600 flex items-center gap-1 text-xs font-semibold"><i data-lucide="bell-plus" class="w-4 h-4"></i> Ingatkan</button></div>
+            </div>
+          </div>
+          <!-- galeri -->
+          <div class="bg-surface rounded-2xl shadow-card p-5">
+            <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="images" class="w-4 h-4 text-brand-600"></i> Galeri</h4>
+            <div class="grid grid-cols-3 md:grid-cols-5 gap-2">
+              <div class="ph aspect-square rounded-lg"></div>
+              <div class="ph3 aspect-square rounded-lg"></div>
+              <div class="ph2 aspect-square rounded-lg"></div>
+              <div class="ph aspect-square rounded-lg"></div>
+              <div class="aspect-square rounded-lg bg-slate-800 grid place-items-center text-white text-sm font-bold">+12</div>
+            </div>
+          </div>
+          <!-- tentang -->
+          <div class="bg-surface rounded-2xl shadow-card p-5">
+            <h4 class="font-bold text-sm mb-2 flex items-center gap-2"><i data-lucide="info" class="w-4 h-4 text-brand-600"></i> Tentang Titik</h4>
+            <p class="text-sm text-slate-600 leading-relaxed">Masjid Al-Falah merupakan pusat kajian rutin di Kepanjenkidul dengan empat majelis ilmu mingguan. Terbuka untuk umum, menyediakan area parkir dan tempat wudhu yang nyaman.</p>
+          </div>
+        </div>
+
+        <!-- kolom kanan aksi -->
+        <aside class="space-y-5">
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="map-bg h-40 relative"><div class="absolute" style="top:40%;left:45%"><i data-lucide="map-pin" class="w-9 h-9 text-brand-600 fill-brand-600"></i></div></div>
+            <div class="p-4">
+              <p class="text-sm font-semibold flex items-start gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-brand-600 mt-0.5 shrink-0"></i> Jl. Merdeka No. 12, Kepanjenkidul</p>
+              <button class="mt-3 w-full h-10 rounded-full bg-brand-600 text-white font-semibold text-sm flex items-center justify-center gap-2"><i data-lucide="navigation" class="w-4 h-4"></i> Buka di Google Maps</button>
+            </div>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card p-4">
+            <h4 class="font-bold text-sm mb-3">Jadwal Rutin</h4>
+            <ul class="space-y-2 text-sm">
+              <li class="flex justify-between"><span class="text-slate-600">Senin</span><span class="font-semibold">Tafsir · 18.00</span></li>
+              <li class="flex justify-between"><span class="text-slate-600">Rabu</span><span class="font-semibold">Aqidah · 18.30</span></li>
+              <li class="flex justify-between"><span class="text-slate-600">Jumat</span><span class="font-semibold">Hadits · 20.00</span></li>
+              <li class="flex justify-between"><span class="text-slate-600">Subuh</span><span class="font-semibold">Tazkiyah · 04.30</span></li>
+            </ul>
+          </div>
+          <div class="bg-brand-700 text-white rounded-2xl p-4">
+            <p class="text-xs text-white/70 mb-1">Pengurus / Takmir</p>
+            <p class="font-bold">H. Imron Rosyadi</p>
+            <button class="mt-3 w-full h-11 rounded-full bg-gold text-white font-bold text-sm flex items-center justify-center gap-2"><i data-lucide="phone" class="w-4 h-4"></i> Hubungi Pengurus</button>
+            <button class="mt-2 w-full h-11 rounded-full bg-white/10 text-white font-semibold text-sm flex items-center justify-center gap-2"><i data-lucide="hand-heart" class="w-4 h-4 text-gold-light"></i> Donasi ke Titik Ini</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <p class="annot mt-3">Cover full-width + breadcrumb · tab Jadwal/Galeri/Video/Donasi · sidebar sticky aksi: peta mini, jadwal rutin, tombol hubungi/donasi.</p>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- 5. CATATAN READER DESKTOP                                      -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="book-open" class="w-5 h-5 text-brand-600"></i> 5. Catatan Reader (Desktop)</h2>
+    <p class="text-sm text-slate-500 mb-5">Artikel terpusat lebar baca ~70ch (gaya kertas), dengan sidebar kanan: daftar isi, catatan terkait, tombol Tanya AI.</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop overflow-hidden border bg-cream">
+      <div class="browserbar px-4 py-2.5 flex items-center gap-3">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+        <div class="flex-1 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-300 flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i> blitarmengaji.id/catatan/makna-sabar-al-baqarah</div>
+      </div>
+      <nav class="bg-surface border-b"><div class="px-6 lg:px-10 h-14 flex items-center gap-4"><span class="font-extrabold inline-flex items-center gap-1.5"><span class="inline-block w-6 h-6"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span>Blitar<span class="text-brand-600">Mengaji</span></span><span class="text-sm font-semibold text-brand-700 ml-4 bg-brand-50 px-3 py-1.5 rounded-lg">Catatan Kajian</span><button class="px-5 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold ml-auto">Masuk</button></div></nav>
+
+      <div class="px-6 lg:px-10 py-10 grid lg:grid-cols-12 gap-8">
+        <!-- artikel -->
+        <article class="lg:col-span-8 lg:col-start-2">
+          <div class="paper rounded-2xl shadow-card p-6 md:p-10 max-w-3xl mx-auto">
+            <span class="px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-700 text-[11px] font-bold">Catatan Kajian · Tafsir</span>
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-3 display">Memahami Makna Sabar dalam Surat Al-Baqarah</h1>
+            <!-- byline -->
+            <div class="flex items-center gap-3 mt-5 pb-5 border-b">
+              <div class="w-11 h-11 rounded-full ph"></div>
+              <div><p class="font-semibold text-ink">Ust. Ahmad Fauzi, Lc.</p><p class="text-xs text-slate-500">Transcript kajian · 18 Mei 2026 · 6 menit baca</p></div>
+              <div class="ml-auto flex gap-2"><button class="w-9 h-9 rounded-full border grid place-items-center"><i data-lucide="type" class="w-4 h-4 text-slate-500"></i></button><button class="w-9 h-9 rounded-full border grid place-items-center"><i data-lucide="bookmark" class="w-4 h-4 text-slate-500"></i></button></div>
+            </div>
+
+            <div class="mt-6 space-y-5 text-[17px] leading-8 text-ink/90 max-w-prose">
+              <p>Dalam kajian malam ini, ustadz membuka pembahasan tentang hakikat sabar yang sering disalahpahami sebagai sikap pasrah tanpa usaha. Padahal, sabar dalam Islam adalah ketabahan yang aktif: tetap berikhtiar sambil menyandarkan hasil kepada Allah.</p>
+
+              <!-- ayat highlight -->
+              <div class="my-6 bg-brand-50 rounded-xl p-5 border-r-4 border-brand-600">
+                <p class="font-arabic text-2xl text-right text-brand-800 leading-loose" dir="rtl">وَبَشِّرِ الصَّابِرِينَ ۝ الَّذِينَ إِذَا أَصَابَتْهُم مُّصِيبَةٌ قَالُوا إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ</p>
+                <p class="text-sm text-slate-600 mt-3 italic">"Dan sampaikanlah kabar gembira kepada orang-orang yang sabar — (yaitu) orang-orang yang apabila ditimpa musibah, mereka mengucapkan: 'Sesungguhnya kami milik Allah dan kepada-Nya kami kembali.'" (QS. Al-Baqarah: 155–156)</p>
+              </div>
+
+              <p>Beliau menjelaskan bahwa sabar terbagi menjadi tiga jenis: sabar dalam menjalankan ketaatan, sabar dalam menjauhi maksiat, dan sabar atas takdir yang Allah tetapkan. Ketiganya menuntut latihan hati yang konsisten.</p>
+
+              <!-- pull quote -->
+              <blockquote class="my-6 pl-5 border-l-4 border-gold text-ink font-semibold italic text-xl leading-relaxed">"Sabar bukan berarti diam, tetapi tetap bergerak dengan hati yang ridha terhadap ketetapan Allah."</blockquote>
+
+              <p>Di penghujung kajian, ustadz mengingatkan bahwa pertolongan Allah sangat dekat bagi orang yang bersabar, sebagaimana janji dalam ayat berikutnya. Sabar adalah kunci yang membuka banyak pintu kemudahan.</p>
+            </div>
+
+            <!-- aksi -->
+            <div class="flex items-center gap-5 text-slate-400 text-sm border-t pt-5 mt-8">
+              <button class="flex items-center gap-1.5 hover:text-brand-600"><i data-lucide="heart" class="w-4 h-4"></i> 248</button>
+              <button class="flex items-center gap-1.5 hover:text-brand-600"><i data-lucide="share-2" class="w-4 h-4"></i> Bagikan</button>
+              <button class="flex items-center gap-1.5 hover:text-brand-600"><i data-lucide="download" class="w-4 h-4"></i> Unduh PDF</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- sidebar -->
+        <aside class="lg:col-span-3 space-y-5">
+          <div class="bg-surface rounded-2xl shadow-card p-4 lg:sticky lg:top-20">
+            <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-brand-600"></i> Daftar Isi</h4>
+            <ul class="space-y-2 text-sm border-l-2 border-slate-100 pl-3">
+              <li class="text-brand-700 font-semibold border-l-2 border-brand-600 -ml-[14px] pl-3">Hakikat Sabar</li>
+              <li class="text-slate-500 hover:text-brand-600">Tiga Jenis Sabar</li>
+              <li class="text-slate-500 hover:text-brand-600">Sabar &amp; Pertolongan Allah</li>
+            </ul>
+          </div>
+          <div class="bg-brand-700 text-white rounded-2xl p-4">
+            <div class="flex items-center gap-2 mb-1"><i data-lucide="bot" class="w-5 h-5 text-gold-light"></i><p class="font-bold text-sm">Tanya AI tentang ini</p></div>
+            <p class="text-xs text-white/70 leading-relaxed">Bingung dengan istilah di catatan ini? Tanyakan langsung ke asisten kajian.</p>
+            <button class="mt-3 w-full h-10 rounded-full bg-gold text-white font-bold text-sm">Mulai Bertanya</button>
+          </div>
+          <div class="bg-surface rounded-2xl shadow-card p-4">
+            <h4 class="font-bold text-sm mb-3">Catatan Terkait</h4>
+            <div class="space-y-3">
+              <a class="flex gap-3 group"><div class="ph2 w-14 h-14 rounded-lg shrink-0"></div><div><p class="text-sm font-semibold leading-tight group-hover:text-brand-600">Tawakkal: Menyandarkan Hati</p><p class="text-[11px] text-slate-400 mt-0.5">Ust. Yusuf · 5 mnt</p></div></a>
+              <a class="flex gap-3 group"><div class="ph3 w-14 h-14 rounded-lg shrink-0"></div><div><p class="text-sm font-semibold leading-tight group-hover:text-brand-600">Syukur dalam Kelapangan</p><p class="text-[11px] text-slate-400 mt-0.5">Ust. Hamid · 7 mnt</p></div></a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <p class="annot mt-3">Konten max-w-3xl/prose ~70ch dengan latar kertas (.paper) · ayat Amiri di kotak brand-50 border kanan · pull-quote border gold · sidebar TOC + terkait + Tanya AI.</p>
+  </section>
+
+  <!-- ============================================================= -->
+  <!-- 6. DONASI DESKTOP                                              -->
+  <!-- ============================================================= -->
+  <section>
+    <h2 class="text-lg font-bold mb-1 flex items-center gap-2"><i data-lucide="hand-heart" class="w-5 h-5 text-brand-600"></i> 6. Donasi (Desktop)</h2>
+    <p class="text-sm text-slate-500 mb-5">Dua kolom: kiri poster + progress + tombol donasi/QRIS, kanan laporan penggunaan dana (timeline) + Unduh PDF.</p>
+
+    <div data-theme="teduh" class="rounded-2xl shadow-pop overflow-hidden border bg-cream">
+      <div class="browserbar px-4 py-2.5 flex items-center gap-3">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span></div>
+        <div class="flex-1 bg-slate-700 rounded-md px-3 py-1 text-xs text-slate-300 flex items-center gap-2"><i data-lucide="lock" class="w-3 h-3"></i> blitarmengaji.id/donasi/renovasi-wudhu-al-falah</div>
+      </div>
+      <nav class="bg-surface border-b"><div class="px-6 lg:px-10 h-14 flex items-center gap-4"><span class="font-extrabold inline-flex items-center gap-1.5"><span class="inline-block w-6 h-6"><svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg></span>Blitar<span class="text-brand-600">Mengaji</span></span><span class="text-sm font-semibold text-brand-700 ml-4 bg-brand-50 px-3 py-1.5 rounded-lg">Donasi</span><button class="px-5 h-9 rounded-full bg-brand-600 text-white text-sm font-semibold ml-auto">Masuk</button></div></nav>
+
+      <div class="px-6 lg:px-10 py-10 grid lg:grid-cols-5 gap-6">
+        <!-- kiri: poster + progress -->
+        <div class="lg:col-span-3 space-y-5">
+          <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+            <div class="ph2 h-60 relative grid place-items-center">
+              <i data-lucide="hand-heart" class="w-16 h-16 text-white"></i>
+              <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white/90 text-amber-700 text-[11px] font-bold">● Aktif</span>
+            </div>
+            <div class="p-6">
+              <p class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Masjid Al-Falah · Kepanjenkidul, Kota Blitar</p>
+              <h2 class="text-2xl font-extrabold leading-tight mt-1 display">Renovasi Tempat Wudhu &amp; MCK</h2>
+              <p class="text-sm text-slate-600 leading-relaxed mt-3">Tempat wudhu masjid sudah berusia 15 tahun dan mengalami kebocoran. Mari bersama wujudkan tempat bersuci yang nyaman bagi para jamaah yang hadir setiap hari.</p>
+
+              <!-- progress -->
+              <div class="mt-5">
+                <div class="flex items-end justify-between mb-1"><span class="text-2xl font-extrabold text-brand-700">Rp 18.500.000</span><span class="text-sm text-slate-400">dari Rp 30.000.000</span></div>
+                <div class="h-3 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-gold" style="width:62%"></div></div>
+                <div class="flex justify-between text-xs text-slate-500 mt-2"><span class="font-semibold text-gold-dark">62% tercapai</span><span>132 donatur · sisa 18 hari</span></div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                <button class="flex-1 h-12 rounded-full bg-gold text-white font-bold flex items-center justify-center gap-2"><i data-lucide="hand-heart" class="w-5 h-5"></i> Donasi Sekarang</button>
+                <button class="h-12 px-5 rounded-full border-2 border-brand-600 text-brand-700 font-semibold flex items-center justify-center gap-2"><i data-lucide="qr-code" class="w-5 h-5"></i> QRIS</button>
+                <button class="w-12 h-12 rounded-full border grid place-items-center"><i data-lucide="share-2" class="w-5 h-5 text-brand-700"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- donatur terbaru -->
+          <div class="bg-surface rounded-2xl shadow-card p-5">
+            <h4 class="font-bold text-sm mb-3 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-brand-600"></i> Donatur Terbaru</h4>
+            <div class="space-y-3 text-sm">
+              <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full ph grid place-items-center text-white text-xs font-bold">HA</div><div class="flex-1"><p class="font-semibold">Hamba Allah</p><p class="text-[11px] text-slate-400">2 jam lalu</p></div><span class="font-bold text-brand-700">Rp 500.000</span></div>
+              <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full ph3 grid place-items-center text-white text-xs font-bold">BS</div><div class="flex-1"><p class="font-semibold">Budi Santoso</p><p class="text-[11px] text-slate-400">5 jam lalu</p></div><span class="font-bold text-brand-700">Rp 250.000</span></div>
+              <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full ph2 grid place-items-center text-white text-xs font-bold">HA</div><div class="flex-1"><p class="font-semibold">Hamba Allah</p><p class="text-[11px] text-slate-400">1 hari lalu</p></div><span class="font-bold text-brand-700">Rp 1.000.000</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- kanan: laporan penggunaan dana -->
+        <aside class="lg:col-span-2">
+          <div class="bg-surface rounded-2xl shadow-card p-5 lg:sticky lg:top-20">
+            <div class="flex items-center justify-between mb-4"><h4 class="font-bold text-sm flex items-center gap-2"><i data-lucide="receipt-text" class="w-4 h-4 text-brand-600"></i> Laporan Penggunaan Dana</h4></div>
+            <div class="bg-brand-50 rounded-xl p-3 mb-4 flex items-center justify-between text-sm"><span class="text-slate-600">Total terpakai</span><span class="font-extrabold text-brand-700">Rp 10.200.000</span></div>
+            <!-- timeline -->
+            <div class="space-y-0">
+              <div class="flex gap-3">
+                <div class="flex flex-col items-center"><div class="w-3 h-3 rounded-full bg-brand-600"></div><div class="w-px flex-1 bg-slate-200"></div></div>
+                <div class="pb-5 -mt-1 flex-1">
+                  <div class="flex justify-between gap-2"><p class="font-semibold text-sm">Pembelian keramik &amp; semen</p><span class="text-sm font-bold text-red-500 whitespace-nowrap">- Rp 7,2jt</span></div>
+                  <p class="text-xs text-slate-400 mt-0.5">12 Mei 2026</p>
+                  <span class="inline-flex items-center gap-1 mt-1.5 text-[11px] text-brand-600 font-semibold"><i data-lucide="paperclip" class="w-3 h-3"></i> Nota terlampir</span>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="flex flex-col items-center"><div class="w-3 h-3 rounded-full bg-brand-600"></div><div class="w-px flex-1 bg-slate-200"></div></div>
+                <div class="pb-5 -mt-1 flex-1">
+                  <div class="flex justify-between gap-2"><p class="font-semibold text-sm">Upah tukang (termin 1)</p><span class="text-sm font-bold text-red-500 whitespace-nowrap">- Rp 3,0jt</span></div>
+                  <p class="text-xs text-slate-400 mt-0.5">8 Mei 2026</p>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="flex flex-col items-center"><div class="w-3 h-3 rounded-full bg-gold"></div></div>
+                <div class="-mt-1 flex-1">
+                  <div class="flex justify-between gap-2"><p class="font-semibold text-sm text-slate-500">Pemasangan instalasi air</p><span class="text-xs text-slate-400 whitespace-nowrap">Direncanakan</span></div>
+                  <p class="text-xs text-slate-400 mt-0.5">Estimasi 25 Mei 2026</p>
+                </div>
+              </div>
+            </div>
+            <button class="w-full h-11 rounded-full border-2 border-brand-600 text-brand-700 font-semibold text-sm mt-5 flex items-center justify-center gap-2"><i data-lucide="download" class="w-4 h-4"></i> Unduh Laporan PDF</button>
+            <p class="text-[11px] text-slate-400 text-center mt-3 flex items-center justify-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-brand-600"></i> Setiap rupiah dilaporkan transparan</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <p class="annot mt-3">Kolom kiri: poster + progress bar gold + tombol Donasi/QRIS + daftar donatur (termasuk "Hamba Allah"). Kolom kanan sticky: timeline penggunaan dana + Unduh PDF.</p>
+  </section>
+
+  <footer class="text-center text-xs text-slate-400 pt-6">
+    Blitar Mengaji · Prototype UI/UX — Desktop / Web · dibuat untuk brainstorming sebelum eksekusi · 2026-05-20
+  </footer>
+
+</main>
+
+<script>lucide.createIcons();</script>
+<script src="theme-switcher.js" defer></script>
+</body>
+</html>

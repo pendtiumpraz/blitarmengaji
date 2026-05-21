@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blitar Mengaji — Pembayaran QRIS &amp; Konfirmasi WhatsApp</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="theme-tokens.css">
+<link rel="stylesheet" href="craft.css">
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      brand:{50:'var(--c-brand-50)',100:'var(--c-brand-100)',200:'var(--c-brand-200)',300:'var(--c-brand-300)',400:'var(--c-brand-400)',500:'var(--c-brand-500)',600:'var(--c-brand-600)',700:'var(--c-brand-700)',800:'var(--c-brand-800)',900:'var(--c-brand-900)'},
+      gold:{DEFAULT:'var(--c-gold)',light:'var(--c-gold-light)',dark:'var(--c-gold-dark)'},
+      cream:'var(--c-cream)', surface:'var(--c-surface)', ink:'var(--c-ink)'
+    },
+    fontFamily: { sans:['"Plus Jakarta Sans"','system-ui','sans-serif'], arabic:['Amiri','serif'] },
+    boxShadow: { card:'0 2px 10px rgba(15,23,42,.06)', pop:'0 10px 30px rgba(15,23,42,.15)' }
+  } } }
+</script>
+<style>
+  body { background:#e7e5e4; font-family:'Plus Jakarta Sans',sans-serif; }
+  .device { width:370px; border:9px solid #0f172a; border-radius:2.4rem; background:#0f172a; box-shadow:0 20px 45px rgba(15,23,42,.25); overflow:hidden; position:relative; }
+  .device .notch { position:absolute; top:9px; left:50%; transform:translateX(-50%); width:120px; height:22px; background:#0f172a; border-radius:0 0 14px 14px; z-index:50; }
+  .screen { height:760px; overflow-y:auto; background:var(--c-cream); position:relative; }
+  .screen::-webkit-scrollbar { width:0; }
+  .statusbar { height:34px; }
+  .ph { background:linear-gradient(135deg,#0E6E55,#3C9E84); }
+  .ph2 { background:linear-gradient(135deg,#A8851A,#E3C766); }
+  .ph3 { background:linear-gradient(135deg,#0B5947,#18816A); }
+  .scrollx { scrollbar-width:none; } .scrollx::-webkit-scrollbar{display:none;}
+  .annot { font-size:11px; color:#64748b; }
+  .pagenav a { padding:.4rem .8rem; border-radius:999px; font-size:13px; font-weight:600; }
+  /* QR placeholder pattern */
+  .qr-grid { background-image:
+      linear-gradient(45deg,#23241E 25%,transparent 25%,transparent 75%,#23241E 75%),
+      linear-gradient(45deg,#23241E 25%,transparent 25%,transparent 75%,#23241E 75%);
+    background-size:16px 16px; background-position:0 0,8px 8px; }
+</style>
+</head>
+<body class="text-ink">
+
+<!-- PAGE NAV (disalin dari 09-entity-dash.html) -->
+<div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+  <div class="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 flex-wrap pagenav">
+    <span class="font-extrabold mr-2">ﷺ Blitar Mengaji</span>
+    <a href="index.html" class="text-slate-500 hover:bg-slate-100">Core</a>
+    <a href="02-mobile-more.html" class="text-slate-500 hover:bg-slate-100">Mobile</a>
+    <a href="03-admin.html" class="text-slate-500 hover:bg-slate-100">Admin &amp; RBAC</a>
+    <a href="04-desktop.html" class="text-slate-500 hover:bg-slate-100">Desktop</a>
+    <a href="05-ustadz.html" class="text-slate-500 hover:bg-slate-100">Ustadz</a>
+    <a href="06-kajian-video.html" class="text-slate-500 hover:bg-slate-100">Kajian/Video</a>
+    <a href="07-states.html" class="text-slate-500 hover:bg-slate-100">UX States</a>
+    <a href="08-keuangan.html" class="text-slate-500 hover:bg-slate-100">Keuangan</a>
+    <a href="09-entity-dash.html" class="text-slate-500 hover:bg-slate-100">Entitas</a>
+    <a href="themes.html" class="text-gold-dark font-bold hover:bg-amber-50">🎨 Tema</a>
+    <a href="10-pdf.html" class="text-rose-600 font-bold hover:bg-rose-50">📄 PDF</a>
+  </div>
+</div>
+
+<!-- HEADER besar berwarna (craft) -->
+<header class="bg-brand-700 text-white relative overflow-hidden" data-theme="teduh">
+  <div class="orn-overlay pat-girih-light"></div>
+  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-9 pb-8">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="w-11 h-11 rounded-xl grid place-items-center overflow-hidden shrink-0">
+        <svg viewBox="0 0 56 56" width="100%" height="100%" aria-label="Blitar Mengaji"><rect x="2" y="2" width="52" height="52" rx="13" fill="#0E5C46"/><rect x="7.5" y="7.5" width="41" height="41" rx="9" fill="none" stroke="#C9A227" stroke-opacity=".55"/><path d="M19 44 L19 27 C19 16 27 13 28 13 C29 13 37 16 37 27 L37 44" fill="none" stroke="#E6CC8A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(28 9.5)" fill="#C9A227"><rect x="-3.2" y="-3.2" width="6.4" height="6.4"/><rect x="-3.2" y="-3.2" width="6.4" height="6.4" transform="rotate(45)"/></g></svg>
+      </span>
+      <span class="px-2.5 py-1 rounded-full bg-white/15 text-white text-xs font-bold inline-flex items-center gap-1.5"><i data-lucide="qr-code" class="w-3.5 h-3.5"></i> Tanpa payment gateway</span>
+    </div>
+    <h1 class="text-3xl font-extrabold display">Pembayaran QRIS &amp; Konfirmasi WhatsApp</h1>
+    <p class="text-sm text-white/80 mt-2 max-w-3xl">Alur pembayaran manual untuk <b>donasi</b> &amp; <b>lapak UMKM</b>: jamaah bayar via QRIS / transfer, lalu konfirmasi lewat WhatsApp dengan pesan otomatis. Pengelola memverifikasi pembayaran dari panel admin. Sederhana, transparan, tanpa biaya gateway.</p>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 pb-24 pt-10 space-y-16">
+
+  <!-- ===================================================================== -->
+  <!-- BAGIAN 1 + 2 + 3 — TIGA DEVICE HP                                       -->
+  <!-- ===================================================================== -->
+  <section>
+    <div class="flex items-center gap-3 mb-1">
+      <span class="w-9 h-9 rounded-xl bg-brand-600 text-white grid place-items-center"><i data-lucide="smartphone" class="w-5 h-5"></i></span>
+      <h2 class="text-xl font-extrabold display">Sisi Jamaah (Aplikasi HP)</h2>
+    </div>
+    <p class="text-sm text-slate-500 mb-6">Tiga layar HP: bayar donasi via QRIS, status menunggu konfirmasi, dan pesan + bayar di lapak UMKM. Semua diakhiri dengan tombol WhatsApp berpesan otomatis.</p>
+
+    <div class="grid xl:grid-cols-3 gap-8 justify-items-center">
+
+      <!-- ============== 1. DONASI — BAYAR VIA QRIS ============== -->
+      <div>
+        <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="hand-heart" class="w-4 h-4 text-brand-600"></i> 1 · Donasi — Bayar via QRIS</h3>
+        <div class="device mx-auto"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-700"></div>
+            <!-- topbar layar -->
+            <div class="bg-brand-700 text-white px-4 pb-4 relative overflow-hidden">
+              <div class="orn-overlay pat-girih-light"></div>
+              <div class="relative z-10 flex items-center gap-3">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                <div><p class="font-bold leading-none">Donasi</p><p class="text-[11px] text-white/70 mt-0.5">Salurkan kebaikan Anda</p></div>
+              </div>
+            </div>
+
+            <div class="p-4 space-y-4 pb-8">
+              <!-- ringkasan campaign -->
+              <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+                <div class="flex gap-3 p-3">
+                  <div class="ph2 w-14 h-14 rounded-xl grid place-items-center shrink-0"><i data-lucide="droplets" class="w-6 h-6 text-white"></i></div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm leading-tight">Renovasi Tempat Wudhu</p>
+                    <p class="text-[11px] text-slate-500">Masjid Al-Falah · Kepanjenkidul</p>
+                  </div>
+                </div>
+                <div class="px-3 pb-3">
+                  <div class="h-2 rounded-full bg-slate-200 overflow-hidden"><div class="h-full bg-brand-500" style="width:62%"></div></div>
+                  <div class="flex justify-between text-[11px] mt-1">
+                    <span class="text-brand-700 font-bold">Rp 31jt terkumpul (62%)</span>
+                    <span class="text-slate-400">target Rp 50jt</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- input nominal -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <p class="text-xs font-bold text-slate-500 mb-2">Pilih nominal donasi</p>
+                <div class="grid grid-cols-3 gap-2 mb-2">
+                  <button class="h-9 rounded-full border text-xs font-bold text-slate-600 bg-white">Rp 20rb</button>
+                  <button class="h-9 rounded-full border-2 border-brand-500 text-xs font-extrabold text-brand-700 bg-brand-50">Rp 50rb</button>
+                  <button class="h-9 rounded-full border text-xs font-bold text-slate-600 bg-white">Rp 100rb</button>
+                </div>
+                <div class="flex items-center gap-2 border-2 border-brand-500 rounded-xl px-3 h-12 bg-white">
+                  <span class="text-slate-400 font-bold text-sm">Rp</span>
+                  <input class="flex-1 outline-none bg-transparent text-lg font-extrabold text-ink" value="50.000" />
+                  <span class="text-[10px] text-slate-400 font-semibold">nominal lain</span>
+                </div>
+              </div>
+
+              <!-- nama donatur + anonim -->
+              <div class="bg-surface rounded-2xl shadow-card p-4 space-y-3">
+                <div>
+                  <label class="text-xs font-bold text-slate-500">Nama donatur</label>
+                  <input class="mt-1 w-full border rounded-xl px-3 h-10 text-sm bg-white" value="Hamba Allah" />
+                </div>
+                <label class="flex items-center justify-between gap-3 cursor-pointer">
+                  <span class="text-sm flex items-center gap-2"><i data-lucide="venetian-mask" class="w-4 h-4 text-brand-600"></i> Sembunyikan nama <span class="text-[11px] text-slate-400">(Hamba Allah)</span></span>
+                  <span class="w-10 h-6 rounded-full bg-brand-500 relative shrink-0"><span class="absolute right-0.5 top-0.5 w-5 h-5 rounded-full bg-white shadow"></span></span>
+                </label>
+              </div>
+
+              <!-- QRIS -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <p class="text-sm font-bold flex items-center gap-2"><i data-lucide="qr-code" class="w-4 h-4 text-brand-600"></i> Scan QRIS</p>
+                  <span class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-extrabold tracking-widest text-slate-600">QRIS</span>
+                </div>
+                <div class="rounded-xl border bg-white p-3 grid place-items-center">
+                  <div class="w-40 h-40 rounded-lg qr-grid relative grid place-items-center">
+                    <span class="w-10 h-10 rounded bg-white grid place-items-center shadow"><i data-lucide="image" class="w-5 h-5 text-slate-400"></i></span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-2 text-center">Buka m-banking / e-wallet → scan kode</p>
+                </div>
+              </div>
+
+              <!-- alternatif transfer -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <p class="text-sm font-bold flex items-center gap-2 mb-2"><i data-lucide="landmark" class="w-4 h-4 text-brand-600"></i> Atau transfer bank</p>
+                <div class="bg-cream/70 rounded-xl p-3 flex items-center gap-3">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-[11px] text-slate-500">Bank Syariah Indonesia · a.n. Masjid Al-Falah</p>
+                    <p class="font-extrabold text-base tracking-wide">7012 3456 789</p>
+                  </div>
+                  <button class="px-3 h-9 rounded-lg border text-xs font-bold text-brand-700 bg-white flex items-center gap-1.5 shrink-0"><i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin</button>
+                </div>
+              </div>
+
+              <!-- unggah bukti -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <p class="text-sm font-bold flex items-center gap-2 mb-2"><i data-lucide="receipt" class="w-4 h-4 text-brand-600"></i> Unggah bukti transfer <span class="text-[11px] font-medium text-slate-400">(opsional)</span></p>
+                <label class="h-20 rounded-xl border-2 border-dashed border-brand-300 bg-brand-50/40 grid place-items-center cursor-pointer text-center">
+                  <span><i data-lucide="upload-cloud" class="w-6 h-6 text-brand-500 mx-auto"></i><span class="block text-[11px] text-brand-700 font-bold mt-1">Tarik / pilih foto bukti</span></span>
+                </label>
+              </div>
+
+              <!-- pratinjau pesan WA -->
+              <div class="bg-green-50 border border-green-200 rounded-2xl p-3">
+                <p class="text-[11px] font-bold text-green-800 flex items-center gap-1.5 mb-1.5"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Pratinjau pesan WhatsApp</p>
+                <p class="text-[12px] text-green-900 leading-relaxed bg-white/70 rounded-lg p-2.5 italic">"Assalamu'alaikum, saya telah donasi <b>Rp50.000</b> untuk <b>Renovasi Tempat Wudhu — Masjid Al-Falah</b> a.n. <b>Hamba Allah</b>. Mohon dikonfirmasi. Jazakumullah khairan."</p>
+              </div>
+
+              <!-- tombol konfirmasi WA -->
+              <button class="w-full h-13 py-3.5 rounded-2xl bg-green-600 text-white font-extrabold text-base flex items-center justify-center gap-2 shadow-pop">
+                <i data-lucide="message-circle" class="w-5 h-5"></i> Konfirmasi via WhatsApp
+              </button>
+              <p class="text-[11px] text-slate-400 text-center">Membuka WhatsApp ke pengelola dengan pesan otomatis (<code>wa.me</code>).</p>
+            </div>
+          </div>
+        </div>
+        <p class="annot text-center max-w-[340px] mx-auto mt-3">Nominal preset + custom, toggle anonim, QRIS &amp; transfer, lalu CTA hijau ke WhatsApp dengan pesan terisi otomatis.</p>
+      </div>
+
+      <!-- ============== 2. DONASI — STATUS ============== -->
+      <div>
+        <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-brand-600"></i> 2 · Donasi — Status Konfirmasi</h3>
+        <div class="device mx-auto"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-700"></div>
+            <div class="bg-brand-700 text-white px-4 pb-4 relative overflow-hidden">
+              <div class="orn-overlay pat-girih-light"></div>
+              <div class="relative z-10 flex items-center gap-3">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                <div><p class="font-bold leading-none">Status Donasi</p><p class="text-[11px] text-white/70 mt-0.5">#DON-2026-0518</p></div>
+              </div>
+            </div>
+
+            <div class="p-4 space-y-4">
+              <!-- kartu menunggu -->
+              <div class="bg-surface rounded-2xl shadow-card p-5 text-center">
+                <div class="w-16 h-16 rounded-full bg-amber-100 grid place-items-center mx-auto mb-3">
+                  <i data-lucide="hourglass" class="w-8 h-8 text-amber-600"></i>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-extrabold inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Menunggu konfirmasi pengelola</span>
+                <p class="text-2xl font-extrabold mt-3">Rp 50.000</p>
+                <p class="text-xs text-slate-500">Renovasi Tempat Wudhu · a.n. Hamba Allah</p>
+              </div>
+
+              <!-- langkah 1-2-3 -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <p class="text-xs font-bold text-slate-500 mb-3">Alur verifikasi</p>
+                <div class="space-y-0">
+                  <!-- step 1 done -->
+                  <div class="flex gap-3">
+                    <div class="flex flex-col items-center">
+                      <span class="w-8 h-8 rounded-full bg-green-600 text-white grid place-items-center shrink-0"><i data-lucide="check" class="w-4 h-4"></i></span>
+                      <span class="w-0.5 flex-1 bg-green-500 my-1"></span>
+                    </div>
+                    <div class="pb-4"><p class="font-bold text-sm">Bayar</p><p class="text-[11px] text-slate-400">QRIS / transfer · selesai 09.14</p></div>
+                  </div>
+                  <!-- step 2 done -->
+                  <div class="flex gap-3">
+                    <div class="flex flex-col items-center">
+                      <span class="w-8 h-8 rounded-full bg-green-600 text-white grid place-items-center shrink-0"><i data-lucide="check" class="w-4 h-4"></i></span>
+                      <span class="w-0.5 flex-1 bg-amber-400 my-1"></span>
+                    </div>
+                    <div class="pb-4"><p class="font-bold text-sm">Konfirmasi WhatsApp</p><p class="text-[11px] text-slate-400">Pesan terkirim ke pengelola · 09.15</p></div>
+                  </div>
+                  <!-- step 3 pending -->
+                  <div class="flex gap-3">
+                    <div class="flex flex-col items-center">
+                      <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 border-2 border-amber-400 grid place-items-center shrink-0 animate-pulse"><i data-lucide="loader" class="w-4 h-4"></i></span>
+                    </div>
+                    <div><p class="font-bold text-sm text-amber-700">Diverifikasi pengelola</p><p class="text-[11px] text-slate-400">Sedang ditinjau…</p></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- estimasi -->
+              <div class="bg-brand-50 border border-brand-200 rounded-xl px-4 py-3 flex items-start gap-3 text-sm">
+                <i data-lucide="info" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+                <p class="text-brand-800">Estimasi verifikasi <b>maks 1×24 jam</b>. Setelah dikonfirmasi, donasi Anda otomatis tercatat &amp; muncul di progres campaign. Anda akan dapat notifikasi.</p>
+              </div>
+
+              <button class="w-full h-11 rounded-xl border border-green-300 text-green-700 font-bold text-sm flex items-center justify-center gap-2 bg-green-50">
+                <i data-lucide="message-circle" class="w-4 h-4"></i> Kirim ulang konfirmasi WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="annot text-center max-w-[340px] mx-auto mt-3">Badge amber "menunggu konfirmasi" + linimasa 3 langkah (Bayar → Konfirmasi WA → Diverifikasi) dengan estimasi waktu.</p>
+      </div>
+
+      <!-- ============== 3. LAPAK — PESAN & BAYAR ============== -->
+      <div>
+        <h3 class="text-base font-bold mb-2 flex items-center gap-2"><i data-lucide="shopping-bag" class="w-4 h-4 text-brand-600"></i> 3 · Lapak — Pesan &amp; Bayar</h3>
+        <div class="device mx-auto"><div class="notch"></div>
+          <div class="screen" data-theme="teduh">
+            <div class="statusbar bg-brand-700"></div>
+            <div class="bg-brand-700 text-white px-4 pb-4 relative overflow-hidden">
+              <div class="orn-overlay pat-girih-light"></div>
+              <div class="relative z-10 flex items-center gap-3">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                <div><p class="font-bold leading-none">Pesan Produk</p><p class="text-[11px] text-white/70 mt-0.5">Toko Barokah · UMKM Jamaah</p></div>
+              </div>
+            </div>
+
+            <div class="p-4 space-y-4 pb-8">
+              <!-- produk -->
+              <div class="bg-surface rounded-2xl shadow-card overflow-hidden">
+                <div class="flex gap-3 p-3">
+                  <div class="ph2 w-16 h-16 rounded-xl grid place-items-center shrink-0"><i data-lucide="image" class="w-7 h-7 text-white/80"></i></div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm leading-tight">Kurma Ajwa</p>
+                    <p class="text-[11px] text-slate-500">Kurma premium · 500 gram</p>
+                    <p class="text-brand-700 font-extrabold text-base mt-1">Rp 95.000</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- qty -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-bold">Jumlah</p>
+                  <div class="flex items-center gap-3">
+                    <button class="w-9 h-9 rounded-full border grid place-items-center text-slate-600"><i data-lucide="minus" class="w-4 h-4"></i></button>
+                    <span class="font-extrabold text-lg w-6 text-center">2</span>
+                    <button class="w-9 h-9 rounded-full bg-brand-600 text-white grid place-items-center"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- catatan -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <label class="text-xs font-bold text-slate-500">Catatan untuk penjual</label>
+                <textarea class="mt-1 w-full border rounded-xl px-3 py-2 text-sm bg-white resize-none" rows="2" placeholder="Mis. ambil di lokasi / kirim ke alamat…">Tolong dikirim ke Kepanjenkidul, terima kasih</textarea>
+              </div>
+
+              <!-- total -->
+              <div class="bg-cream/70 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                  <p class="text-[11px] text-slate-500">Total (2 × Rp 95.000)</p>
+                  <p class="text-xl font-extrabold text-brand-700">Rp 190.000</p>
+                </div>
+                <span class="px-2 py-1 rounded bg-slate-100 text-[10px] font-extrabold tracking-widest text-slate-600">QRIS</span>
+              </div>
+
+              <!-- QRIS partner -->
+              <div class="bg-surface rounded-2xl shadow-card p-4">
+                <p class="text-sm font-bold flex items-center gap-2 mb-3"><i data-lucide="qr-code" class="w-4 h-4 text-brand-600"></i> QRIS Toko Barokah</p>
+                <div class="rounded-xl border bg-white p-3 grid place-items-center">
+                  <div class="w-36 h-36 rounded-lg qr-grid relative grid place-items-center">
+                    <span class="w-9 h-9 rounded bg-white grid place-items-center shadow"><i data-lucide="store" class="w-4 h-4 text-slate-400"></i></span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-2 text-center">Scan untuk bayar langsung ke penjual</p>
+                </div>
+              </div>
+
+              <!-- pratinjau WA -->
+              <div class="bg-green-50 border border-green-200 rounded-2xl p-3">
+                <p class="text-[11px] font-bold text-green-800 flex items-center gap-1.5 mb-1.5"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Pratinjau pesan WhatsApp</p>
+                <p class="text-[12px] text-green-900 leading-relaxed bg-white/70 rounded-lg p-2.5 italic">"Assalamu'alaikum, saya mau pesan <b>2× Kurma Ajwa</b> total <b>Rp190.000</b>. Catatan: tolong dikirim ke Kepanjenkidul. Mohon info pembayaran &amp; konfirmasi."</p>
+              </div>
+
+              <!-- CTA -->
+              <button class="w-full py-3.5 rounded-2xl bg-green-600 text-white font-extrabold text-base flex items-center justify-center gap-2 shadow-pop">
+                <i data-lucide="message-circle" class="w-5 h-5"></i> Pesan via WhatsApp
+              </button>
+              <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 flex items-start gap-2">
+                <i data-lucide="info" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                <p class="text-[11px] text-amber-800">Pembayaran &amp; konfirmasi <b>langsung ke penjual</b>. Blitar Mengaji hanya menampilkan lapak — transaksi di luar tanggung jawab platform.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="annot text-center max-w-[340px] mx-auto mt-3">QRIS partner + tombol "Pesan via WhatsApp" dengan pesan prefilled (produk + jumlah + total). Catatan: transaksi langsung ke penjual.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- BAGIAN 4 — PANEL ADMIN / PENGELOLA (DESKTOP)                            -->
+  <!-- ===================================================================== -->
+  <section>
+    <div class="flex items-center gap-3 mb-1">
+      <span class="w-9 h-9 rounded-xl bg-brand-600 text-white grid place-items-center"><i data-lucide="shield-check" class="w-5 h-5"></i></span>
+      <h2 class="text-xl font-extrabold display">4 · Admin / Pengelola — Konfirmasi Pembayaran</h2>
+    </div>
+    <p class="text-sm text-slate-500 mb-5">Panel desktop bagi pengelola (permission <code>payment.confirm</code> / <code>payment.manage_own</code>): meninjau pembayaran masuk, melihat bukti, membuka chat WhatsApp, lalu menandai <b>Verifikasi</b> atau <b>Tolak</b>.</p>
+
+    <div data-theme="teduh" class="rounded-2xl overflow-hidden shadow-pop border bg-surface">
+      <!-- topbar panel -->
+      <div class="bg-surface border-b px-6 py-3 flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-lg font-extrabold display">Konfirmasi Pembayaran</h3>
+            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold inline-flex items-center gap-1"><i data-lucide="hourglass" class="w-3.5 h-3.5"></i> Menunggu konfirmasi: 5</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">Masjid Al-Falah · pembayaran masuk yang perlu ditinjau</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 bg-cream rounded-lg px-3 h-9 w-56"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i><span class="text-sm text-slate-400">Cari nama / nominal…</span></div>
+          <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full ph"></div><div class="leading-none hidden sm:block"><p class="text-sm font-semibold">Ust. Ahmad Fauzi</p><p class="text-[10px] text-slate-400">Takmir</p></div></div>
+        </div>
+      </div>
+
+      <!-- tabs -->
+      <div class="bg-cream/60 border-b px-6 flex items-center gap-1">
+        <button class="px-4 py-3 text-sm font-bold text-brand-700 border-b-2 border-brand-600 flex items-center gap-2"><i data-lucide="hand-heart" class="w-4 h-4"></i> Donasi <span class="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-extrabold">3</span></button>
+        <button class="px-4 py-3 text-sm font-semibold text-slate-500 hover:text-brand-700 flex items-center gap-2"><i data-lucide="shopping-bag" class="w-4 h-4"></i> Pesanan <span class="px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold">2</span></button>
+      </div>
+
+      <!-- ringkasan mini -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-6 pb-2">
+        <div class="bg-cream/60 rounded-xl p-3"><div class="flex items-center justify-between"><span class="w-8 h-8 rounded-lg bg-amber-100 grid place-items-center"><i data-lucide="hourglass" class="w-4 h-4 text-amber-600"></i></span></div><p class="text-xl font-extrabold mt-1.5">5</p><p class="text-[11px] text-slate-500">Pending</p></div>
+        <div class="bg-cream/60 rounded-xl p-3"><div class="flex items-center justify-between"><span class="w-8 h-8 rounded-lg bg-green-100 grid place-items-center"><i data-lucide="check-circle-2" class="w-4 h-4 text-green-600"></i></span></div><p class="text-xl font-extrabold mt-1.5">28</p><p class="text-[11px] text-slate-500">Terverifikasi (bln ini)</p></div>
+        <div class="bg-cream/60 rounded-xl p-3"><div class="flex items-center justify-between"><span class="w-8 h-8 rounded-lg bg-red-100 grid place-items-center"><i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i></span></div><p class="text-xl font-extrabold mt-1.5">2</p><p class="text-[11px] text-slate-500">Ditolak</p></div>
+        <div class="bg-cream/60 rounded-xl p-3"><div class="flex items-center justify-between"><span class="w-8 h-8 rounded-lg bg-brand-50 grid place-items-center"><i data-lucide="wallet" class="w-4 h-4 text-brand-600"></i></span></div><p class="text-xl font-extrabold mt-1.5">Rp 4,2jt</p><p class="text-[11px] text-slate-500">Terkonfirmasi (bln ini)</p></div>
+      </div>
+
+      <!-- tabel pending (DONASI) -->
+      <div class="p-6 pt-3">
+        <div class="rounded-2xl border overflow-hidden bg-surface">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[860px]">
+              <thead class="bg-cream text-slate-500 text-xs uppercase">
+                <tr>
+                  <th class="text-left font-bold px-5 py-3">Donatur</th>
+                  <th class="text-left font-bold px-5 py-3">Nominal</th>
+                  <th class="text-left font-bold px-5 py-3">Campaign</th>
+                  <th class="text-left font-bold px-5 py-3">Waktu</th>
+                  <th class="text-left font-bold px-5 py-3">Bukti</th>
+                  <th class="text-left font-bold px-5 py-3">Status</th>
+                  <th class="text-right font-bold px-5 py-3">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y">
+                <!-- row pending 1 -->
+                <tr class="hover:bg-cream/60 align-middle">
+                  <td class="px-5 py-3"><div class="flex items-center gap-2"><span class="w-8 h-8 rounded-full bg-slate-200 grid place-items-center shrink-0"><i data-lucide="venetian-mask" class="w-4 h-4 text-slate-500"></i></span><div><p class="font-semibold leading-tight">Hamba Allah</p><p class="text-[10px] text-slate-400">anonim</p></div></div></td>
+                  <td class="px-5 py-3 font-extrabold text-brand-700">Rp 50.000</td>
+                  <td class="px-5 py-3 text-slate-600">Renovasi Tempat Wudhu</td>
+                  <td class="px-5 py-3 text-slate-500 whitespace-nowrap">20 Mei · 09.15</td>
+                  <td class="px-5 py-3"><span class="ph w-12 h-9 rounded-lg grid place-items-center cursor-pointer relative group"><i data-lucide="image" class="w-4 h-4 text-white/80"></i><span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 grid place-items-center rounded-lg transition"><i data-lucide="zoom-in" class="w-4 h-4 text-white"></i></span></span></td>
+                  <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> pending</span></td>
+                  <td class="px-5 py-3"><div class="flex items-center justify-end gap-1.5">
+                    <a class="w-9 h-9 rounded-lg bg-green-50 text-green-600 grid place-items-center hover:bg-green-100" title="Chat WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+                    <button class="px-3 h-9 rounded-lg bg-green-600 text-white text-xs font-bold flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i> Verifikasi</button>
+                    <button class="px-3 h-9 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i> Tolak</button>
+                  </div></td>
+                </tr>
+                <!-- row pending 2 -->
+                <tr class="hover:bg-cream/60 align-middle">
+                  <td class="px-5 py-3"><div class="flex items-center gap-2"><span class="w-8 h-8 rounded-full ph2 shrink-0"></span><div><p class="font-semibold leading-tight">Budi Santoso</p><p class="text-[10px] text-slate-400">+62 812 3456 7890</p></div></div></td>
+                  <td class="px-5 py-3 font-extrabold text-brand-700">Rp 100.000</td>
+                  <td class="px-5 py-3 text-slate-600">Renovasi Tempat Wudhu</td>
+                  <td class="px-5 py-3 text-slate-500 whitespace-nowrap">20 Mei · 08.42</td>
+                  <td class="px-5 py-3"><span class="text-[11px] text-slate-400 italic">tanpa bukti</span></td>
+                  <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> pending</span></td>
+                  <td class="px-5 py-3"><div class="flex items-center justify-end gap-1.5">
+                    <a class="w-9 h-9 rounded-lg bg-green-50 text-green-600 grid place-items-center hover:bg-green-100" title="Chat WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+                    <button class="px-3 h-9 rounded-lg bg-green-600 text-white text-xs font-bold flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i> Verifikasi</button>
+                    <button class="px-3 h-9 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i> Tolak</button>
+                  </div></td>
+                </tr>
+                <!-- row pending 3 -->
+                <tr class="hover:bg-cream/60 align-middle">
+                  <td class="px-5 py-3"><div class="flex items-center gap-2"><span class="w-8 h-8 rounded-full ph3 shrink-0"></span><div><p class="font-semibold leading-tight">Siti Aisyah</p><p class="text-[10px] text-slate-400">+62 856 1122 3344</p></div></div></td>
+                  <td class="px-5 py-3 font-extrabold text-brand-700">Rp 250.000</td>
+                  <td class="px-5 py-3 text-slate-600">Renovasi Tempat Wudhu</td>
+                  <td class="px-5 py-3 text-slate-500 whitespace-nowrap">19 Mei · 21.10</td>
+                  <td class="px-5 py-3"><span class="ph3 w-12 h-9 rounded-lg grid place-items-center cursor-pointer relative group"><i data-lucide="image" class="w-4 h-4 text-white/80"></i><span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 grid place-items-center rounded-lg transition"><i data-lucide="zoom-in" class="w-4 h-4 text-white"></i></span></span></td>
+                  <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[11px] font-bold inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> pending</span></td>
+                  <td class="px-5 py-3"><div class="flex items-center justify-end gap-1.5">
+                    <a class="w-9 h-9 rounded-lg bg-green-50 text-green-600 grid place-items-center hover:bg-green-100" title="Chat WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+                    <button class="px-3 h-9 rounded-lg bg-green-600 text-white text-xs font-bold flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i> Verifikasi</button>
+                    <button class="px-3 h-9 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i> Tolak</button>
+                  </div></td>
+                </tr>
+                <!-- row confirmed -->
+                <tr class="hover:bg-cream/60 align-middle opacity-80">
+                  <td class="px-5 py-3"><div class="flex items-center gap-2"><span class="w-8 h-8 rounded-full ph shrink-0"></span><div><p class="font-semibold leading-tight">Ahmad Dahlan</p><p class="text-[10px] text-slate-400">+62 813 9988 7766</p></div></div></td>
+                  <td class="px-5 py-3 font-extrabold text-slate-600">Rp 75.000</td>
+                  <td class="px-5 py-3 text-slate-600">Renovasi Tempat Wudhu</td>
+                  <td class="px-5 py-3 text-slate-500 whitespace-nowrap">19 Mei · 17.30</td>
+                  <td class="px-5 py-3"><span class="ph2 w-12 h-9 rounded-lg grid place-items-center"><i data-lucide="image" class="w-4 h-4 text-white/80"></i></span></td>
+                  <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-[11px] font-bold inline-flex items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> confirmed</span></td>
+                  <td class="px-5 py-3 text-right"><span class="text-[11px] text-slate-400">oleh Ust. Ahmad · 17.45</span></td>
+                </tr>
+                <!-- row rejected -->
+                <tr class="hover:bg-cream/60 align-middle opacity-80">
+                  <td class="px-5 py-3"><div class="flex items-center gap-2"><span class="w-8 h-8 rounded-full bg-slate-200 grid place-items-center shrink-0"><i data-lucide="venetian-mask" class="w-4 h-4 text-slate-500"></i></span><div><p class="font-semibold leading-tight">Hamba Allah</p><p class="text-[10px] text-slate-400">anonim</p></div></div></td>
+                  <td class="px-5 py-3 font-extrabold text-slate-600">Rp 20.000</td>
+                  <td class="px-5 py-3 text-slate-600">Renovasi Tempat Wudhu</td>
+                  <td class="px-5 py-3 text-slate-500 whitespace-nowrap">18 Mei · 14.02</td>
+                  <td class="px-5 py-3"><span class="text-[11px] text-slate-400 italic">bukti tak sesuai</span></td>
+                  <td class="px-5 py-3"><span class="px-2.5 py-1 rounded-full bg-red-100 text-red-600 text-[11px] font-bold inline-flex items-center gap-1"><i data-lucide="x" class="w-3 h-3"></i> rejected</span></td>
+                  <td class="px-5 py-3 text-right"><span class="text-[11px] text-slate-400">oleh Ust. Ahmad · 14.20</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="annot mt-3">Baris pending punya aksi <b>Verifikasi</b> (hijau) &amp; <b>Tolak</b> (merah) + ikon chat WhatsApp. Status diberi badge <code>pending</code> / <code>confirmed</code> / <code>rejected</code>. Verifikasi menulis <code>status='confirmed'</code>, <code>confirmed_by</code>, <code>confirmed_at</code> lalu mencatat ke <code>donation_records</code> / pesanan.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- catatan data -->
+  <section>
+    <div data-theme="teduh" class="rounded-2xl border border-brand-200 bg-brand-50 p-5 flex items-start gap-4">
+      <span class="w-10 h-10 rounded-xl bg-brand-600 text-white grid place-items-center shrink-0"><i data-lucide="database" class="w-5 h-5"></i></span>
+      <div>
+        <p class="font-bold text-brand-800">Catatan data</p>
+        <p class="text-sm text-brand-800/90 mt-1">Metode pembayaran (QRIS, rekening bank, e-wallet, nomor WhatsApp) tersimpan di tabel <code>payment_methods</code>; setiap konfirmasi dari jamaah (donasi &amp; pesanan, beserta nama/anonim, nominal, bukti, link <code>wa.me</code>, dan status pending/confirmed/rejected) tersimpan di <code>payment_confirmations</code>. Tanpa payment gateway — alur manual + verifikasi pengelola. Lihat <code>docs/DATABASE-ARCHITECTURE.md</code> §4 (Pembayaran QRIS + Konfirmasi WhatsApp).</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-center text-xs text-slate-400 pt-6">
+    Blitar Mengaji · Prototype UI/UX — Pembayaran QRIS &amp; Konfirmasi WhatsApp (D14) · dibuat untuk brainstorming sebelum eksekusi · 2026-05-20
+  </footer>
+</main>
+
+<script>lucide.createIcons();</script>
+<script src="theme-switcher.js" defer></script>
+</body>
+</html>
