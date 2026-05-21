@@ -1,0 +1,26 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+
+# env & secrets (JANGAN commit)
+.env
+.env.local
+.env.*.local
+*.key
+
+# drizzle
+/drizzle/meta
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+.vercel
+/coverage
