@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blitar Mengaji
 
-## Getting Started
+> Platform informasi kajian, transparansi keuangan & ekosistem dakwah digital se-**Blitar Raya**. Gratis, mobile-first, dan siap dipasang sebagai aplikasi (PWA/APK).
 
-First, run the development server:
+Melayani umat Blitar Raya sejak **2019** — kini hadir dalam versi digital.
 
+---
+
+## ✨ Fitur
+
+- **Kajian & Jadwal** — info kajian per titik dakwah, jadwal rutin, rekaman & live (YouTube/Facebook).
+- **Peta Dakwah** — peta titik dakwah (Leaflet + OpenStreetMap), kunci lokasi via pin + tautan Google Maps.
+- **Transparansi Keuangan** — pemasukan/pengeluaran per masjid & global, unduh **laporan PDF**.
+- **Donasi** — kampanye per titik dakwah, poster + target + progres, QRIS + konfirmasi WhatsApp, laporan penggunaan dana.
+- **Catatan/Blog** — transkrip kajian bergaya catatan.
+- **Perpustakaan** — pustaka PDF yang diunggah ustadz.
+- **Kelas Online** — kursus + modul + pelajaran (video/teks/PDF) + progres belajar.
+- **Event/Webinar** — info acara + pendaftaran.
+- **Lapak** — UMKM jamaah (maks 3 produk aktif/partner).
+- **Partner & Media Partner** — profil mitra usaha & media.
+- **Tanya Ustadz** — tanya jawab (penanya boleh "Hamba Allah").
+- **Tanya AI** — asisten AI **multi-provider** (DeepSeek/OpenAI/Anthropic/Gemini/dll) dengan retrieval (RAG) + sitasi sumber.
+- **RBAC dinamis** — peran & izin dapat dikonfigurasi; pendaftaran mandiri entitas (titik/ustadz/partner) + verifikasi admin.
+- **Dashboard** terpisah: Admin, Ustadz, dan Pengelola Entitas.
+- **Recycle Bin**, **Audit Log**, **Notifikasi** in-app.
+- **Tema** — 8 tema tampilan yang bisa dipilih pengguna.
+- **PWA → APK** — installable, dukungan offline, siap dibungkus TWA jadi APK Android.
+
+## 🧱 Tech Stack
+
+| Lapisan | Teknologi |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack), React 19, TypeScript |
+| Styling | Tailwind CSS v4 + design system *craft* (ornamen SVG Islami) |
+| Database | Neon (Postgres serverless) + **Drizzle ORM** + pgvector |
+| Auth | NextAuth v5 (Credentials + JWT, opsional Google OAuth) |
+| Storage | Vercel Blob (token terenkripsi AES-256-GCM per entitas) |
+| AI | Lapisan generik OpenAI-compatible (provider/model dikelola via DB) |
+| Peta | Leaflet + OpenStreetMap |
+| PWA | Web App Manifest + Service Worker + TWA (Bubblewrap) |
+
+## 🚀 Mulai
+
+### 1. Prasyarat
+- Node.js 20+ dan **npm**
+- Database **Neon** (Postgres) — aktifkan extension: `CREATE EXTENSION IF NOT EXISTS vector;`
+- Token **Vercel Blob**
+
+### 2. Instalasi
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # lalu isi nilainya
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment (`.env.local`)
+| Variabel | Keterangan |
+|---|---|
+| `DATABASE_URL` | Connection string Neon (pooled) |
+| `DATABASE_URL_UNPOOLED` | Connection string Neon (direct, untuk migrasi) |
+| `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | `http://localhost:3000` (lokal) |
+| `BLOB_READ_WRITE_TOKEN` | Token Vercel Blob |
+| `STORAGE_ENC_KEY` | Hex 32 byte (64 char) — enkripsi token storage & API key AI |
+| `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` | Akun super admin awal (saat seed) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | (opsional) login Google |
+| `NEXT_PUBLIC_SITE_URL` | URL produksi (sitemap/robots/OG/TWA) |
+| `NEXT_PUBLIC_APK_URL` | (opsional) tautan file `.apk` → mengaktifkan banner unduh |
+| `TWA_PACKAGE_NAME` / `TWA_SHA256` | Untuk `/.well-known/assetlinks.json` (APK) |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Kredensial **tidak pernah** di-commit — `.env.local` masuk `.gitignore`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Database
+```bash
+npx tsx db/setup-extensions.ts   # aktifkan pgvector & pgcrypto
+npm run db:generate              # buat migrasi dari schema
+npx drizzle-kit migrate          # terapkan ke Neon
+npm run db:seed                  # RBAC, menu, super admin, 8 tema
+npm run db:seed:ai               # provider & model AI terbaru
+npm run db:seed:uat              # (opsional) data contoh UAT  →  db:unseed:uat untuk hapus
+```
 
-## Learn More
+### 5. Jalankan
+```bash
+npm run dev      # http://localhost:3000
+```
+Login admin memakai `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD`.
 
-To learn more about Next.js, take a look at the following resources:
+## 📜 Skrip npm
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Skrip | Fungsi |
+|---|---|
+| `dev` / `build` / `start` | Next.js dev / build / produksi |
+| `typecheck` | `tsc --noEmit` |
+| `lint` | ESLint |
+| `db:generate` / `db:push` / `db:studio` | Drizzle Kit |
+| `db:seed` / `db:seed:ai` / `db:seed:uat` / `db:unseed:uat` | Seeding |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🗂️ Struktur Proyek
 
-## Deploy on Vercel
+```
+db/                 # Drizzle schema, migrasi, seed
+src/
+  app/
+    (public)/       # halaman publik (beranda, peta, kajian, donasi, ...)
+    (auth)/         # masuk, daftar, lupa/atur ulang sandi
+    admin/          # dashboard admin + modul + manajemen AI
+    kelola/         # dashboard pengelola entitas
+    ustadz/         # dashboard ustadz
+    api/            # NextAuth, AI chat, laporan PDF, assetlinks
+  components/       # ui primitives, site shell, admin shell, map, dll
+  lib/              # db, auth, rbac, blob, storage, ai, queries, actions
+public/             # service worker, ikon, offline, manifest APK
+docs/               # brainstorm, rencana DB, design system, audit, QA, panduan APK
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📱 Build APK (TWA)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+PWA ini bisa dibungkus jadi APK Android via **Bubblewrap**. Langkah lengkap di **[docs/APK-BUILD-GUIDE.md](docs/APK-BUILD-GUIDE.md)** (butuh situs online HTTPS + Android SDK).
+
+## 📚 Dokumentasi
+
+- [AGENTS.md](AGENTS.md) — aturan & konvensi pengembangan
+- [docs/BLITAR-MENGAJI-BRAINSTORM.md](docs/BLITAR-MENGAJI-BRAINSTORM.md) — master plan
+- [docs/DATABASE-PLAN.md](docs/DATABASE-PLAN.md) — rancangan database
+- [docs/AUDIT-IMPROVEMENT-PLAN.md](docs/AUDIT-IMPROVEMENT-PLAN.md) — audit & rencana peningkatan
+- [docs/QA-REPORT.md](docs/QA-REPORT.md) — laporan QA/UAT
+
+## 🤝 Kontribusi
+
+Aturan utama: **DATABASE → BACKEND → FRONTEND**, frontend mengikuti mockup di `docs/ui/`, **npm** saja, dan jangan commit kredensial.
+
+---
+
+_Blitar Mengaji — semoga menjadi amal jariyah untuk umat Blitar Raya._ 🤲
