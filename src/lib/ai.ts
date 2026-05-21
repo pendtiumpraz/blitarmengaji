@@ -7,7 +7,7 @@ import { decryptToken } from "@/lib/storage";
  * (lihat ai_task_bindings). Provider OpenAI-compatible (DeepSeek/OpenAI/Groq/xAI/
  * Mistral/Gemini-compat/OpenRouter/dll). API key terenkripsi di ai_providers.
  */
-export type AiTask = "chat" | "agent" | "doc" | "embedding" | "transcribe" | "summarize" | "vision";
+export type AiTask = "chat" | "agent" | "doc" | "embedding" | "transcribe" | "summarize" | "vision" | "wa_extract";
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
 export type ResolvedModel = {
