@@ -1389,6 +1389,7 @@ export const aiTaskEnum = pgEnum('ai_task', [
   'transcribe',
   'summarize',
   'vision',
+  'wa_extract',
 ]);
 export const aiModelKindEnum = pgEnum('ai_model_kind', [
   'chat',
@@ -1480,5 +1481,55 @@ export const courseLessonProgress = pgTable(
   (t) => ({
     userLessonUq: uniqueIndex('clp_user_lesson_uq').on(t.userId, t.lessonId),
     userCourseIdx: index('clp_user_course_idx').on(t.userId, t.courseId),
+  }),
+);
+
+/* ============================================================
+ * 6.12 WA INGEST — pesan dari WA Listener (read-only) → ekstrak AI → review.
+ * wa_messages: log mentah pesan grup. wa_ingest_queue: draft hasil ekstrak menunggu approve.
+ * ============================================================ */
+export const waMessages = pgTable(
+  'wa_messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: varchar('account_id', { length: 64 }),
+    groupJid: varchar('group_jid', { length: 128 }),
+    groupName: varchar('group_name', { length: 255 }),
+    sender: varchar('sender', { length: 128 }),
+    pushName: varchar('push_name', { length: 255 }),
+    text: text('text'),
+    hasImage: boolean('has_image').notNull().default(false),
+    imageUrl: text('image_url'), // setelah diunggah ke Blob
+    waMessageId: varchar('wa_message_id', { length: 128 }),
+    waTimestamp: timestamp('wa_timestamp', { withTimezone: true }),
+    classification: varchar('classification', { length: 32 }), // kajian|faedah|qna|other|error|pending
+    status: varchar('status', { length: 32 }).notNull().default('received'), // received|processed|error|ai_unconfigured
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    groupIdx: index('wa_messages_group_idx').on(t.groupJid),
+    waMsgIdx: index('wa_messages_msgid_idx').on(t.waMessageId),
+  }),
+);
+
+export const waIngestStatusEnum = pgEnum('wa_ingest_status', ['pending', 'approved', 'rejected']);
+export const waIngestTypeEnum = pgEnum('wa_ingest_type', ['kajian', 'faedah']);
+
+export const waIngestQueue = pgTable(
+  'wa_ingest_queue',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    messageId: uuid('message_id').references(() => waMessages.id, { onDelete: 'set null' }),
+    type: waIngestTypeEnum('type').notNull(),
+    status: waIngestStatusEnum('status').notNull().default('pending'),
+    payloadJson: jsonb('payload_json'), // field hasil ekstrak (judul, ustadz, waktu, dst)
+    titikDakwahId: uuid('titik_dakwah_id').references(() => titikDakwah.id, { onDelete: 'set null' }),
+    imageUrl: text('image_url'),
+    reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    statusIdx: index('wa_ingest_status_idx').on(t.status),
   }),
 );
