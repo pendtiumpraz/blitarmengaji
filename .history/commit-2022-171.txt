@@ -1,2 +1,0 @@
-commit 2022-171
-fix: responsive design improvements

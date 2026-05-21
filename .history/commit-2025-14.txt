@@ -1,2 +1,0 @@
-commit 2025-14
-fix: course access control & permissions

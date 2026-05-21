@@ -1,2 +1,0 @@
-commit 2023-27
-feat: catatan detail & reading experience

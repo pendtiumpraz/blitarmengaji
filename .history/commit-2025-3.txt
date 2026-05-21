@@ -1,2 +1,0 @@
-commit 2025-3
-feat: course module & lesson organization

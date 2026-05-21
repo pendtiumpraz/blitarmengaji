@@ -1,2 +1,0 @@
-commit 2021-82
-feat: donasi status & transparansi laporan

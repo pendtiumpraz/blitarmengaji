@@ -1,2 +1,0 @@
-commit 2024-78
-feat: lapak (products) with 3 item limit

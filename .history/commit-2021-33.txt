@@ -1,2 +1,0 @@
-commit 2021-33
-feat: kajian & titik dakwah detail pages

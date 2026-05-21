@@ -1,2 +1,0 @@
-commit 2023-73
-feat: library browsing & metadata

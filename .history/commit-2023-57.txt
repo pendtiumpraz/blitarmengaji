@@ -1,2 +1,0 @@
-commit 2023-57
-fix: Tiptap editor toolbar styling

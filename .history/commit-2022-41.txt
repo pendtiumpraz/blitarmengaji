@@ -1,2 +1,0 @@
-commit 2022-41
-feat: titik dakwah data model & CRUD

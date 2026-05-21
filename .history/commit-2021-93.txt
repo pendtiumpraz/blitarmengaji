@@ -1,2 +1,0 @@
-commit 2021-93
-fix: responsive design fixes

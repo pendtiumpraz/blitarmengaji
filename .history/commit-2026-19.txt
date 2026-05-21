@@ -1,2 +1,0 @@
-commit 2026-19
-fix: embedding accuracy improvements

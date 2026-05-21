@@ -1,2 +1,0 @@
-commit 2025-24
-feat: lesson progress tracking

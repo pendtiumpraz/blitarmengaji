@@ -1,2 +1,0 @@
-commit 2020-47
-chore: env variables configuration

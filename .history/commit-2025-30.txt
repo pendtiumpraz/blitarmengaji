@@ -1,2 +1,0 @@
-commit 2025-30
-feat: course structure schema

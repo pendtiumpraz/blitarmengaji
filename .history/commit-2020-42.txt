@@ -1,2 +1,0 @@
-commit 2020-42
-feat: configure Drizzle ORM with Neon

@@ -1,2 +1,0 @@
-commit 2021-58
-feat: detail titik dakwah page

@@ -1,2 +1,0 @@
-commit 2026-10
-feat: content embeddings with pgvector

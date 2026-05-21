@@ -1,2 +1,0 @@
-commit 2023-51
-feat: perpustakaan PDF management

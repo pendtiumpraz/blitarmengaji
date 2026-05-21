@@ -1,2 +1,0 @@
-commit 2020-12
-fix: responsive design fixes

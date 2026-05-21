@@ -1,2 +1,0 @@
-commit 2023-143
-fix: responsive design fixes

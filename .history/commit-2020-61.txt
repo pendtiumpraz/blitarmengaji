@@ -1,2 +1,0 @@
-commit 2020-61
-feat: install Tailwind CSS & shadcn/ui

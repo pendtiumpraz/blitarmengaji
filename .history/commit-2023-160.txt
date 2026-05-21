@@ -1,2 +1,0 @@
-commit 2023-160
-fix: permission checks for content creation
