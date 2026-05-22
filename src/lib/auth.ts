@@ -50,6 +50,9 @@ if (googleEnabled) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Ikuti host dari request (X-Forwarded-Host) → redirect ke domain yang dipakai
+  // user (mis. blitarmengaji.com), bukan terkunci ke satu domain.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/masuk" },
   providers,
