@@ -101,7 +101,7 @@ export default async function PerpustakaanPage() {
                     {/* Baca (viewer in-app) + Unduh */}
                     <div className="mt-3 flex items-center gap-2">
                       <Link
-                        href={`/perpustakaan/baca?url=${encodeURIComponent(doc.pdfUrl)}&judul=${encodeURIComponent(doc.title)}`}
+                        href={`/baca?url=${encodeURIComponent(doc.pdfUrl)}&judul=${encodeURIComponent(doc.title)}&back=/perpustakaan`}
                         className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-brand-600 px-4 text-xs font-bold tracking-[0.01em] text-white transition-colors hover:bg-brand-700"
                       >
                         <BookOpen className="h-3.5 w-3.5" /> Baca

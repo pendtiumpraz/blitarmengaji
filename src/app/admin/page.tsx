@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { count } from "drizzle-orm";
 import { Users, ShieldCheck, KeyRound, Palette, FileDown } from "lucide-react";
 import { db, schema } from "@/lib/db";
@@ -62,11 +63,9 @@ export default async function AdminDashboard() {
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {DOCS.map((d) => (
-            <a
+            <Link
               key={d.href}
-              href={d.href}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`/baca?url=${encodeURIComponent(d.href)}&judul=${encodeURIComponent(d.label)}&back=/admin`}
               className="flex items-start gap-3 rounded-sm border border-line bg-cream p-3 transition-colors hover:border-brand-600 hover:bg-brand-50"
             >
               <FileDown className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
@@ -74,7 +73,7 @@ export default async function AdminDashboard() {
                 <span className="block text-sm font-bold text-ink">{d.label}</span>
                 <span className="block text-xs text-muted">{d.note}</span>
               </span>
-            </a>
+            </Link>
           ))}
         </div>
       </Card>

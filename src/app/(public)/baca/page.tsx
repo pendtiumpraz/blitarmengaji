@@ -2,11 +2,12 @@ import Link from "next/link";
 import { ArrowLeft, Download, ExternalLink } from "lucide-react";
 import { Container } from "@/components/ui/container";
 
-export const metadata = { title: "Baca Materi" };
+export const metadata = { title: "Baca Dokumen" };
 export const dynamic = "force-dynamic";
 
-/** Izinkan hanya PDF dari Vercel Blob (cegah embed situs sembarangan). */
+/** Izinkan PDF dari Vercel Blob ATAU endpoint PDF milik sendiri (laporan/panduan). */
 function isAllowed(url: string): boolean {
+  if (url.startsWith("/api/laporan/") || url.startsWith("/api/guide/")) return true;
   try {
     const u = new URL(url);
     return u.protocol === "https:" && u.hostname.endsWith("blob.vercel-storage.com");
@@ -15,24 +16,22 @@ function isAllowed(url: string): boolean {
   }
 }
 
-export default async function BacaMateriPage({
+export default async function BacaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ url?: string; judul?: string }>;
+  searchParams: Promise<{ url?: string; judul?: string; back?: string }>;
 }) {
-  const { url, judul } = await searchParams;
+  const { url, judul, back } = await searchParams;
   const ok = !!url && isAllowed(url);
+  const backHref = back && back.startsWith("/") ? back : "/";
 
   return (
     <Container className="py-4">
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Link
-          href="/perpustakaan"
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 hover:text-brand-600"
-        >
-          <ArrowLeft className="h-4 w-4" /> Perpustakaan
+        <Link href={backHref} className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 hover:text-brand-600">
+          <ArrowLeft className="h-4 w-4" /> Kembali
         </Link>
-        <span className="min-w-0 flex-1 truncate text-sm font-bold text-ink">{judul ?? "Materi"}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-bold text-ink">{judul ?? "Dokumen"}</span>
         {ok ? (
           <>
             <a

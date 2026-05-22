@@ -1,6 +1,8 @@
+import Link from "next/link";
 import {
   ArrowDownLeft,
   ArrowUpRight,
+  BookOpen,
   FileDown,
   Inbox,
   Paperclip,
@@ -105,14 +107,21 @@ export default async function KeuanganPage() {
           <p className="text-sm text-muted">
             Ringkasan dihitung otomatis dari seluruh transaksi yang tercatat.
           </p>
-          <a
-            href="/api/laporan/keuangan"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gold px-5 text-sm font-bold tracking-[0.01em] text-[#241f10] transition-colors hover:bg-gold-light"
-          >
-            <FileDown className="h-4 w-4" /> Unduh Laporan PDF
-          </a>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <Link
+              href="/baca?url=/api/laporan/keuangan&judul=Laporan%20Keuangan&back=/keuangan"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-600 px-5 text-sm font-bold tracking-[0.01em] text-white transition-colors hover:bg-brand-700"
+            >
+              <BookOpen className="h-4 w-4" /> Lihat Laporan
+            </Link>
+            <a
+              href="/api/laporan/keuangan"
+              download
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gold px-5 text-sm font-bold tracking-[0.01em] text-[#241f10] transition-colors hover:bg-gold-light"
+            >
+              <FileDown className="h-4 w-4" /> Unduh PDF
+            </a>
+          </div>
         </div>
 
         {/* RIBBON AYAT AMANAH */}
@@ -312,15 +321,20 @@ export default async function KeuanganPage() {
           )}
         </Card>
 
-        {/* TOMBOL BESAR UNDUH PDF */}
-        <div className="mt-8 text-center">
+        {/* TOMBOL BESAR — LIHAT / UNDUH PDF */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-center">
+          <Link
+            href="/baca?url=/api/laporan/keuangan&judul=Laporan%20Keuangan&back=/keuangan"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[3px] bg-brand-600 px-7 text-sm font-bold tracking-[0.01em] text-white transition-colors hover:bg-brand-700 sm:w-auto sm:px-10"
+          >
+            <BookOpen className="h-5 w-5" /> Lihat Laporan
+          </Link>
           <a
             href="/api/laporan/keuangan"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[3px] bg-gold px-7 text-sm font-bold tracking-[0.01em] text-[#241f10] transition-colors hover:bg-gold-light sm:w-auto sm:px-12"
+            download
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[3px] bg-gold px-7 text-sm font-bold tracking-[0.01em] text-[#241f10] transition-colors hover:bg-gold-light sm:w-auto sm:px-10"
           >
-            <FileDown className="h-5 w-5" /> Unduh Laporan PDF
+            <FileDown className="h-5 w-5" /> Unduh PDF
           </a>
           <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-muted">
             <ShieldCheck className="h-3.5 w-3.5 text-brand-600" /> Laporan resmi, sah, & dapat diaudit
