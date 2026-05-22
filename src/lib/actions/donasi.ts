@@ -79,7 +79,8 @@ export async function createCampaign(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data campaign tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data campaign tidak valid.";
+    redirect("/admin/donasi?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -91,7 +92,10 @@ export async function createCampaign(formData: FormData): Promise<void> {
       .where(and(eq(schema.titikDakwah.id, data.titikDakwahId), isNull(schema.titikDakwah.deletedAt)))
       .limit(1);
     if (!titik[0] || titik[0].ownerUserId !== userId) {
-      throw new Error("Akses ditolak: Anda hanya bisa membuat campaign untuk titik dakwah sendiri.");
+      redirect(
+        "/admin/donasi?err=" +
+          encodeURIComponent("Akses ditolak: Anda hanya bisa membuat campaign untuk titik dakwah sendiri."),
+      );
     }
   }
 
@@ -115,7 +119,7 @@ export async function createCampaign(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/donasi");
   revalidatePath("/donasi");
-  redirect("/admin/donasi");
+  redirect("/admin/donasi?ok=" + encodeURIComponent("Donasi tersimpan."));
 }
 
 const updateCampaignSchema = z.object({
@@ -159,7 +163,8 @@ export async function updateCampaign(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data campaign tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data campaign tidak valid.";
+    redirect("/admin/donasi?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -178,10 +183,17 @@ export async function updateCampaign(formData: FormData): Promise<void> {
     .limit(1);
 
   const campaign = rows[0];
-  if (!campaign) throw new Error("Campaign tidak ditemukan atau sudah dihapus.");
+  if (!campaign) {
+    redirect(
+      "/admin/donasi?err=" + encodeURIComponent("Campaign tidak ditemukan atau sudah dihapus."),
+    );
+  }
 
   if (!allowedAll && campaign.createdBy !== userId && campaign.titikOwner !== userId) {
-    throw new Error("Akses ditolak: Anda hanya bisa mengubah campaign sendiri.");
+    redirect(
+      "/admin/donasi?err=" +
+        encodeURIComponent("Akses ditolak: Anda hanya bisa mengubah campaign sendiri."),
+    );
   }
 
   // Bila pindah titik, pastikan titik tujuan dimiliki user (untuk manage_own).
@@ -192,7 +204,10 @@ export async function updateCampaign(formData: FormData): Promise<void> {
       .where(and(eq(schema.titikDakwah.id, data.titikDakwahId), isNull(schema.titikDakwah.deletedAt)))
       .limit(1);
     if (!titik[0] || titik[0].ownerUserId !== userId) {
-      throw new Error("Akses ditolak: Anda hanya bisa memindahkan ke titik dakwah sendiri.");
+      redirect(
+        "/admin/donasi?err=" +
+          encodeURIComponent("Akses ditolak: Anda hanya bisa memindahkan ke titik dakwah sendiri."),
+      );
     }
   }
 
@@ -221,7 +236,7 @@ export async function updateCampaign(formData: FormData): Promise<void> {
   revalidatePath("/admin/donasi");
   revalidatePath("/donasi");
   revalidatePath(`/donasi/${data.slug}`);
-  redirect("/admin/donasi");
+  redirect("/admin/donasi?ok=" + encodeURIComponent("Donasi tersimpan."));
 }
 
 const addUpdateSchema = z.object({
@@ -244,7 +259,8 @@ export async function addDonationUpdate(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data laporan tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data laporan tidak valid.";
+    redirect("/admin/donasi?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -254,7 +270,9 @@ export async function addDonationUpdate(formData: FormData): Promise<void> {
     .from(schema.donationCampaigns)
     .where(and(eq(schema.donationCampaigns.id, data.campaignId), isNull(schema.donationCampaigns.deletedAt)))
     .limit(1);
-  if (!campaign[0]) throw new Error("Campaign tidak ditemukan.");
+  if (!campaign[0]) {
+    redirect("/admin/donasi?err=" + encodeURIComponent("Campaign tidak ditemukan."));
+  }
 
   // Upload bukti/nota NYATA ke Vercel Blob. File menang atas input URL.
   const attachment = await uploadToBlob(
@@ -273,7 +291,7 @@ export async function addDonationUpdate(formData: FormData): Promise<void> {
   revalidatePath("/admin/donasi");
   revalidatePath("/donasi");
   revalidatePath(`/donasi/${campaign[0].slug}`);
-  redirect("/admin/donasi");
+  redirect("/admin/donasi?ok=" + encodeURIComponent("Laporan ditambahkan."));
 }
 
 const softDeleteSchema = z.object({
@@ -289,7 +307,8 @@ export async function softDeleteCampaign(formData: FormData): Promise<void> {
 
   const parsed = softDeleteSchema.safeParse({ id: formData.get("id") });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Campaign tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Campaign tidak valid.";
+    redirect("/admin/donasi?err=" + encodeURIComponent(msg));
   }
 
   // Verifikasi keberadaan + ownership bila perlu.
@@ -305,10 +324,17 @@ export async function softDeleteCampaign(formData: FormData): Promise<void> {
     .limit(1);
 
   const campaign = rows[0];
-  if (!campaign) throw new Error("Campaign tidak ditemukan atau sudah dihapus.");
+  if (!campaign) {
+    redirect(
+      "/admin/donasi?err=" + encodeURIComponent("Campaign tidak ditemukan atau sudah dihapus."),
+    );
+  }
 
   if (!allowedAll && campaign.createdBy !== userId && campaign.titikOwner !== userId) {
-    throw new Error("Akses ditolak: Anda hanya bisa menghapus campaign sendiri.");
+    redirect(
+      "/admin/donasi?err=" +
+        encodeURIComponent("Akses ditolak: Anda hanya bisa menghapus campaign sendiri."),
+    );
   }
 
   await db
@@ -318,5 +344,5 @@ export async function softDeleteCampaign(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/donasi");
   revalidatePath("/donasi");
-  redirect("/admin/donasi");
+  redirect("/admin/donasi?ok=" + encodeURIComponent("Campaign dihapus."));
 }

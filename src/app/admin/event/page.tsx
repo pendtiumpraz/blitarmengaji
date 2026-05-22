@@ -1,57 +1,48 @@
-import { CalendarDays, Eye, MapPin, Pencil, Save, Trash2, Users, Video } from "lucide-react";
+import { CalendarDays, Save } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { FileUpload } from "@/components/ui/file-upload";
-import { Pagination } from "@/components/ui/pagination";
-import { listEventsPaged, countEvents } from "@/lib/queries/event";
+import { DataTable, type Column } from "@/components/ui/data-table";
+import { TitikField } from "@/components/map/titik-field";
+import { listEventsPaged } from "@/lib/queries/event";
+import { listTitikActiveOptions } from "@/lib/queries/titik";
 import { createEvent, softDeleteEvent } from "@/lib/actions/event";
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 10;
+const KIND_LABEL: Record<string, string> = {
+  webinar: "Webinar",
+  offline: "Offline",
+  hybrid: "Hybrid",
+};
 
-function KindBadge({ kind }: { kind: "webinar" | "offline" | "hybrid" }) {
-  if (kind === "webinar")
-    return (
-      <Badge tone="brand">
-        <Video className="h-3 w-3" /> Webinar
-      </Badge>
-    );
-  if (kind === "hybrid")
-    return (
-      <Badge tone="gold">
-        <MapPin className="h-3 w-3" /> Hybrid
-      </Badge>
-    );
-  return (
-    <Badge tone="muted">
-      <MapPin className="h-3 w-3" /> Offline
-    </Badge>
-  );
-}
+const STATUS_LABEL: Record<string, string> = {
+  published: "Terbit",
+  draft: "Draf",
+};
 
-function formatTanggal(d: Date | null) {
-  if (!d) return "—";
-  return new Date(d).toLocaleString("id-ID", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
+const columns: Column[] = [
+  { key: "title", label: "Acara", sortable: true },
+  { key: "kind", label: "Jenis", type: "badge", sortable: true, filter: true },
+  { key: "startAt", label: "Mulai", type: "datetime", sortable: true },
+  { key: "status", label: "Status", type: "badge", sortable: true, filter: true },
+];
 
-export default async function AdminEventPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
-  const { page: pageParam } = await searchParams;
-  const page = Math.max(1, Number(pageParam) || 1);
-  const [events, total] = await Promise.all([
-    listEventsPaged(page, PAGE_SIZE),
-    countEvents(),
+export default async function AdminEventPage() {
+  // Ambil SEMUA acara (semua status, belum dihapus) untuk DataTable.
+  const [events, titikOptions] = await Promise.all([
+    listEventsPaged(1, 100000),
+    listTitikActiveOptions(),
   ]);
+  const rows = events.map((e) => ({
+    id: e.id,
+    title: e.title,
+    kind: KIND_LABEL[e.kind] ?? e.kind,
+    startAt: e.startAt,
+    status: STATUS_LABEL[e.status] ?? e.status,
+  }));
 
   return (
     <div>
@@ -105,8 +96,10 @@ export default async function AdminEventPage({
                 </Field>
               </div>
 
-              <Field label="Lokasi" htmlFor="location" hint="Untuk acara offline / hybrid.">
-                <Input id="location" name="location" placeholder="Mis. Masjid Agung Blitar" />
+              <TitikField name="titikDakwahId" options={titikOptions} label="Titik Dakwah / Lokasi" />
+
+              <Field label="Detail alamat (opsional)" htmlFor="location" hint="Pelengkap titik, mis. ruang/lantai.">
+                <Input id="location" name="location" placeholder="Mis. Aula lantai 2" />
               </Field>
 
               <Field label="Link daring" htmlFor="onlineUrl" hint="Untuk webinar / hybrid.">
@@ -143,86 +136,18 @@ export default async function AdminEventPage({
 
         {/* Daftar acara */}
         <section>
-          <h2 className="display flex items-center gap-2 text-lg text-ink">
+          <h2 className="display mb-4 flex items-center gap-2 text-lg text-ink">
             <CalendarDays className="h-5 w-5 text-brand-600" /> Daftar Acara
           </h2>
 
-          {events.length === 0 ? (
-            <Card className="mt-4 grid place-items-center px-6 py-16 text-center">
-              <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand-600">
-                <CalendarDays className="h-7 w-7" />
-              </span>
-              <p className="display mt-3 text-lg text-ink">Belum ada acara</p>
-              <p className="mt-1 max-w-sm text-sm text-muted">
-                Buat acara atau webinar pertama lewat formulir di samping agar muncul di halaman publik.
-              </p>
-            </Card>
-          ) : (
-            <div className="mt-4 space-y-3">
-              {events.map((e) => (
-                <Card key={e.id} className="flex items-start gap-3 p-4">
-                  <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-sm bg-brand-600 text-white">
-                    {e.coverImage ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={e.coverImage} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <CalendarDays className="h-6 w-6" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-bold leading-tight text-ink">{e.title}</p>
-                      <span className="flex shrink-0 items-center gap-1.5">
-                        <KindBadge kind={e.kind} />
-                        <Badge tone={e.status === "published" ? "success" : "muted"}>
-                          {e.status === "published" ? "Terbit" : "Draf"}
-                        </Badge>
-                      </span>
-                    </div>
-                    <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted">
-                      <span className="inline-flex items-center gap-1">
-                        <CalendarDays className="h-3 w-3" /> {formatTanggal(e.startAt)}
-                      </span>
-                      {e.location ? (
-                        <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-3 w-3" /> {e.location}
-                        </span>
-                      ) : null}
-                      <span className="inline-flex items-center gap-1">
-                        <Users className="h-3 w-3" /> {e.registeredCount} pendaftar
-                      </span>
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
-                      <Button href={`/event/${e.slug}`} variant="ghost" size="sm">
-                        <Eye className="h-3.5 w-3.5" /> Lihat Publik
-                      </Button>
-                      <div className="flex items-center gap-2">
-                        <Button href={`/admin/event/${e.id}`} variant="ghost" size="sm">
-                          <Pencil className="h-3.5 w-3.5" /> Edit
-                        </Button>
-                        <form action={softDeleteEvent}>
-                          <input type="hidden" name="id" value={e.id} />
-                          <Button
-                            type="submit"
-                            variant="danger"
-                            size="sm"
-                            className="bg-red-50 text-red-600 hover:bg-red-100"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" /> Hapus
-                          </Button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {total > 0 ? (
-            <Pagination page={page} pageSize={PAGE_SIZE} total={total} baseHref="/admin/event" />
-          ) : null}
+          <DataTable
+            columns={columns}
+            rows={rows}
+            editBase="/admin/event"
+            deleteAction={softDeleteEvent}
+            deleteConfirmText="Acara akan dipindah ke Recycle Bin (bisa dipulihkan)."
+            emptyText="Belum ada acara."
+          />
         </section>
       </div>
     </div>

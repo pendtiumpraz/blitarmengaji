@@ -57,7 +57,7 @@ export async function createTitik(formData: FormData): Promise<void> {
 
   if (!parsed.success) {
     const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
-    throw new Error(msg);
+    redirect("/admin/titik?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -97,7 +97,7 @@ export async function createTitik(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/titik");
   revalidatePath("/peta");
-  redirect("/admin/titik");
+  redirect("/admin/titik?ok=" + encodeURIComponent("Data titik tersimpan."));
 }
 
 const updateSchema = createSchema.extend({
@@ -124,7 +124,7 @@ export async function updateTitik(formData: FormData): Promise<void> {
 
   if (!parsed.success) {
     const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
-    throw new Error(msg);
+    redirect("/admin/titik?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -165,7 +165,7 @@ export async function updateTitik(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/titik");
   revalidatePath("/peta");
-  redirect("/admin/titik");
+  redirect("/admin/titik?ok=" + encodeURIComponent("Data titik tersimpan."));
 }
 
 const deleteSchema = z.object({
@@ -190,4 +190,34 @@ export async function softDeleteTitik(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/titik");
   revalidatePath("/peta");
+  redirect("/admin/titik?ok=" + encodeURIComponent("Titik dihapus — tersedia di Recycle Bin."));
+}
+
+/** Aktifkan / nonaktifkan titik dakwah (tanpa hapus). Nonaktif = hilang dari peta & dropdown. */
+export async function toggleTitikActive(formData: FormData): Promise<void> {
+  await requirePermission("titik.update");
+
+  const parsed = deleteSchema.safeParse({ id: opt(formData.get("id")) });
+  if (!parsed.success) {
+    redirect("/admin/titik?err=" + encodeURIComponent("Titik tidak valid."));
+  }
+
+  const rows = await db
+    .select({ isActive: schema.titikDakwah.isActive })
+    .from(schema.titikDakwah)
+    .where(and(eq(schema.titikDakwah.id, parsed.data.id), isNull(schema.titikDakwah.deletedAt)))
+    .limit(1);
+  if (!rows[0]) {
+    redirect("/admin/titik?err=" + encodeURIComponent("Titik tidak ditemukan."));
+  }
+
+  const next = !rows[0].isActive;
+  await db
+    .update(schema.titikDakwah)
+    .set({ isActive: next, updatedAt: new Date() })
+    .where(eq(schema.titikDakwah.id, parsed.data.id));
+
+  revalidatePath("/admin/titik");
+  revalidatePath("/peta");
+  redirect("/admin/titik?ok=" + encodeURIComponent(next ? "Titik diaktifkan." : "Titik dinonaktifkan."));
 }

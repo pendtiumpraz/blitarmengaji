@@ -53,6 +53,10 @@ const askSchema = z
 export async function askQuestion(formData: FormData): Promise<void> {
   const session = await auth();
   const userId = session?.user?.id ?? null;
+  // Hanya pengguna berakun yang boleh bertanya.
+  if (!userId) {
+    redirect("/masuk?next=" + encodeURIComponent("/tanya-ustadz/ajukan"));
+  }
 
   const rawCategory = String(formData.get("category_id") ?? "").trim();
   const parsed = askSchema.safeParse({
@@ -117,7 +121,7 @@ export async function answerQuestion(formData: FormData): Promise<void> {
   const userId = session?.user?.id;
   const userName = session?.user?.name?.trim();
   if (!userId || !userName) {
-    throw new Error("Sesi tidak valid. Silakan masuk kembali.");
+    redirect("/admin/tanya?err=" + encodeURIComponent("Sesi tidak valid. Silakan masuk kembali."));
   }
 
   const parsed = answerSchema.safeParse({
@@ -125,7 +129,7 @@ export async function answerQuestion(formData: FormData): Promise<void> {
     body: String(formData.get("body") ?? ""),
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    redirect("/admin/tanya?err=" + encodeURIComponent(parsed.error.issues[0]?.message ?? "Data tidak valid."));
   }
   const { questionId, body } = parsed.data;
 
@@ -137,7 +141,9 @@ export async function answerQuestion(formData: FormData): Promise<void> {
     .where(and(eq(questions.id, questionId), isNull(questions.deletedAt)))
     .limit(1);
   const question = qRows[0];
-  if (!question) throw new Error("Pertanyaan tidak ditemukan.");
+  if (!question) {
+    redirect("/admin/tanya?err=" + encodeURIComponent("Pertanyaan tidak ditemukan."));
+  }
 
   // answers.ustadz_id WAJIB (NOT NULL). Resolusi profil ustadz milik penjawab.
   // Bila belum ada profil, buat otomatis dengan NAMA dari sesi (jawaban WAJIB pakai nama).
@@ -187,4 +193,5 @@ export async function answerQuestion(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/tanya");
   revalidatePath("/tanya-ustadz");
+  redirect("/admin/tanya?ok=" + encodeURIComponent("Jawaban terkirim."));
 }

@@ -1,7 +1,8 @@
 "use server";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db, schema } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -43,7 +44,8 @@ export async function createRole(formData: FormData): Promise<void> {
     description: opt(formData.get("description")),
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/rbac?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -55,7 +57,7 @@ export async function createRole(formData: FormData): Promise<void> {
     .where(and(eq(schema.roles.slug, data.slug), isNull(schema.roles.deletedAt)))
     .limit(1);
   if (existing.length > 0) {
-    throw new Error(`Slug role '${data.slug}' sudah dipakai.`);
+    redirect("/admin/rbac?err=" + encodeURIComponent(`Slug role '${data.slug}' sudah dipakai.`));
   }
 
   await db.insert(schema.roles).values({
@@ -66,6 +68,7 @@ export async function createRole(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/rbac");
+  redirect("/admin/rbac?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 // ── saveRolePermissions ────────────────────────────────────────────────────────
@@ -83,7 +86,8 @@ export async function saveRolePermissions(formData: FormData): Promise<void> {
 
   const parsed = saveRolePermsSchema.safeParse({ roleId: opt(formData.get("roleId")) });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/rbac?err=" + encodeURIComponent(msg));
   }
   const { roleId } = parsed.data;
 
@@ -93,7 +97,9 @@ export async function saveRolePermissions(formData: FormData): Promise<void> {
     .from(schema.roles)
     .where(and(eq(schema.roles.id, roleId), isNull(schema.roles.deletedAt)))
     .limit(1);
-  if (roleRow.length === 0) throw new Error("Role tidak ditemukan.");
+  if (roleRow.length === 0) {
+    redirect("/admin/rbac?err=" + encodeURIComponent("Role tidak ditemukan."));
+  }
 
   // Daftar key tercentang dari form.
   const checkedKeys = formData
@@ -123,6 +129,7 @@ export async function saveRolePermissions(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/admin/rbac");
+  redirect("/admin/rbac?ok=" + encodeURIComponent("Berhasil."));
 }
 
 // ── verifyEntity / rejectEntity ────────────────────────────────────────────────
@@ -266,7 +273,8 @@ export async function verifyEntity(formData: FormData): Promise<void> {
     id: opt(formData.get("id")),
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/users?err=" + encodeURIComponent(msg));
   }
 
   await setEntityStatus(parsed.data.type, parsed.data.id, "active");
@@ -284,6 +292,7 @@ export async function verifyEntity(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/users");
+  redirect("/admin/users?ok=" + encodeURIComponent("Berhasil."));
 }
 
 /** Tolak entitas: set status 'rejected'. */
@@ -295,11 +304,13 @@ export async function rejectEntity(formData: FormData): Promise<void> {
     id: opt(formData.get("id")),
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/users?err=" + encodeURIComponent(msg));
   }
 
   await setEntityStatus(parsed.data.type, parsed.data.id, "rejected");
   revalidatePath("/admin/users");
+  redirect("/admin/users?ok=" + encodeURIComponent("Berhasil."));
 }
 
 // ── softDeleteUser ─────────────────────────────────────────────────────────────
@@ -314,13 +325,14 @@ export async function softDeleteUser(formData: FormData): Promise<void> {
 
   const parsed = deleteUserSchema.safeParse({ id: opt(formData.get("id")) });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/users?err=" + encodeURIComponent(msg));
   }
 
   const session = await auth();
   const actorId = session?.user?.id ?? null;
   if (actorId && actorId === parsed.data.id) {
-    throw new Error("Tidak dapat menghapus akun sendiri.");
+    redirect("/admin/users?err=" + encodeURIComponent("Tidak dapat menghapus akun sendiri."));
   }
 
   await db
@@ -329,4 +341,143 @@ export async function softDeleteUser(formData: FormData): Promise<void> {
     .where(and(eq(schema.users.id, parsed.data.id), isNull(schema.users.deletedAt)));
 
   revalidatePath("/admin/users");
+  redirect("/admin/users?ok=" + encodeURIComponent("Berhasil."));
+}
+
+// ── updateUser ───────────────────────────────────────────────────────────────
+
+const updateUserSchema = z.object({
+  id: z.string().uuid("ID pengguna tidak valid."),
+  name: z.string().trim().min(2, "Nama minimal 2 karakter."),
+  email: z.string().trim().email("Email tidak valid."),
+  phone: z.string().trim().max(32, "Nomor telepon terlalu panjang.").optional(),
+  status: z.enum(["active", "pending", "banned"], { message: "Status tidak valid." }),
+  roleId: z.string().uuid("ID role tidak valid.").optional(),
+});
+
+/**
+ * Ubah data pengguna (name/email/phone/status) + set role tunggal.
+ * Cek RBAC (user.manage). Validasi Zod. Email unik dijaga (cegah bentrok dgn user aktif lain).
+ * Role: hapus semua user_roles lama lalu set role yang dipilih (boleh kosong = tanpa role).
+ * Revalidate /admin/users + redirect.
+ */
+export async function updateUser(formData: FormData): Promise<void> {
+  await requirePermission("user.manage");
+
+  const parsed = updateUserSchema.safeParse({
+    id: opt(formData.get("id")),
+    name: opt(formData.get("name")),
+    email: opt(formData.get("email")),
+    phone: opt(formData.get("phone")),
+    status: opt(formData.get("status")),
+    roleId: opt(formData.get("roleId")),
+  });
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/users?err=" + encodeURIComponent(msg));
+  }
+  const data = parsed.data;
+
+  // Pastikan user ada & aktif.
+  const [userRow] = await db
+    .select({ id: schema.users.id })
+    .from(schema.users)
+    .where(and(eq(schema.users.id, data.id), isNull(schema.users.deletedAt)))
+    .limit(1);
+  if (!userRow) {
+    redirect("/admin/users?err=" + encodeURIComponent("Pengguna tidak ditemukan."));
+  }
+
+  // Cegah email bentrok dengan user aktif LAIN.
+  const dup = await db
+    .select({ id: schema.users.id })
+    .from(schema.users)
+    .where(
+      and(
+        eq(schema.users.email, data.email),
+        ne(schema.users.id, data.id),
+        isNull(schema.users.deletedAt),
+      ),
+    )
+    .limit(1);
+  if (dup.length > 0) {
+    redirect(
+      "/admin/users?err=" +
+        encodeURIComponent(`Email '${data.email}' sudah dipakai pengguna lain.`),
+    );
+  }
+
+  await db
+    .update(schema.users)
+    .set({
+      name: data.name,
+      email: data.email,
+      phone: data.phone ?? null,
+      status: data.status,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(schema.users.id, data.id), isNull(schema.users.deletedAt)));
+
+  // Set role: hapus semua role lama, lalu pasang yang dipilih (bila ada).
+  await db.delete(schema.userRoles).where(eq(schema.userRoles.userId, data.id));
+  if (data.roleId) {
+    await db
+      .insert(schema.userRoles)
+      .values({ userId: data.id, roleId: data.roleId })
+      .onConflictDoNothing();
+  }
+
+  revalidatePath("/admin/users");
+  redirect("/admin/users?ok=" + encodeURIComponent("Tersimpan."));
+}
+
+// ── updateRole ───────────────────────────────────────────────────────────────
+
+const updateRoleSchema = z.object({
+  id: z.string().uuid("ID role tidak valid."),
+  name: z.string().trim().min(2, "Nama role minimal 2 karakter."),
+  description: z.string().trim().optional(),
+});
+
+/**
+ * Ubah role: hanya name & description. Slug & is_system TIDAK boleh diubah
+ * untuk role sistem (kunci di service layer). Cek RBAC (role.manage).
+ * Revalidate /admin/rbac.
+ */
+export async function updateRole(formData: FormData): Promise<void> {
+  await requirePermission("role.manage");
+
+  const parsed = updateRoleSchema.safeParse({
+    id: opt(formData.get("id")),
+    name: opt(formData.get("name")),
+    description: opt(formData.get("description")),
+  });
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/rbac?err=" + encodeURIComponent(msg));
+  }
+  const data = parsed.data;
+
+  // Pastikan role ada & aktif.
+  const [roleRow] = await db
+    .select({ id: schema.roles.id })
+    .from(schema.roles)
+    .where(and(eq(schema.roles.id, data.id), isNull(schema.roles.deletedAt)))
+    .limit(1);
+  if (!roleRow) {
+    redirect("/admin/rbac?err=" + encodeURIComponent("Role tidak ditemukan."));
+  }
+
+  // Hanya name & description yang diubah — slug & isSystem dipertahankan.
+  await db
+    .update(schema.roles)
+    .set({
+      name: data.name,
+      description: data.description ?? null,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(schema.roles.id, data.id), isNull(schema.roles.deletedAt)));
+
+  revalidatePath("/admin/rbac");
+  redirect("/admin/rbac?ok=" + encodeURIComponent("Tersimpan."));
 }

@@ -1,23 +1,12 @@
-import { BadgeDollarSign, CircleDot, Check, X, FileText, History, Inbox } from "lucide-react";
+import { CircleDot, Check, History, Inbox } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { listPendingConfirmations, listConfirmationHistory } from "@/lib/queries/pembayaran";
 import { verifyPayment, rejectPayment } from "@/lib/actions/pembayaran-admin";
 
 export const dynamic = "force-dynamic";
-
-function rupiah(amount: string | null): string {
-  const n = Number(amount ?? 0);
-  return Number.isFinite(n) ? "Rp " + n.toLocaleString("id-ID") : "—";
-}
-
-function tanggal(d: Date | null): string {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
-}
 
 function donaturName(payerName: string | null, isAnonymous: boolean): string {
   if (isAnonymous) return "Hamba Allah";
@@ -28,11 +17,58 @@ function jenisLabel(kind: "donation" | "order"): string {
   return kind === "donation" ? "Donasi" : "Pesanan";
 }
 
+function jenisKampanye(kind: "donation" | "order", campaignTitle: string | null): string {
+  if (kind === "donation") {
+    return "Donasi — " + (campaignTitle?.trim() || "Kampanye tidak ditemukan");
+  }
+  return jenisLabel(kind);
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  confirmed: "Terverifikasi",
+  rejected: "Ditolak",
+  pending: "Menunggu",
+};
+
+const pendingColumns: Column[] = [
+  { key: "payer", label: "Donatur", sortable: true },
+  { key: "campaignTitle", label: "Jenis / Kampanye", filter: true },
+  { key: "amount", label: "Jumlah", type: "money", sortable: true, className: "text-right" },
+  { key: "status", label: "Status", type: "badge" },
+  { key: "createdAt", label: "Tanggal", type: "datetime", sortable: true },
+];
+
+const historyColumns: Column[] = [
+  { key: "payer", label: "Donatur", sortable: true },
+  { key: "campaignTitle", label: "Jenis / Kampanye", filter: true },
+  { key: "amount", label: "Jumlah", type: "money", sortable: true, className: "text-right" },
+  { key: "status", label: "Status", type: "badge", sortable: true, filter: true },
+  { key: "createdAt", label: "Diproses", type: "datetime", sortable: true },
+];
+
 export default async function AdminPembayaranPage() {
   const [pending, history] = await Promise.all([
     listPendingConfirmations(),
     listConfirmationHistory(20),
   ]);
+
+  const pendingRows = pending.map((p) => ({
+    id: p.id,
+    payer: donaturName(p.payerName, p.isAnonymous),
+    campaignTitle: jenisKampanye(p.kind, p.campaignTitle),
+    amount: p.amount,
+    status: STATUS_LABEL[p.status] ?? p.status,
+    createdAt: p.createdAt,
+  }));
+
+  const historyRows = history.map((h) => ({
+    id: h.id,
+    payer: donaturName(h.payerName, h.isAnonymous),
+    campaignTitle: jenisKampanye(h.kind, h.campaignTitle),
+    amount: h.amount,
+    status: STATUS_LABEL[h.status] ?? h.status,
+    createdAt: h.confirmedAt ?? h.createdAt,
+  }));
 
   return (
     <div>
@@ -65,71 +101,25 @@ export default async function AdminPembayaranPage() {
             </p>
           </Card>
         ) : (
-          <Table className="mt-4">
-            <THead>
-              <TR>
-                <TH>Donatur</TH>
-                <TH>Jenis / Kampanye</TH>
-                <TH className="text-right">Jumlah</TH>
-                <TH>Bukti</TH>
-                <TH>Tanggal</TH>
-                <TH className="text-right">Aksi</TH>
-              </TR>
-            </THead>
-            <tbody>
-              {pending.map((p) => (
-                <TR key={p.id}>
-                  <TD>
-                    <span className="font-bold text-ink">{donaturName(p.payerName, p.isAnonymous)}</span>
-                    {p.note ? <p className="mt-0.5 text-[11px] text-muted">{p.note}</p> : null}
-                  </TD>
-                  <TD>
-                    <Badge tone={p.kind === "donation" ? "brand" : "muted"}>{jenisLabel(p.kind)}</Badge>
-                    {p.kind === "donation" ? (
-                      <p className="mt-1 text-xs text-muted">{p.campaignTitle ?? "Kampanye tidak ditemukan"}</p>
-                    ) : null}
-                  </TD>
-                  <TD className="text-right font-bold text-brand-700">{rupiah(p.amount)}</TD>
-                  <TD>
-                    {p.proofUrl ? (
-                      <a
-                        href={p.proofUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-brand-700 underline-offset-2 hover:underline"
-                      >
-                        <FileText className="h-3.5 w-3.5" /> Lihat
-                      </a>
-                    ) : (
-                      <span className="text-muted">—</span>
-                    )}
-                  </TD>
-                  <TD className="whitespace-nowrap text-muted">{tanggal(p.createdAt)}</TD>
-                  <TD>
-                    <div className="flex items-center justify-end gap-2">
-                      <form action={verifyPayment}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <Button type="submit" variant="primary" size="sm">
-                          <Check className="h-3.5 w-3.5" /> Verifikasi
-                        </Button>
-                      </form>
-                      <form action={rejectPayment}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <Button
-                          type="submit"
-                          variant="danger"
-                          size="sm"
-                          className="bg-red-50 text-red-600 hover:bg-red-100"
-                        >
-                          <X className="h-3.5 w-3.5" /> Tolak
-                        </Button>
-                      </form>
-                    </div>
-                  </TD>
-                </TR>
-              ))}
-            </tbody>
-          </Table>
+          <div className="mt-4">
+            <DataTable
+              columns={pendingColumns}
+              rows={pendingRows}
+              rowActions={[
+                { action: verifyPayment, label: "Verifikasi", idField: "id" },
+                {
+                  action: rejectPayment,
+                  label: "Tolak",
+                  idField: "id",
+                  confirm: true,
+                  danger: true,
+                  confirmTitle: "Tolak pembayaran ini?",
+                  confirmText: "Konfirmasi pembayaran akan ditandai ditolak.",
+                },
+              ]}
+              emptyText="Tidak ada konfirmasi menunggu verifikasi."
+            />
+          </div>
         )}
       </section>
 
@@ -150,45 +140,13 @@ export default async function AdminPembayaranPage() {
             </p>
           </Card>
         ) : (
-          <Table className="mt-4">
-            <THead>
-              <TR>
-                <TH>Donatur</TH>
-                <TH>Jenis / Kampanye</TH>
-                <TH className="text-right">Jumlah</TH>
-                <TH>Status</TH>
-                <TH>Diproses</TH>
-              </TR>
-            </THead>
-            <tbody>
-              {history.map((h) => (
-                <TR key={h.id}>
-                  <TD>
-                    <span className="font-bold text-ink">{donaturName(h.payerName, h.isAnonymous)}</span>
-                  </TD>
-                  <TD>
-                    <Badge tone={h.kind === "donation" ? "brand" : "muted"}>{jenisLabel(h.kind)}</Badge>
-                    {h.kind === "donation" ? (
-                      <p className="mt-1 text-xs text-muted">{h.campaignTitle ?? "Kampanye tidak ditemukan"}</p>
-                    ) : null}
-                  </TD>
-                  <TD className="text-right font-bold text-brand-700">{rupiah(h.amount)}</TD>
-                  <TD>
-                    {h.status === "confirmed" ? (
-                      <Badge tone="success">
-                        <Check className="h-3 w-3" /> Terverifikasi
-                      </Badge>
-                    ) : (
-                      <Badge tone="danger">
-                        <X className="h-3 w-3" /> Ditolak
-                      </Badge>
-                    )}
-                  </TD>
-                  <TD className="whitespace-nowrap text-muted">{tanggal(h.confirmedAt)}</TD>
-                </TR>
-              ))}
-            </tbody>
-          </Table>
+          <div className="mt-4">
+            <DataTable
+              columns={historyColumns}
+              rows={historyRows}
+              emptyText="Belum ada riwayat konfirmasi."
+            />
+          </div>
         )}
       </section>
     </div>

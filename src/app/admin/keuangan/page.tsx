@@ -1,11 +1,8 @@
-import Link from "next/link";
 import {
   ArrowDownLeft,
   ArrowUpRight,
   FileDown,
   History,
-  Inbox,
-  Paperclip,
   Pencil,
   Tags,
   Trash2,
@@ -15,48 +12,60 @@ import { AdminPageHeader } from "@/components/admin/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
-import { Pagination } from "@/components/ui/pagination";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
 import { cn } from "@/lib/cn";
-import { createFinanceCategory, softDeleteTransaction } from "@/lib/actions/keuangan";
 import {
-  countTransactions,
+  createFinanceCategory,
+  deleteFinanceCategory,
+  softDeleteTransaction,
+  updateFinanceCategory,
+} from "@/lib/actions/keuangan";
+import {
   getSummary,
   listCategories,
   listFinanceCategories,
   listScopes,
-  listTransactionsPaged,
+  listTransactions,
 } from "@/lib/queries/keuangan";
 import { FinanceForm } from "./form";
 
 // Halaman ini membaca data langsung dari Neon → jangan di-cache statik.
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 10;
-
 function rupiah(n: number) {
   return "Rp " + Math.round(n).toLocaleString("id-ID");
 }
 
-const dateFmt = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short" });
+// Kolom DataTable transaksi. Tipe ditampilkan sebagai badge income/expense (Indonesia),
+// jumlah & tanggal diformat oleh DataTable (type:'money' & type:'datetime').
+const columns: Column[] = [
+  { key: "trxDate", label: "Tanggal", type: "datetime", sortable: true },
+  { key: "categoryName", label: "Kategori", sortable: true },
+  { key: "type", label: "Tipe", type: "badge", sortable: true, filter: true },
+  { key: "amount", label: "Jumlah", type: "money", sortable: true, className: "text-right" },
+  { key: "description", label: "Deskripsi" },
+];
 
-export default async function AdminKeuanganPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
-  const sp = await searchParams;
-  const page = Math.max(1, Number(sp.page) || 1);
-
-  const [summary, total, transaksi, scopes, categories, financeCategories] = await Promise.all([
+export default async function AdminKeuanganPage() {
+  const [summary, transaksi, scopes, categories, financeCategories] = await Promise.all([
     getSummary(),
-    countTransactions(),
-    listTransactionsPaged(page, PAGE_SIZE),
+    listTransactions(),
     listScopes(),
     listCategories(),
     listFinanceCategories(),
   ]);
+
+  // Baris polos untuk DataTable. Tipe di-mapping ke label Indonesia agar badge & filter
+  // konsisten dengan tampilan lama (Pemasukan/Pengeluaran).
+  const rows = transaksi.map((t) => ({
+    id: t.id,
+    trxDate: t.trxDate,
+    categoryName: t.categoryName ?? "Tanpa kategori",
+    type: t.type === "income" ? "Pemasukan" : "Pengeluaran",
+    amount: t.amount,
+    description: t.description ?? t.scopeName,
+  }));
 
   const cards = [
     {
@@ -128,115 +137,21 @@ export default async function AdminKeuanganPage({
           <Card className="overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-5 py-4">
               <h2 className="flex items-center gap-2 font-bold text-ink">
-                <History className="h-4 w-4 text-brand-600" /> Transaksi Terakhir
+                <History className="h-4 w-4 text-brand-600" /> Transaksi
               </h2>
               <span className="text-[11px] text-muted">{summary.count} transaksi tercatat</span>
             </div>
 
-            {transaksi.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 px-6 py-14 text-center">
-                <Inbox className="h-9 w-9 text-brand-300" />
-                <p className="font-bold text-ink">Belum ada transaksi</p>
-                <p className="max-w-xs text-sm text-muted">
-                  Catat pemasukan atau pengeluaran pertama lewat formulir di samping. Saldo akan
-                  otomatis dihitung.
-                </p>
-              </div>
-            ) : (
-              <Table className="border-0">
-                <THead>
-                  <TR className="border-0">
-                    <TH>Tgl</TH>
-                    <TH>Kategori</TH>
-                    <TH>Tipe</TH>
-                    <TH className="text-right">Jumlah</TH>
-                    <TH className="text-center">Bukti</TH>
-                    <TH className="text-center">Aksi</TH>
-                  </TR>
-                </THead>
-                <tbody>
-                  {transaksi.map((t) => {
-                    const masuk = t.type === "income";
-                    return (
-                      <TR key={t.id}>
-                        <TD className="whitespace-nowrap text-muted">{dateFmt.format(t.trxDate)}</TD>
-                        <TD>
-                          <span className="font-semibold text-ink">
-                            {t.categoryName ?? "Tanpa kategori"}
-                          </span>
-                          <span className="block text-[11px] text-muted">
-                            {t.description ?? t.scopeName}
-                          </span>
-                        </TD>
-                        <TD>
-                          <Badge tone={masuk ? "success" : "danger"}>
-                            {masuk ? "Pemasukan" : "Pengeluaran"}
-                          </Badge>
-                        </TD>
-                        <TD
-                          className={cn(
-                            "whitespace-nowrap text-right font-bold",
-                            masuk ? "text-green-700" : "text-red-600",
-                          )}
-                        >
-                          {masuk ? "+ " : "− "}
-                          {rupiah(t.amount)}
-                        </TD>
-                        <TD className="text-center">
-                          {t.proofUrl ? (
-                            <a
-                              href={t.proofUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex text-brand-600"
-                              title="Lihat bukti"
-                            >
-                              <Paperclip className="h-4 w-4" />
-                            </a>
-                          ) : (
-                            <span className="text-[11px] text-muted">—</span>
-                          )}
-                        </TD>
-                        <TD className="text-center">
-                          <div className="inline-flex items-center gap-1">
-                            <Link
-                              href={`/admin/keuangan/${t.id}`}
-                              title="Ubah transaksi"
-                              aria-label="Ubah transaksi"
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted transition-colors hover:bg-brand-50 hover:text-brand-700"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Link>
-                            <form action={softDeleteTransaction}>
-                              <input type="hidden" name="id" value={t.id} />
-                              <button
-                                type="submit"
-                                title="Hapus transaksi"
-                                aria-label="Hapus transaksi"
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted transition-colors hover:bg-red-50 hover:text-red-600"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </form>
-                          </div>
-                        </TD>
-                      </TR>
-                    );
-                  })}
-                </tbody>
-              </Table>
-            )}
-
-            {total > PAGE_SIZE ? (
-              <div className="px-5">
-                <Pagination
-                  page={page}
-                  pageSize={PAGE_SIZE}
-                  total={total}
-                  baseHref="/admin/keuangan"
-                />
-              </div>
-            ) : null}
+            <div className="p-5">
+              <DataTable
+                columns={columns}
+                rows={rows}
+                editBase="/admin/keuangan"
+                deleteAction={softDeleteTransaction}
+                deleteConfirmText="Transaksi akan dipindah ke Recycle Bin (bisa dipulihkan)."
+                emptyText="Belum ada transaksi."
+              />
+            </div>
 
             <p className="border-t border-line px-5 py-3 text-[11px] text-muted">
               Scope memisahkan kas; saldo dihitung dari seluruh transaksi aktif. Hapus = pindah ke
@@ -253,10 +168,83 @@ export default async function AdminKeuanganPage({
             {financeCategories.length === 0 ? (
               <p className="mb-4 text-sm text-muted">Belum ada kategori.</p>
             ) : (
-              <ul className="mb-4 flex flex-wrap gap-2">
+              <ul className="mb-4 space-y-2">
                 {financeCategories.map((k) => (
-                  <li key={k.id}>
-                    <Badge tone={k.type === "income" ? "success" : "danger"}>{k.name}</Badge>
+                  <li
+                    key={k.id}
+                    className="rounded-sm border border-line bg-brand-50/30 px-3 py-2"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Badge tone={k.type === "income" ? "success" : "danger"}>{k.name}</Badge>
+                        <span className="text-[11px] text-muted">
+                          {k.type === "income" ? "Pemasukan" : "Pengeluaran"}
+                        </span>
+                      </div>
+                      <div className="inline-flex items-center gap-1">
+                        <details className="group inline-flex">
+                          <summary
+                            title="Ubah kategori"
+                            aria-label="Ubah kategori"
+                            className="inline-flex h-8 w-8 cursor-pointer list-none items-center justify-center rounded-sm text-muted transition-colors hover:bg-brand-50 hover:text-brand-700 [&::-webkit-details-marker]:hidden"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </summary>
+                          {/* Inline form ubah kategori (updateFinanceCategory) */}
+                          <form
+                            action={updateFinanceCategory}
+                            className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end"
+                          >
+                            <input type="hidden" name="id" value={k.id} />
+                            <div className="flex-1">
+                              <label
+                                htmlFor={`cat-name-${k.id}`}
+                                className="mb-1.5 block text-xs font-bold text-muted"
+                              >
+                                Nama Kategori
+                              </label>
+                              <Input
+                                id={`cat-name-${k.id}`}
+                                name="name"
+                                defaultValue={k.name}
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor={`cat-type-${k.id}`}
+                                className="mb-1.5 block text-xs font-bold text-muted"
+                              >
+                                Tipe
+                              </label>
+                              <select
+                                id={`cat-type-${k.id}`}
+                                name="type"
+                                defaultValue={k.type}
+                                className="h-11 w-full rounded-sm border border-line bg-surface px-3 text-sm text-ink focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20 sm:w-40"
+                              >
+                                <option value="income">Pemasukan</option>
+                                <option value="expense">Pengeluaran</option>
+                              </select>
+                            </div>
+                            <Button type="submit" variant="outline" size="sm" className="shrink-0">
+                              Simpan
+                            </Button>
+                          </form>
+                        </details>
+                        <form action={deleteFinanceCategory}>
+                          <input type="hidden" name="id" value={k.id} />
+                          <button
+                            type="submit"
+                            title="Hapus kategori"
+                            aria-label="Hapus kategori"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted transition-colors hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </form>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>

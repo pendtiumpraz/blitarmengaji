@@ -21,7 +21,8 @@ function statusTone(status: "active" | "pending" | "rejected"): {
 }
 
 export default async function PetaPage() {
-  const titikList = await listTitik();
+  // Hanya titik AKTIF yang tampil di peta publik (yang dinonaktifkan disembunyikan).
+  const titikList = (await listTitik()).filter((t) => t.isActive !== false);
 
   // Marker hanya untuk titik yang punya koordinat.
   const markers: TitikMarker[] = titikList

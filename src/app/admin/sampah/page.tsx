@@ -1,30 +1,32 @@
-import { RotateCcw, Trash2, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { listSampah, countSampah } from "@/lib/queries/sampah";
 import { restoreItem, hardDeleteItem } from "@/lib/actions/sampah";
 
 export const dynamic = "force-dynamic";
 
-const dateFmt = new Intl.DateTimeFormat("id-ID", {
-  dateStyle: "medium",
-  timeStyle: "short",
-});
-
-function formatDeletedAt(d: Date): string {
-  try {
-    return dateFmt.format(d);
-  } catch {
-    return new Date(d).toLocaleString("id-ID");
-  }
-}
+const columns: Column[] = [
+  { key: "typeLabel", label: "Jenis", sortable: true, filter: true },
+  { key: "label", label: "Label", sortable: true },
+  { key: "deletedAt", label: "Dihapus pada", type: "datetime", sortable: true },
+];
 
 export default async function AdminSampahPage() {
   const sections = await listSampah();
   const total = countSampah(sections);
-  const filled = sections.filter((s) => s.items.length > 0);
+
+  // Gabungkan semua section jadi satu daftar baris. Tiap baris WAJIB punya
+  // `id` & `type` (dikirim ulang sebagai hidden input lewat RowAction.fields).
+  const rows = sections.flatMap((section) =>
+    section.items.map((item) => ({
+      id: item.id,
+      type: item.type,
+      typeLabel: section.title,
+      label: item.label,
+      deletedAt: item.deletedAt,
+    })),
+  );
 
   return (
     <div>
@@ -44,60 +46,24 @@ export default async function AdminSampahPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-8">
-          {filled.map((section) => (
-            <section key={section.type}>
-              <div className="mb-3 flex items-center gap-2">
-                <h2 className="display text-lg text-ink">{section.title}</h2>
-                <Badge tone="muted">{section.items.length} item</Badge>
-              </div>
-
-              <Table className="min-w-[640px]">
-                <THead>
-                  <TR>
-                    <TH>Label</TH>
-                    <TH>Dihapus pada</TH>
-                    <TH className="text-right">Aksi</TH>
-                  </TR>
-                </THead>
-                <tbody>
-                  {section.items.map((item) => (
-                    <TR key={`${item.type}:${item.id}`} className="hover:bg-brand-50/60">
-                      <TD>
-                        <span className="font-bold text-ink">{item.label}</span>
-                      </TD>
-                      <TD className="text-muted">{formatDeletedAt(item.deletedAt)}</TD>
-                      <TD className="text-right">
-                        <div className="inline-flex items-center justify-end gap-2">
-                          <form action={restoreItem} className="inline-flex">
-                            <input type="hidden" name="type" value={item.type} />
-                            <input type="hidden" name="id" value={item.id} />
-                            <Button type="submit" variant="outline" size="sm" title={`Pulihkan ${item.label}`}>
-                              <RotateCcw className="h-4 w-4" />
-                              Pulihkan
-                            </Button>
-                          </form>
-                          <form action={hardDeleteItem} className="inline-flex">
-                            <input type="hidden" name="type" value={item.type} />
-                            <input type="hidden" name="id" value={item.id} />
-                            <Button type="submit" variant="danger" size="sm" title={`Hapus permanen ${item.label}`}>
-                              <Trash2 className="h-4 w-4" />
-                              Hapus Permanen
-                            </Button>
-                          </form>
-                        </div>
-                      </TD>
-                    </TR>
-                  ))}
-                </tbody>
-              </Table>
-
-              <p className="mt-2 text-xs text-muted">
-                Hapus permanen tidak dapat dibatalkan — data akan hilang selamanya.
-              </p>
-            </section>
-          ))}
-        </div>
+        <DataTable
+          columns={columns}
+          rows={rows}
+          rowActions={[
+            { action: restoreItem, label: "Pulihkan", idField: "id", fields: ["type"] },
+            {
+              action: hardDeleteItem,
+              label: "Hapus permanen",
+              idField: "id",
+              fields: ["type"],
+              confirm: true,
+              danger: true,
+              confirmTitle: "Hapus permanen?",
+              confirmText: "Permanen & tidak bisa dipulihkan.",
+            },
+          ]}
+          emptyText="Recycle bin kosong."
+        />
       )}
     </div>
   );

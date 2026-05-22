@@ -21,6 +21,7 @@ export type TitikListItem = {
   contactPhone: string | null;
   contactEmail: string | null;
   status: "active" | "pending" | "rejected";
+  isActive: boolean;
   ownerUserId: string | null;
   ownerName: string | null;
   createdAt: Date;
@@ -44,6 +45,7 @@ export async function listTitik(): Promise<TitikListItem[]> {
       contactPhone: schema.titikDakwah.contactPhone,
       contactEmail: schema.titikDakwah.contactEmail,
       status: schema.titikDakwah.status,
+      isActive: schema.titikDakwah.isActive,
       ownerUserId: schema.titikDakwah.ownerUserId,
       ownerName: schema.users.name,
       createdAt: schema.titikDakwah.createdAt,
@@ -54,6 +56,15 @@ export async function listTitik(): Promise<TitikListItem[]> {
     .orderBy(desc(schema.titikDakwah.createdAt));
 
   return rows;
+}
+
+/** Opsi titik untuk dropdown lokasi (hanya yang AKTIF & belum dihapus). */
+export async function listTitikActiveOptions(): Promise<{ id: string; name: string }[]> {
+  return db
+    .select({ id: schema.titikDakwah.id, name: schema.titikDakwah.name })
+    .from(schema.titikDakwah)
+    .where(and(isNull(schema.titikDakwah.deletedAt), eq(schema.titikDakwah.isActive, true)))
+    .orderBy(schema.titikDakwah.name);
 }
 
 export type TitikDetail = TitikListItem & {
@@ -80,6 +91,7 @@ export async function getTitikBySlug(slug: string): Promise<TitikDetail | null> 
       contactPhone: schema.titikDakwah.contactPhone,
       contactEmail: schema.titikDakwah.contactEmail,
       status: schema.titikDakwah.status,
+      isActive: schema.titikDakwah.isActive,
       ownerUserId: schema.titikDakwah.ownerUserId,
       ownerName: schema.users.name,
       verifiedAt: schema.titikDakwah.verifiedAt,
@@ -112,6 +124,7 @@ export async function getTitikById(id: string): Promise<TitikDetail | null> {
       contactPhone: schema.titikDakwah.contactPhone,
       contactEmail: schema.titikDakwah.contactEmail,
       status: schema.titikDakwah.status,
+      isActive: schema.titikDakwah.isActive,
       ownerUserId: schema.titikDakwah.ownerUserId,
       ownerName: schema.users.name,
       verifiedAt: schema.titikDakwah.verifiedAt,
@@ -160,6 +173,7 @@ export async function listTitikPaged(
         contactPhone: schema.titikDakwah.contactPhone,
         contactEmail: schema.titikDakwah.contactEmail,
         status: schema.titikDakwah.status,
+        isActive: schema.titikDakwah.isActive,
         ownerUserId: schema.titikDakwah.ownerUserId,
         ownerName: schema.users.name,
         createdAt: schema.titikDakwah.createdAt,

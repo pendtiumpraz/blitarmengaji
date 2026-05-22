@@ -1,19 +1,9 @@
-import {
-  Boxes,
-  KeyRound,
-  Lock,
-  Pencil,
-  Plus,
-  Power,
-  ShieldCheck,
-  Trash2,
-} from "lucide-react";
+import { Lock, Plus, ShieldCheck } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { listAiProviders } from "@/lib/queries/ai-admin";
 import {
   createProvider,
@@ -25,8 +15,23 @@ import {
 // API key disimpan TERENKRIPSI (AES-256-GCM) & tidak pernah ditampilkan kembali.
 export const dynamic = "force-dynamic";
 
+const columns: Column[] = [
+  { key: "id", label: "ID", type: "code" },
+  { key: "name", label: "Nama", sortable: true },
+  { key: "baseUrl", label: "Base URL", type: "code" },
+  { key: "hasKey", label: "API Key", type: "bool" },
+  { key: "isActive", label: "Aktif", type: "bool", sortable: true },
+];
+
 export default async function AdminAiProvidersPage() {
   const providers = await listAiProviders();
+  const rows = providers.map((p) => ({
+    id: p.id,
+    name: p.name,
+    baseUrl: p.baseUrl,
+    hasKey: p.hasKey,
+    isActive: p.isActive,
+  }));
 
   return (
     <div>
@@ -110,99 +115,20 @@ export default async function AdminAiProvidersPage() {
         </Card>
 
         {/* Daftar provider */}
-        <div>
-          {providers.length === 0 ? (
-            <div className="grid place-items-center rounded-[3px] border border-dashed border-line bg-surface px-6 py-16 text-center">
-              <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand-600">
-                <Boxes className="h-7 w-7" />
-              </span>
-              <h2 className="display mt-4 text-lg text-ink">Belum ada provider AI</h2>
-              <p className="mt-1 max-w-sm text-sm text-muted">
-                Tambahkan penyedia model AI pertama (mis. DeepSeek) lewat formulir di
-                samping untuk mulai menautkan model & task.
-              </p>
-            </div>
-          ) : (
-            <>
-              <Table className="min-w-[720px]">
-                <THead>
-                  <TR>
-                    <TH>Provider</TH>
-                    <TH>Base URL</TH>
-                    <TH>API Key</TH>
-                    <TH>Status</TH>
-                    <TH className="text-right">Aksi</TH>
-                  </TR>
-                </THead>
-                <tbody>
-                  {providers.map((p) => (
-                    <TR key={p.id} className="hover:bg-brand-50/60">
-                      <TD>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-ink">{p.name}</span>
-                          <span className="text-[11px] text-muted">{p.slug}</span>
-                        </div>
-                      </TD>
-                      <TD className="font-mono text-xs text-ink/80">{p.baseUrl}</TD>
-                      <TD>
-                        {p.hasKey ? (
-                          <Badge tone="success">
-                            <KeyRound className="h-3 w-3" /> Key terisi
-                          </Badge>
-                        ) : (
-                          <Badge tone="muted">Tanpa key</Badge>
-                        )}
-                      </TD>
-                      <TD>
-                        {p.isActive ? (
-                          <Badge tone="success">Aktif</Badge>
-                        ) : (
-                          <Badge tone="muted">Nonaktif</Badge>
-                        )}
-                      </TD>
-                      <TD>
-                        <div className="flex items-center justify-end gap-3">
-                          <Button href={`/admin/ai/providers/${p.id}`} variant="ghost" size="sm">
-                            <Pencil className="h-4 w-4" /> Edit
-                          </Button>
-
-                          <form action={toggleProviderActive} className="inline-flex">
-                            <input type="hidden" name="id" value={p.id} />
-                            <button
-                              type="submit"
-                              aria-label={`${p.isActive ? "Nonaktifkan" : "Aktifkan"} ${p.name}`}
-                              title={p.isActive ? "Nonaktifkan" : "Aktifkan"}
-                              className="text-muted hover:text-brand-700"
-                            >
-                              <Power className="h-4 w-4" />
-                            </button>
-                          </form>
-
-                          <form action={softDeleteProvider} className="inline-flex">
-                            <input type="hidden" name="id" value={p.id} />
-                            <button
-                              type="submit"
-                              aria-label={`Hapus ${p.name}`}
-                              title="Hapus"
-                              className="text-muted hover:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </form>
-                        </div>
-                      </TD>
-                    </TR>
-                  ))}
-                </tbody>
-              </Table>
-
-              <p className="mt-3 text-[11px] text-muted">
-                Menampilkan {providers.length} provider aktif. API key tersimpan
-                terenkripsi — tidak ditampilkan.
-              </p>
-            </>
-          )}
-        </div>
+        <DataTable
+          columns={columns}
+          rows={rows}
+          editBase="/admin/ai/providers"
+          deleteAction={softDeleteProvider}
+          deleteConfirmText="Provider akan dihapus (soft delete)."
+          rowActions={[
+            {
+              action: toggleProviderActive,
+              label: "Toggle",
+            },
+          ]}
+          emptyText="Belum ada provider AI."
+        />
       </div>
     </div>
   );

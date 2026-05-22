@@ -1,41 +1,41 @@
-import { Eye, Info, Pencil, Save, Store, Tag, Trash2 } from "lucide-react";
+import { Info, Save, Store } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { FileUpload } from "@/components/ui/file-upload";
-import { Pagination } from "@/components/ui/pagination";
-import {
-  listProductsPaged,
-  countProducts,
-  listBusinessPartners,
-} from "@/lib/queries/lapak";
+import { DataTable, type Column } from "@/components/ui/data-table";
+import { listProductsPaged, listBusinessPartners } from "@/lib/queries/lapak";
 import { createProduct, softDeleteProduct } from "@/lib/actions/lapak";
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 10;
+const STATUS_LABEL: Record<string, string> = {
+  active: "Aktif",
+  inactive: "Nonaktif",
+};
 
-function rupiah(price: string | null) {
-  if (price == null) return "—";
-  const n = Number(price);
-  if (!Number.isFinite(n)) return "—";
-  return "Rp " + n.toLocaleString("id-ID");
-}
+const columns: Column[] = [
+  { key: "title", label: "Produk", sortable: true },
+  { key: "partnerName", label: "Partner", sortable: true, filter: true },
+  { key: "price", label: "Harga", type: "money", sortable: true },
+  { key: "status", label: "Status", type: "badge", sortable: true, filter: true },
+];
 
-export default async function AdminLapakPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
-  const { page: pageParam } = await searchParams;
-  const page = Math.max(1, Number(pageParam) || 1);
-  const [products, total, partners] = await Promise.all([
-    listProductsPaged(page, PAGE_SIZE),
-    countProducts(),
+export default async function AdminLapakPage() {
+  // Ambil SEMUA produk (semua status, belum dihapus) + daftar partner aktif untuk form.
+  const [products, partners] = await Promise.all([
+    listProductsPaged(1, 100000),
     listBusinessPartners(),
   ]);
+
+  const rows = products.map((p) => ({
+    id: p.id,
+    title: p.title,
+    partnerName: p.partnerName,
+    price: p.price ?? "",
+    status: STATUS_LABEL[p.status] ?? p.status,
+  }));
 
   return (
     <div>
@@ -115,81 +115,18 @@ export default async function AdminLapakPage({
 
         {/* Daftar produk */}
         <section>
-          <h2 className="display flex items-center gap-2 text-lg text-ink">
+          <h2 className="display mb-4 flex items-center gap-2 text-lg text-ink">
             <Store className="h-5 w-5 text-brand-600" /> Produk Lapak
           </h2>
 
-          {products.length === 0 ? (
-            <Card className="mt-4 grid place-items-center px-6 py-16 text-center">
-              <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand-600">
-                <Store className="h-7 w-7" />
-              </span>
-              <p className="display mt-3 text-lg text-ink">Belum ada produk</p>
-              <p className="mt-1 max-w-sm text-sm text-muted">
-                Tambah produk UMKM jamaah lewat formulir di samping. Maksimal 3 produk aktif per partner usaha.
-              </p>
-            </Card>
-          ) : (
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {products.map((p) => (
-                <Card key={p.id} className="flex flex-col p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-sm bg-brand-600 text-white">
-                      {p.posterImage ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={p.posterImage} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <Store className="h-6 w-6" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-bold leading-tight text-ink">{p.title}</p>
-                        <Badge tone={p.status === "active" ? "success" : "muted"}>
-                          {p.status === "active" ? "Aktif" : "Nonaktif"}
-                        </Badge>
-                      </div>
-                      <p className="mt-0.5 text-[11px] text-muted">{p.partnerName}</p>
-                      <p className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-brand-700">
-                        <Tag className="h-3.5 w-3.5" /> {rupiah(p.price)}
-                      </p>
-                      {p.partnerCategory ? (
-                        <Badge tone="muted" className="mt-1.5">
-                          {p.partnerCategory}
-                        </Badge>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
-                    <Button href="/lapak" variant="ghost" size="sm">
-                      <Eye className="h-3.5 w-3.5" /> Lihat Publik
-                    </Button>
-                    <div className="flex items-center gap-2">
-                      <Button href={`/admin/lapak/${p.id}`} variant="ghost" size="sm">
-                        <Pencil className="h-3.5 w-3.5" /> Edit
-                      </Button>
-                      <form action={softDeleteProduct}>
-                        <input type="hidden" name="id" value={p.id} />
-                        <Button
-                          type="submit"
-                          variant="danger"
-                          size="sm"
-                          className="bg-red-50 text-red-600 hover:bg-red-100"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" /> Hapus
-                        </Button>
-                      </form>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {total > 0 ? (
-            <Pagination page={page} pageSize={PAGE_SIZE} total={total} baseHref="/admin/lapak" />
-          ) : null}
+          <DataTable
+            columns={columns}
+            rows={rows}
+            editBase="/admin/lapak"
+            deleteAction={softDeleteProduct}
+            deleteConfirmText="Produk akan dipindah ke Recycle Bin (bisa dipulihkan)."
+            emptyText="Belum ada produk."
+          />
 
           <p className="mt-3 flex items-center gap-1.5 text-[11px] text-muted">
             <Info className="h-3.5 w-3.5" /> Kebijakan lapak: maksimal 3 produk aktif per partner usaha.

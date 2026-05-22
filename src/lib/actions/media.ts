@@ -4,11 +4,22 @@ import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { db, schema } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getUserPermissions } from "@/lib/rbac";
 import { uploadToBlob } from "@/lib/blob";
 import { resolveUploadToken } from "@/lib/storage";
+
+/**
+ * Bungkus error menjadi redirect `?err=` agar Toaster global menampilkannya.
+ * `redirect()` melempar NEXT_REDIRECT secara internal — itu HARUS diteruskan.
+ */
+function toErrRedirect(path: string, err: unknown): never {
+  if (isRedirectError(err)) throw err;
+  const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
+  redirect(path + "?err=" + encodeURIComponent(msg));
+}
 
 /**
  * Server actions (MUTATION) untuk domain Galeri (media_assets) & Video (videos)
@@ -66,42 +77,46 @@ const addGalleryImageSchema = z.object({
 
 /** Upload foto galeri ke Vercel Blob lalu simpan ke media_assets milik titik. */
 export async function addGalleryImage(formData: FormData): Promise<void> {
-  const userId = await currentUserId();
+  try {
+    const userId = await currentUserId();
 
-  const parsed = addGalleryImageSchema.safeParse({
-    titikId: formData.get("titikId"),
-    caption: formData.get("caption") ?? "",
-  });
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data foto tidak valid.");
+    const parsed = addGalleryImageSchema.safeParse({
+      titikId: formData.get("titikId"),
+      caption: formData.get("caption") ?? "",
+    });
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Data foto tidak valid.");
+    }
+    const data = parsed.data;
+
+    const titikId = await assertOwnTitik(data.titikId, userId);
+
+    const imageFile = formData.get("imageFile") as File | null;
+    if (!imageFile || typeof imageFile === "string" || imageFile.size === 0) {
+      throw new Error("Berkas foto wajib diunggah.");
+    }
+
+    // Token storage milik titik bila ada, jika tidak fallback ke token global (env).
+    const token = await resolveUploadToken("titik", titikId);
+    const url = await uploadToBlob(imageFile, "galeri", token);
+    if (!url) throw new Error("Gagal mengunggah foto. Coba lagi.");
+
+    await db.insert(schema.mediaAssets).values({
+      ownerType: "titik",
+      ownerId: titikId,
+      kind: "image",
+      url,
+      caption: data.caption,
+      size: imageFile.size,
+      mime: imageFile.type || null,
+      uploadedBy: userId,
+    });
+
+    revalidatePath("/kelola/galeri");
+  } catch (err) {
+    toErrRedirect("/kelola/galeri", err);
   }
-  const data = parsed.data;
-
-  const titikId = await assertOwnTitik(data.titikId, userId);
-
-  const imageFile = formData.get("imageFile") as File | null;
-  if (!imageFile || typeof imageFile === "string" || imageFile.size === 0) {
-    throw new Error("Berkas foto wajib diunggah.");
-  }
-
-  // Token storage milik titik bila ada, jika tidak fallback ke token global (env).
-  const token = await resolveUploadToken("titik", titikId);
-  const url = await uploadToBlob(imageFile, "galeri", token);
-  if (!url) throw new Error("Gagal mengunggah foto. Coba lagi.");
-
-  await db.insert(schema.mediaAssets).values({
-    ownerType: "titik",
-    ownerId: titikId,
-    kind: "image",
-    url,
-    caption: data.caption,
-    size: imageFile.size,
-    mime: imageFile.type || null,
-    uploadedBy: userId,
-  });
-
-  revalidatePath("/kelola/galeri");
-  redirect("/kelola/galeri");
+  redirect("/kelola/galeri?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const deleteMediaSchema = z.object({
@@ -110,31 +125,35 @@ const deleteMediaSchema = z.object({
 
 /** Soft delete satu foto galeri (set deletedAt + deletedBy). */
 export async function deleteMedia(formData: FormData): Promise<void> {
-  const userId = await currentUserId();
+  try {
+    const userId = await currentUserId();
 
-  const parsed = deleteMediaSchema.safeParse({ id: formData.get("id") });
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Foto tidak valid.");
+    const parsed = deleteMediaSchema.safeParse({ id: formData.get("id") });
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Foto tidak valid.");
+    }
+
+    const rows = await db
+      .select({ id: schema.mediaAssets.id, ownerId: schema.mediaAssets.ownerId })
+      .from(schema.mediaAssets)
+      .where(and(eq(schema.mediaAssets.id, parsed.data.id), isNull(schema.mediaAssets.deletedAt)))
+      .limit(1);
+    const media = rows[0];
+    if (!media) throw new Error("Foto tidak ditemukan atau sudah dihapus.");
+
+    // Verifikasi kepemilikan titik pemilik foto.
+    await assertOwnTitik(media.ownerId, userId);
+
+    await db
+      .update(schema.mediaAssets)
+      .set({ deletedAt: new Date(), deletedBy: userId, updatedAt: new Date() })
+      .where(eq(schema.mediaAssets.id, parsed.data.id));
+
+    revalidatePath("/kelola/galeri");
+  } catch (err) {
+    toErrRedirect("/kelola/galeri", err);
   }
-
-  const rows = await db
-    .select({ id: schema.mediaAssets.id, ownerId: schema.mediaAssets.ownerId })
-    .from(schema.mediaAssets)
-    .where(and(eq(schema.mediaAssets.id, parsed.data.id), isNull(schema.mediaAssets.deletedAt)))
-    .limit(1);
-  const media = rows[0];
-  if (!media) throw new Error("Foto tidak ditemukan atau sudah dihapus.");
-
-  // Verifikasi kepemilikan titik pemilik foto.
-  await assertOwnTitik(media.ownerId, userId);
-
-  await db
-    .update(schema.mediaAssets)
-    .set({ deletedAt: new Date(), deletedBy: userId, updatedAt: new Date() })
-    .where(eq(schema.mediaAssets.id, parsed.data.id));
-
-  revalidatePath("/kelola/galeri");
-  redirect("/kelola/galeri");
+  redirect("/kelola/galeri?ok=" + encodeURIComponent("Dihapus."));
 }
 
 /* ============================================================
@@ -196,38 +215,42 @@ const addVideoSchema = z.object({
 
 /** Tambah video embed (YouTube/Facebook) milik titik. Parse URL → platform + embedId. */
 export async function addVideo(formData: FormData): Promise<void> {
-  const userId = await currentUserId();
+  try {
+    const userId = await currentUserId();
 
-  const parsed = addVideoSchema.safeParse({
-    titikId: formData.get("titikId"),
-    title: formData.get("title") ?? "",
-    sourceUrl: formData.get("sourceUrl"),
-    isLive: formData.get("isLive") === "on" || formData.get("isLive") === "true",
-  });
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data video tidak valid.");
+    const parsed = addVideoSchema.safeParse({
+      titikId: formData.get("titikId"),
+      title: formData.get("title") ?? "",
+      sourceUrl: formData.get("sourceUrl"),
+      isLive: formData.get("isLive") === "on" || formData.get("isLive") === "true",
+    });
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Data video tidak valid.");
+    }
+    const data = parsed.data;
+
+    const titikId = await assertOwnTitik(data.titikId, userId);
+
+    const parsedUrl = parseVideoUrl(data.sourceUrl);
+    if (!parsedUrl) {
+      throw new Error("Hanya tautan YouTube atau Facebook yang didukung.");
+    }
+
+    await db.insert(schema.videos).values({
+      ownerType: "titik",
+      ownerId: titikId,
+      platform: parsedUrl.platform,
+      sourceUrl: data.sourceUrl,
+      embedId: parsedUrl.embedId,
+      title: data.title,
+      isLive: data.isLive,
+    });
+
+    revalidatePath("/kelola/video");
+  } catch (err) {
+    toErrRedirect("/kelola/video", err);
   }
-  const data = parsed.data;
-
-  const titikId = await assertOwnTitik(data.titikId, userId);
-
-  const parsedUrl = parseVideoUrl(data.sourceUrl);
-  if (!parsedUrl) {
-    throw new Error("Hanya tautan YouTube atau Facebook yang didukung.");
-  }
-
-  await db.insert(schema.videos).values({
-    ownerType: "titik",
-    ownerId: titikId,
-    platform: parsedUrl.platform,
-    sourceUrl: data.sourceUrl,
-    embedId: parsedUrl.embedId,
-    title: data.title,
-    isLive: data.isLive,
-  });
-
-  revalidatePath("/kelola/video");
-  redirect("/kelola/video");
+  redirect("/kelola/video?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const deleteVideoSchema = z.object({
@@ -236,30 +259,34 @@ const deleteVideoSchema = z.object({
 
 /** Soft delete satu video (set deletedAt + deletedBy). */
 export async function deleteVideo(formData: FormData): Promise<void> {
-  const userId = await currentUserId();
+  try {
+    const userId = await currentUserId();
 
-  const parsed = deleteVideoSchema.safeParse({ id: formData.get("id") });
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Video tidak valid.");
+    const parsed = deleteVideoSchema.safeParse({ id: formData.get("id") });
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Video tidak valid.");
+    }
+
+    const rows = await db
+      .select({ id: schema.videos.id, ownerId: schema.videos.ownerId })
+      .from(schema.videos)
+      .where(and(eq(schema.videos.id, parsed.data.id), isNull(schema.videos.deletedAt)))
+      .limit(1);
+    const video = rows[0];
+    if (!video) throw new Error("Video tidak ditemukan atau sudah dihapus.");
+
+    await assertOwnTitik(video.ownerId, userId);
+
+    await db
+      .update(schema.videos)
+      .set({ deletedAt: new Date(), deletedBy: userId, updatedAt: new Date() })
+      .where(eq(schema.videos.id, parsed.data.id));
+
+    revalidatePath("/kelola/video");
+  } catch (err) {
+    toErrRedirect("/kelola/video", err);
   }
-
-  const rows = await db
-    .select({ id: schema.videos.id, ownerId: schema.videos.ownerId })
-    .from(schema.videos)
-    .where(and(eq(schema.videos.id, parsed.data.id), isNull(schema.videos.deletedAt)))
-    .limit(1);
-  const video = rows[0];
-  if (!video) throw new Error("Video tidak ditemukan atau sudah dihapus.");
-
-  await assertOwnTitik(video.ownerId, userId);
-
-  await db
-    .update(schema.videos)
-    .set({ deletedAt: new Date(), deletedBy: userId, updatedAt: new Date() })
-    .where(eq(schema.videos.id, parsed.data.id));
-
-  revalidatePath("/kelola/video");
-  redirect("/kelola/video");
+  redirect("/kelola/video?ok=" + encodeURIComponent("Dihapus."));
 }
 
 /* ============================================================
@@ -273,28 +300,32 @@ const updateGallerySchema = z.object({
 
 /** Ubah caption foto galeri. */
 export async function updateGalleryImage(formData: FormData): Promise<void> {
-  const userId = await currentUserId();
-  const parsed = updateGallerySchema.safeParse({
-    id: formData.get("id"),
-    caption: formData.get("caption") ?? "",
-  });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+  try {
+    const userId = await currentUserId();
+    const parsed = updateGallerySchema.safeParse({
+      id: formData.get("id"),
+      caption: formData.get("caption") ?? "",
+    });
+    if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
 
-  const rows = await db
-    .select({ ownerId: schema.mediaAssets.ownerId })
-    .from(schema.mediaAssets)
-    .where(and(eq(schema.mediaAssets.id, parsed.data.id), isNull(schema.mediaAssets.deletedAt)))
-    .limit(1);
-  if (!rows[0]) throw new Error("Foto tidak ditemukan.");
-  await assertOwnTitik(rows[0].ownerId, userId);
+    const rows = await db
+      .select({ ownerId: schema.mediaAssets.ownerId })
+      .from(schema.mediaAssets)
+      .where(and(eq(schema.mediaAssets.id, parsed.data.id), isNull(schema.mediaAssets.deletedAt)))
+      .limit(1);
+    if (!rows[0]) throw new Error("Foto tidak ditemukan.");
+    await assertOwnTitik(rows[0].ownerId, userId);
 
-  await db
-    .update(schema.mediaAssets)
-    .set({ caption: parsed.data.caption, updatedAt: new Date() })
-    .where(eq(schema.mediaAssets.id, parsed.data.id));
+    await db
+      .update(schema.mediaAssets)
+      .set({ caption: parsed.data.caption, updatedAt: new Date() })
+      .where(eq(schema.mediaAssets.id, parsed.data.id));
 
-  revalidatePath("/kelola/galeri");
-  redirect("/kelola/galeri");
+    revalidatePath("/kelola/galeri");
+  } catch (err) {
+    toErrRedirect("/kelola/galeri", err);
+  }
+  redirect("/kelola/galeri?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const updateVideoSchema = z.object({
@@ -306,38 +337,42 @@ const updateVideoSchema = z.object({
 
 /** Ubah judul/URL/status LIVE video (re-parse platform & embedId). */
 export async function updateVideo(formData: FormData): Promise<void> {
-  const userId = await currentUserId();
-  const parsed = updateVideoSchema.safeParse({
-    id: formData.get("id"),
-    title: formData.get("title") ?? "",
-    sourceUrl: formData.get("sourceUrl"),
-    isLive: formData.get("isLive") === "on" || formData.get("isLive") === "true",
-  });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Data video tidak valid.");
+  try {
+    const userId = await currentUserId();
+    const parsed = updateVideoSchema.safeParse({
+      id: formData.get("id"),
+      title: formData.get("title") ?? "",
+      sourceUrl: formData.get("sourceUrl"),
+      isLive: formData.get("isLive") === "on" || formData.get("isLive") === "true",
+    });
+    if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Data video tidak valid.");
 
-  const rows = await db
-    .select({ ownerId: schema.videos.ownerId })
-    .from(schema.videos)
-    .where(and(eq(schema.videos.id, parsed.data.id), isNull(schema.videos.deletedAt)))
-    .limit(1);
-  if (!rows[0]) throw new Error("Video tidak ditemukan.");
-  await assertOwnTitik(rows[0].ownerId, userId);
+    const rows = await db
+      .select({ ownerId: schema.videos.ownerId })
+      .from(schema.videos)
+      .where(and(eq(schema.videos.id, parsed.data.id), isNull(schema.videos.deletedAt)))
+      .limit(1);
+    if (!rows[0]) throw new Error("Video tidak ditemukan.");
+    await assertOwnTitik(rows[0].ownerId, userId);
 
-  const pu = parseVideoUrl(parsed.data.sourceUrl);
-  if (!pu) throw new Error("Hanya tautan YouTube atau Facebook yang didukung.");
+    const pu = parseVideoUrl(parsed.data.sourceUrl);
+    if (!pu) throw new Error("Hanya tautan YouTube atau Facebook yang didukung.");
 
-  await db
-    .update(schema.videos)
-    .set({
-      title: parsed.data.title,
-      sourceUrl: parsed.data.sourceUrl,
-      platform: pu.platform,
-      embedId: pu.embedId,
-      isLive: parsed.data.isLive,
-      updatedAt: new Date(),
-    })
-    .where(eq(schema.videos.id, parsed.data.id));
+    await db
+      .update(schema.videos)
+      .set({
+        title: parsed.data.title,
+        sourceUrl: parsed.data.sourceUrl,
+        platform: pu.platform,
+        embedId: pu.embedId,
+        isLive: parsed.data.isLive,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.videos.id, parsed.data.id));
 
-  revalidatePath("/kelola/video");
-  redirect("/kelola/video");
+    revalidatePath("/kelola/video");
+  } catch (err) {
+    toErrRedirect("/kelola/video", err);
+  }
+  redirect("/kelola/video?ok=" + encodeURIComponent("Tersimpan."));
 }

@@ -4,9 +4,20 @@ import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { db, schema } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getUserPermissions } from "@/lib/rbac";
+
+/**
+ * Bungkus error menjadi redirect `?err=` agar Toaster global menampilkannya.
+ * `redirect()` melempar NEXT_REDIRECT secara internal — itu HARUS diteruskan.
+ */
+function toErrRedirect(path: string, err: unknown): never {
+  if (isRedirectError(err)) throw err;
+  const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
+  redirect(path + "?err=" + encodeURIComponent(msg));
+}
 
 /**
  * Server actions (MUTATION) untuk dashboard Media Partner (panel /kelola/media-partner).
@@ -126,39 +137,43 @@ const addMediaVideoSchema = z.object({
  * Parse URL → platform + embedId, lalu insert videos (ownerType 'media').
  */
 export async function addMediaVideo(formData: FormData): Promise<void> {
-  const userId = await currentUserId();
-  const isSuper = await assertCanManage(userId);
+  try {
+    const userId = await currentUserId();
+    const isSuper = await assertCanManage(userId);
 
-  const parsed = addMediaVideoSchema.safeParse({
-    mediaPartnerId: formData.get("mediaPartnerId"),
-    title: formData.get("title") ?? "",
-    sourceUrl: formData.get("sourceUrl"),
-    isLive: formData.get("isLive") === "on" || formData.get("isLive") === "true",
-  });
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data video tidak valid.");
+    const parsed = addMediaVideoSchema.safeParse({
+      mediaPartnerId: formData.get("mediaPartnerId"),
+      title: formData.get("title") ?? "",
+      sourceUrl: formData.get("sourceUrl"),
+      isLive: formData.get("isLive") === "on" || formData.get("isLive") === "true",
+    });
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Data video tidak valid.");
+    }
+    const data = parsed.data;
+
+    const ownerId = await assertOwnMediaPartner(data.mediaPartnerId, userId, isSuper);
+
+    const parsedUrl = parseVideoUrl(data.sourceUrl);
+    if (!parsedUrl) {
+      throw new Error("Hanya tautan YouTube atau Facebook yang didukung.");
+    }
+
+    await db.insert(schema.videos).values({
+      ownerType: "media",
+      ownerId,
+      platform: parsedUrl.platform,
+      sourceUrl: data.sourceUrl,
+      embedId: parsedUrl.embedId,
+      title: data.title,
+      isLive: data.isLive,
+    });
+
+    revalidatePath("/kelola/media-partner");
+  } catch (err) {
+    toErrRedirect("/kelola/media-partner", err);
   }
-  const data = parsed.data;
-
-  const ownerId = await assertOwnMediaPartner(data.mediaPartnerId, userId, isSuper);
-
-  const parsedUrl = parseVideoUrl(data.sourceUrl);
-  if (!parsedUrl) {
-    throw new Error("Hanya tautan YouTube atau Facebook yang didukung.");
-  }
-
-  await db.insert(schema.videos).values({
-    ownerType: "media",
-    ownerId,
-    platform: parsedUrl.platform,
-    sourceUrl: data.sourceUrl,
-    embedId: parsedUrl.embedId,
-    title: data.title,
-    isLive: data.isLive,
-  });
-
-  revalidatePath("/kelola/media-partner");
-  redirect("/kelola/media-partner");
+  redirect("/kelola/media-partner?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const deleteMediaVideoSchema = z.object({
@@ -167,35 +182,39 @@ const deleteMediaVideoSchema = z.object({
 
 /** Soft delete satu video media partner (set deletedAt + deletedBy) setelah cek ownership. */
 export async function deleteMediaVideo(formData: FormData): Promise<void> {
-  const userId = await currentUserId();
-  const isSuper = await assertCanManage(userId);
+  try {
+    const userId = await currentUserId();
+    const isSuper = await assertCanManage(userId);
 
-  const parsed = deleteMediaVideoSchema.safeParse({ id: formData.get("id") });
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Video tidak valid.");
+    const parsed = deleteMediaVideoSchema.safeParse({ id: formData.get("id") });
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Video tidak valid.");
+    }
+
+    const rows = await db
+      .select({ id: schema.videos.id, ownerId: schema.videos.ownerId })
+      .from(schema.videos)
+      .where(
+        and(
+          eq(schema.videos.id, parsed.data.id),
+          eq(schema.videos.ownerType, "media"),
+          isNull(schema.videos.deletedAt),
+        ),
+      )
+      .limit(1);
+    const video = rows[0];
+    if (!video) throw new Error("Video tidak ditemukan atau sudah dihapus.");
+
+    await assertOwnMediaPartner(video.ownerId, userId, isSuper);
+
+    await db
+      .update(schema.videos)
+      .set({ deletedAt: new Date(), deletedBy: userId, updatedAt: new Date() })
+      .where(eq(schema.videos.id, parsed.data.id));
+
+    revalidatePath("/kelola/media-partner");
+  } catch (err) {
+    toErrRedirect("/kelola/media-partner", err);
   }
-
-  const rows = await db
-    .select({ id: schema.videos.id, ownerId: schema.videos.ownerId })
-    .from(schema.videos)
-    .where(
-      and(
-        eq(schema.videos.id, parsed.data.id),
-        eq(schema.videos.ownerType, "media"),
-        isNull(schema.videos.deletedAt),
-      ),
-    )
-    .limit(1);
-  const video = rows[0];
-  if (!video) throw new Error("Video tidak ditemukan atau sudah dihapus.");
-
-  await assertOwnMediaPartner(video.ownerId, userId, isSuper);
-
-  await db
-    .update(schema.videos)
-    .set({ deletedAt: new Date(), deletedBy: userId, updatedAt: new Date() })
-    .where(eq(schema.videos.id, parsed.data.id));
-
-  revalidatePath("/kelola/media-partner");
-  redirect("/kelola/media-partner");
+  redirect("/kelola/media-partner?ok=" + encodeURIComponent("Dihapus."));
 }

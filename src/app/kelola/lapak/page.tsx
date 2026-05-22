@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { FileUpload } from "@/components/ui/file-upload";
+import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import { myBusinessPartners, myProducts } from "@/lib/queries/kelola-usaha";
 import { createProduct, softDeleteProduct } from "@/lib/actions/lapak";
 
@@ -149,14 +150,12 @@ export default async function KelolaLapakPage() {
                       <div className="mt-auto flex justify-end border-t border-line pt-3">
                         <form action={softDeleteProduct}>
                           <input type="hidden" name="id" value={p.id} />
-                          <Button
-                            type="submit"
-                            variant="danger"
-                            size="sm"
-                            className="bg-red-50 text-red-600 hover:bg-red-100"
+                          <ConfirmSubmit
+                            text="Produk akan dipindah ke Recycle Bin (bisa dipulihkan)."
+                            className="inline-flex items-center gap-1.5 rounded-sm bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100"
                           >
                             <Trash2 className="h-3.5 w-3.5" /> Hapus
-                          </Button>
+                          </ConfirmSubmit>
                         </form>
                       </div>
                     </div>

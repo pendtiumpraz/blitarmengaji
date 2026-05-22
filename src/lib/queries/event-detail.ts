@@ -21,6 +21,11 @@ export type EventDetail = {
   capacity: number | null;
   needsRegistration: boolean;
   organizerName: string | null;
+  titikName: string | null;
+  titikSlug: string | null;
+  titikLat: string | null;
+  titikLng: string | null;
+  titikGmaps: string | null;
 };
 
 /**
@@ -45,12 +50,18 @@ export async function getEventBySlug(slug: string): Promise<EventDetail | null> 
       needsRegistration: schema.events.needsRegistration,
       organizerType: schema.events.organizerType,
       partnerName: schema.businessPartners.name,
+      titikName: schema.titikDakwah.name,
+      titikSlug: schema.titikDakwah.slug,
+      titikLat: schema.titikDakwah.latitude,
+      titikLng: schema.titikDakwah.longitude,
+      titikGmaps: schema.titikDakwah.gmapsUrl,
     })
     .from(schema.events)
     .leftJoin(
       schema.businessPartners,
       eq(schema.businessPartners.id, schema.events.organizerId),
     )
+    .leftJoin(schema.titikDakwah, eq(schema.titikDakwah.id, schema.events.titikDakwahId))
     .where(
       and(
         eq(schema.events.slug, slug),
@@ -77,6 +88,11 @@ export async function getEventBySlug(slug: string): Promise<EventDetail | null> 
     capacity: row.capacity,
     needsRegistration: row.needsRegistration,
     organizerName: row.organizerType === "internal" ? "Blitar Mengaji" : row.partnerName,
+    titikName: row.titikName,
+    titikSlug: row.titikSlug,
+    titikLat: row.titikLat,
+    titikLng: row.titikLng,
+    titikGmaps: row.titikGmaps,
   };
 }
 

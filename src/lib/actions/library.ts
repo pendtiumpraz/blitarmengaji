@@ -104,21 +104,24 @@ export async function createLibraryItem(formData: FormData): Promise<void> {
     categoryId: formData.get("categoryId") ?? "",
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data materi tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data materi tidak valid.";
+    redirect("/admin/pustaka?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
   // Berkas PDF WAJIB ada (pdf_url NOT NULL di skema).
   const pdfFile = formData.get("pdfFile");
   if (!(pdfFile instanceof File) || pdfFile.size === 0) {
-    throw new Error("Berkas PDF wajib diunggah.");
+    redirect("/admin/pustaka?err=" + encodeURIComponent("Berkas PDF wajib diunggah."));
   }
 
   const ustadz = await resolveUstadz(userId);
 
   // Upload berkas NYATA ke Vercel Blob.
   const pdfUrl = await uploadToBlob(pdfFile, "pustaka/pdf");
-  if (!pdfUrl) throw new Error("Gagal mengunggah berkas PDF.");
+  if (!pdfUrl) {
+    redirect("/admin/pustaka?err=" + encodeURIComponent("Gagal mengunggah berkas PDF."));
+  }
   const coverImage = await uploadToBlob(formData.get("coverFile") as File | null, "pustaka/cover");
 
   await db.insert(libraryItems).values({
@@ -137,7 +140,8 @@ export async function createLibraryItem(formData: FormData): Promise<void> {
   revalidatePath("/ustadz/pustaka");
   revalidatePath("/admin/pustaka");
   revalidatePath("/perpustakaan");
-  redirect(ref.includes("/ustadz") ? "/ustadz/pustaka" : "/admin/pustaka");
+  const base = ref.includes("/ustadz") ? "/ustadz/pustaka" : "/admin/pustaka";
+  redirect(base + "?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const updateSchema = createSchema.extend({
@@ -159,7 +163,8 @@ export async function updateLibraryItem(formData: FormData): Promise<void> {
     categoryId: formData.get("categoryId") ?? "",
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data materi tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data materi tidak valid.";
+    redirect("/admin/pustaka?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -171,7 +176,11 @@ export async function updateLibraryItem(formData: FormData): Promise<void> {
       .where(and(eq(libraryItems.id, data.id), isNull(libraryItems.deletedAt)))
       .limit(1)
   )[0];
-  if (!existing) throw new Error("Materi tidak ditemukan atau sudah dihapus.");
+  if (!existing) {
+    redirect(
+      "/admin/pustaka?err=" + encodeURIComponent("Materi tidak ditemukan atau sudah dihapus."),
+    );
+  }
 
   // Upload PDF BARU bila ada (pertahankan lama bila kosong).
   const pdfFile = formData.get("pdfFile");
@@ -197,7 +206,7 @@ export async function updateLibraryItem(formData: FormData): Promise<void> {
   revalidatePath("/admin/pustaka");
   revalidatePath(`/admin/pustaka/${data.id}`);
   revalidatePath("/perpustakaan");
-  redirect("/admin/pustaka");
+  redirect("/admin/pustaka?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const softDeleteSchema = z.object({
@@ -214,7 +223,8 @@ export async function softDeleteLibrary(formData: FormData): Promise<void> {
   const userId = await currentUserId();
   const parsed = softDeleteSchema.safeParse({ id: formData.get("id") });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Materi tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Materi tidak valid.";
+    redirect("/admin/pustaka?err=" + encodeURIComponent(msg));
   }
 
   await db
@@ -224,5 +234,5 @@ export async function softDeleteLibrary(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/pustaka");
   revalidatePath("/perpustakaan");
-  redirect("/admin/pustaka");
+  redirect("/admin/pustaka?ok=" + encodeURIComponent("Dihapus."));
 }

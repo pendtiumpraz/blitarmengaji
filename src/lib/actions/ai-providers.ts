@@ -2,6 +2,7 @@
 
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db, schema } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -58,7 +59,8 @@ export async function createProvider(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/ai/providers?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -78,6 +80,7 @@ export async function createProvider(formData: FormData): Promise<void> {
   });
 
   revalidate();
+  redirect("/admin/ai/providers?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 // ── updateProvider ──────────────────────────────────────────────────────────
@@ -112,7 +115,8 @@ export async function updateProvider(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/ai/providers?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -140,6 +144,7 @@ export async function updateProvider(formData: FormData): Promise<void> {
     .where(and(eq(schema.aiProviders.id, data.id), isNull(schema.aiProviders.deletedAt)));
 
   revalidate();
+  redirect("/admin/ai/providers?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 // ── softDeleteProvider ──────────────────────────────────────────────────────
@@ -152,7 +157,8 @@ export async function softDeleteProvider(formData: FormData): Promise<void> {
 
   const parsed = idSchema.safeParse({ id: opt(formData.get("id")) });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/ai/providers?err=" + encodeURIComponent(msg));
   }
 
   const deletedBy = (await auth())?.user?.id ?? null;
@@ -163,6 +169,7 @@ export async function softDeleteProvider(formData: FormData): Promise<void> {
     .where(and(eq(schema.aiProviders.id, parsed.data.id), isNull(schema.aiProviders.deletedAt)));
 
   revalidate();
+  redirect("/admin/ai/providers?ok=" + encodeURIComponent("Berhasil."));
 }
 
 // ── toggleProviderActive ────────────────────────────────────────────────────
@@ -173,7 +180,8 @@ export async function toggleProviderActive(formData: FormData): Promise<void> {
 
   const parsed = idSchema.safeParse({ id: opt(formData.get("id")) });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/ai/providers?err=" + encodeURIComponent(msg));
   }
 
   const rows = await db
@@ -184,7 +192,7 @@ export async function toggleProviderActive(formData: FormData): Promise<void> {
 
   const current = rows[0];
   if (!current) {
-    throw new Error("Provider tidak ditemukan.");
+    redirect("/admin/ai/providers?err=" + encodeURIComponent("Provider tidak ditemukan."));
   }
 
   await db
@@ -193,4 +201,5 @@ export async function toggleProviderActive(formData: FormData): Promise<void> {
     .where(and(eq(schema.aiProviders.id, parsed.data.id), isNull(schema.aiProviders.deletedAt)));
 
   revalidate();
+  redirect("/admin/ai/providers?ok=" + encodeURIComponent("Berhasil."));
 }

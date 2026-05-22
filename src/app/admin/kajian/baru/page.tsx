@@ -2,14 +2,15 @@ import { AdminPageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { KajianForm } from "./form";
-import { listUstadzOptions, listTitikOptions, listKajianCategoryOptions } from "@/lib/queries/kajian";
+import { listUstadzOptions, listKajianCategoryOptions } from "@/lib/queries/kajian";
+import { listTitikActiveOptions } from "@/lib/queries/titik";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminKajianBaruPage() {
   const [ustadzOptions, titikOptions, categoryOptions] = await Promise.all([
     listUstadzOptions(),
-    listTitikOptions(),
+    listTitikActiveOptions(),
     listKajianCategoryOptions(),
   ]);
 

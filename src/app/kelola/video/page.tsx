@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Field, Input } from "@/components/ui/input";
+import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import { auth } from "@/lib/auth";
 import { getUserPermissions } from "@/lib/rbac";
 import { myTitikOptions, listVideos } from "@/lib/queries/media";
@@ -182,13 +183,13 @@ export default async function KelolaVideoPage() {
                       </a>
                       <form action={deleteVideo} className="shrink-0">
                         <input type="hidden" name="id" value={v.id} />
-                        <button
-                          type="submit"
+                        <ConfirmSubmit
                           aria-label="Hapus video"
+                          text="Video akan dipindah ke Recycle Bin (bisa dipulihkan)."
                           className="grid h-9 w-9 place-items-center rounded-sm text-muted transition-colors hover:bg-red-50 hover:text-red-600"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </ConfirmSubmit>
                       </form>
                     </div>
 

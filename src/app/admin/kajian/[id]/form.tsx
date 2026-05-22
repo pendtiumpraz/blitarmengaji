@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Field } from "@/components/ui/input";
 import { FileUpload } from "@/components/ui/file-upload";
+import { TitikField } from "@/components/map/titik-field";
 import { updateKajian } from "@/lib/actions/kajian";
 import type { KajianEditItem } from "@/lib/queries/kajian";
 
 type Option = { id: string; name: string };
-type TitikOption = { id: string; name: string; kecamatan: string | null };
 
 const selectCls =
   "h-11 w-full rounded-sm border border-line bg-surface px-3 text-sm text-ink focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20";
@@ -20,7 +20,7 @@ export function KajianEditForm({
 }: {
   kajian: KajianEditItem;
   ustadzOptions: Option[];
-  titikOptions: TitikOption[];
+  titikOptions: Option[];
   categoryOptions: Option[];
 }) {
   return (
@@ -65,27 +65,12 @@ export function KajianEditForm({
             )}
           </Field>
 
-          <Field label="Titik Dakwah" htmlFor="titikDakwahId">
-            {titikOptions.length > 0 ? (
-              <select
-                id="titikDakwahId"
-                name="titikDakwahId"
-                className={selectCls}
-                defaultValue={kajian.titikDakwahId ?? ""}
-              >
-                <option value="">Tanpa titik / pilih nanti…</option>
-                {titikOptions.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.kecamatan ? `${t.name} — ${t.kecamatan}` : t.name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p className="rounded-sm border border-dashed border-line bg-cream px-3 py-2.5 text-xs text-muted">
-                Belum ada titik dakwah. Tambahkan dahulu di menu Titik Dakwah.
-              </p>
-            )}
-          </Field>
+          <TitikField
+            name="titikDakwahId"
+            options={titikOptions}
+            defaultValue={kajian.titikDakwahId ?? ""}
+            label="Titik Dakwah / Lokasi"
+          />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

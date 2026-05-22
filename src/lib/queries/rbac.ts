@@ -33,6 +33,33 @@ export type RoleListItem = {
   permissionCount: number;
 };
 
+/** Detail satu user untuk form edit admin (prefill). */
+export type UserEditItem = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  status: "active" | "pending" | "banned";
+  image: string | null;
+  /** ID role yang sedang dimiliki user (untuk pra-pilih di form). */
+  roleIds: string[];
+};
+
+/** Opsi role aktif untuk dropdown form (id + nama). */
+export type RoleOption = {
+  id: string;
+  name: string;
+};
+
+/** Detail satu role untuk form edit admin (prefill). */
+export type RoleEditItem = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  isSystem: boolean;
+};
+
 export type PermissionItem = {
   id: string;
   key: string;
@@ -177,6 +204,42 @@ export async function countUsers(): Promise<number> {
   return Number(rows[0]?.total ?? 0);
 }
 
+/**
+ * Detail satu pengguna aktif (deleted_at IS NULL) untuk form edit admin.
+ * Menyertakan ID role yang dimiliki (untuk pra-pilih dropdown role).
+ * Mengembalikan null bila tidak ditemukan agar caller bisa memanggil notFound().
+ */
+export async function getUserById(id: string): Promise<UserEditItem | null> {
+  if (!id) return null;
+
+  const [user] = await db
+    .select({
+      id: schema.users.id,
+      name: schema.users.name,
+      email: schema.users.email,
+      phone: schema.users.phone,
+      status: schema.users.status,
+      image: schema.users.image,
+    })
+    .from(schema.users)
+    .where(and(eq(schema.users.id, id), isNull(schema.users.deletedAt)))
+    .limit(1);
+
+  if (!user) return null;
+
+  // ID role aktif yang dimiliki user (untuk pra-pilih di form).
+  const roleRows = await db
+    .select({ roleId: schema.userRoles.roleId })
+    .from(schema.userRoles)
+    .innerJoin(
+      schema.roles,
+      and(eq(schema.roles.id, schema.userRoles.roleId), isNull(schema.roles.deletedAt)),
+    )
+    .where(eq(schema.userRoles.userId, id));
+
+  return { ...user, roleIds: roleRows.map((r) => r.roleId) };
+}
+
 // ── Roles ────────────────────────────────────────────────────────────────────
 
 /** Daftar role aktif + jumlah user & jumlah permission tiap role. */
@@ -216,6 +279,35 @@ export async function listRoles(): Promise<RoleListItem[]> {
     userCount: userCountByRole.get(r.id) ?? 0,
     permissionCount: permCountByRole.get(r.id) ?? 0,
   }));
+}
+
+/** Opsi role aktif untuk dropdown form (id + nama), urut nama. */
+export async function listRoleOptions(): Promise<RoleOption[]> {
+  return db
+    .select({ id: schema.roles.id, name: schema.roles.name })
+    .from(schema.roles)
+    .where(isNull(schema.roles.deletedAt))
+    .orderBy(asc(schema.roles.name));
+}
+
+/**
+ * Detail satu role aktif (deleted_at IS NULL) untuk form edit admin.
+ * Mengembalikan null bila tidak ditemukan agar caller bisa memanggil notFound().
+ */
+export async function getRoleById(id: string): Promise<RoleEditItem | null> {
+  if (!id) return null;
+  const [row] = await db
+    .select({
+      id: schema.roles.id,
+      name: schema.roles.name,
+      slug: schema.roles.slug,
+      description: schema.roles.description,
+      isSystem: schema.roles.isSystem,
+    })
+    .from(schema.roles)
+    .where(and(eq(schema.roles.id, id), isNull(schema.roles.deletedAt)))
+    .limit(1);
+  return row ?? null;
 }
 
 // ── Permissions ──────────────────────────────────────────────────────────────

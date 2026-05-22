@@ -1,10 +1,9 @@
-import { Database, HardDrive, Lock, ShieldCheck, Trash2 } from "lucide-react";
+import { HardDrive, Lock, ShieldCheck } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { listStorageConfigs } from "@/lib/queries/storage";
 import { createStorageConfig, softDeleteStorageConfig } from "@/lib/actions/storage";
 
@@ -25,16 +24,33 @@ const OWNER_LABEL: Record<string, string> = Object.fromEntries(
   OWNER_TYPES.map((o) => [o.value, o.label]),
 );
 
-function StatusBadge({ status }: { status: "active" | "disabled" }) {
-  return status === "active" ? (
-    <Badge tone="success">Aktif</Badge>
-  ) : (
-    <Badge tone="muted">Nonaktif</Badge>
-  );
-}
+const STATUS_LABEL: Record<string, string> = {
+  active: "Aktif",
+  disabled: "Nonaktif",
+};
+
+const columns: Column[] = [
+  { key: "id", label: "ID", type: "code" },
+  { key: "label", label: "Label", sortable: true },
+  { key: "provider", label: "Provider", sortable: true, filter: true },
+  { key: "ownerType", label: "Pemilik", sortable: true, filter: true },
+  { key: "isDefault", label: "Default", type: "bool" },
+  { key: "status", label: "Status", type: "badge", sortable: true, filter: true },
+  { key: "hasKey", label: "Token", type: "bool" },
+];
 
 export default async function AdminStoragePage() {
   const configs = await listStorageConfigs();
+  const rows = configs.map((c) => ({
+    id: c.id,
+    label: c.label ?? "—",
+    provider: c.provider,
+    ownerType: OWNER_LABEL[c.ownerType] ?? c.ownerType,
+    isDefault: c.isDefault,
+    status: STATUS_LABEL[c.status] ?? c.status,
+    // Setiap konfigurasi tersimpan selalu memiliki token (wajib saat create).
+    hasKey: true,
+  }));
 
   return (
     <div>
@@ -125,69 +141,14 @@ export default async function AdminStoragePage() {
         </Card>
 
         {/* Daftar konfigurasi */}
-        <div>
-          {configs.length === 0 ? (
-            <div className="grid place-items-center rounded-[3px] border border-dashed border-line bg-surface px-6 py-16 text-center">
-              <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand-600">
-                <Database className="h-7 w-7" />
-              </span>
-              <h2 className="display mt-4 text-lg text-ink">Belum ada konfigurasi storage</h2>
-              <p className="mt-1 max-w-sm text-sm text-muted">
-                Tambahkan token Vercel Blob pertama. Tanpa konfigurasi, sistem memakai
-                token global default dari environment.
-              </p>
-            </div>
-          ) : (
-            <>
-              <Table className="min-w-[640px]">
-                <THead>
-                  <TR>
-                    <TH>Label</TH>
-                    <TH>Provider</TH>
-                    <TH>Pemilik</TH>
-                    <TH>Status</TH>
-                    <TH className="text-right">Aksi</TH>
-                  </TR>
-                </THead>
-                <tbody>
-                  {configs.map((c) => (
-                    <TR key={c.id} className="hover:bg-brand-50/60">
-                      <TD>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-ink">{c.label ?? "—"}</span>
-                          {c.isDefault ? <Badge tone="brand">Default</Badge> : null}
-                        </div>
-                      </TD>
-                      <TD className="text-muted">{c.provider}</TD>
-                      <TD className="text-ink/80">{OWNER_LABEL[c.ownerType] ?? c.ownerType}</TD>
-                      <TD>
-                        <StatusBadge status={c.status} />
-                      </TD>
-                      <TD className="text-right">
-                        <form action={softDeleteStorageConfig} className="inline-flex">
-                          <input type="hidden" name="id" value={c.id} />
-                          <button
-                            type="submit"
-                            aria-label={`Hapus ${c.label ?? "konfigurasi"}`}
-                            title="Hapus"
-                            className="text-muted"
-                          >
-                            <Trash2 className="h-4 w-4 hover:text-red-600" />
-                          </button>
-                        </form>
-                      </TD>
-                    </TR>
-                  ))}
-                </tbody>
-              </Table>
-
-              <p className="mt-3 text-[11px] text-muted">
-                Menampilkan {configs.length} konfigurasi aktif. Token tersimpan terenkripsi —
-                tidak ditampilkan.
-              </p>
-            </>
-          )}
-        </div>
+        <DataTable
+          columns={columns}
+          rows={rows}
+          editBase="/admin/storage"
+          deleteAction={softDeleteStorageConfig}
+          deleteConfirmText="Konfigurasi storage akan dihapus (soft delete)."
+          emptyText="Belum ada konfigurasi storage."
+        />
       </div>
     </div>
   );

@@ -19,7 +19,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { FileUpload } from "@/components/ui/file-upload";
+import { ConfirmSubmit } from "@/components/ui/confirm-submit";
+import { TitikField } from "@/components/map/titik-field";
 import { myBusinessPartners, myEvents } from "@/lib/queries/kelola-usaha";
+import { listTitikActiveOptions } from "@/lib/queries/titik";
 import { createEvent, softDeleteEvent } from "@/lib/actions/event";
 
 export const dynamic = "force-dynamic";
@@ -59,9 +62,10 @@ export default async function KelolaEventPage() {
   const perms = await getUserPermissions(userId);
   if (!perms.some((p) => PERMS_OK.includes(p))) redirect("/");
 
-  const [partners, events] = await Promise.all([
+  const [partners, events, titikOptions] = await Promise.all([
     myBusinessPartners(userId),
     myEvents(userId),
+    listTitikActiveOptions(),
   ]);
 
   const hasPartner = partners.length > 0;
@@ -163,13 +167,15 @@ export default async function KelolaEventPage() {
                   </Field>
                 </div>
 
-                <Field label="Lokasi" htmlFor="location" hint="Untuk acara offline / hybrid.">
+                <TitikField name="titikDakwahId" options={titikOptions} label="Titik Dakwah / Lokasi" />
+
+                <Field label="Detail alamat (opsional)" htmlFor="location" hint="Pelengkap titik.">
                   <div className="flex items-center gap-2 rounded-sm border border-line bg-surface px-3 focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/20">
                     <MapPin className="h-4 w-4 shrink-0 text-brand-600" />
                     <input
                       id="location"
                       name="location"
-                      placeholder="Mis. Gedung Dakwah, Kota Blitar"
+                      placeholder="Mis. Aula lantai 2"
                       className="h-11 w-full bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none"
                     />
                   </div>
@@ -291,14 +297,12 @@ export default async function KelolaEventPage() {
                         </Button>
                         <form action={softDeleteEvent}>
                           <input type="hidden" name="id" value={e.id} />
-                          <Button
-                            type="submit"
-                            variant="danger"
-                            size="sm"
-                            className="bg-red-50 text-red-600 hover:bg-red-100"
+                          <ConfirmSubmit
+                            text="Acara akan dipindah ke Recycle Bin (bisa dipulihkan)."
+                            className="inline-flex items-center gap-1.5 rounded-sm bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100"
                           >
                             <Trash2 className="h-3.5 w-3.5" /> Hapus
-                          </Button>
+                          </ConfirmSubmit>
                         </form>
                       </div>
                     </div>

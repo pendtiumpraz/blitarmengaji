@@ -59,7 +59,8 @@ export async function createModel(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data model tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data model tidak valid.";
+    redirect("/admin/ai/models?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -73,6 +74,7 @@ export async function createModel(formData: FormData): Promise<void> {
   });
 
   revalidateAi();
+  redirect("/admin/ai/models?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 // ── updateModel ──────────────────────────────────────────────────────────────
@@ -93,7 +95,8 @@ export async function updateModel(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data model tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data model tidak valid.";
+    redirect("/admin/ai/models?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -111,7 +114,7 @@ export async function updateModel(formData: FormData): Promise<void> {
     .where(and(eq(schema.aiModels.id, data.id), isNull(schema.aiModels.deletedAt)));
 
   revalidateAi();
-  redirect("/admin/ai/models");
+  redirect("/admin/ai/models?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 // ── softDeleteModel ──────────────────────────────────────────────────────────
@@ -122,7 +125,8 @@ export async function softDeleteModel(formData: FormData): Promise<void> {
 
   const parsed = idSchema.safeParse({ id: formData.get("id") ?? "" });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "ID model tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "ID model tidak valid.";
+    redirect("/admin/ai/models?err=" + encodeURIComponent(msg));
   }
 
   const session = await auth();
@@ -133,6 +137,7 @@ export async function softDeleteModel(formData: FormData): Promise<void> {
     .where(and(eq(schema.aiModels.id, parsed.data.id), isNull(schema.aiModels.deletedAt)));
 
   revalidateAi();
+  redirect("/admin/ai/models?ok=" + encodeURIComponent("Berhasil."));
 }
 
 // ── toggleModelActive ────────────────────────────────────────────────────────
@@ -152,7 +157,8 @@ export async function toggleModelActive(formData: FormData): Promise<void> {
     current: formData.get("current") ?? "false",
   });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/ai/models?err=" + encodeURIComponent(msg));
   }
 
   await db
@@ -161,4 +167,5 @@ export async function toggleModelActive(formData: FormData): Promise<void> {
     .where(and(eq(schema.aiModels.id, parsed.data.id), isNull(schema.aiModels.deletedAt)));
 
   revalidateAi();
+  redirect("/admin/ai/models?ok=" + encodeURIComponent("Berhasil."));
 }

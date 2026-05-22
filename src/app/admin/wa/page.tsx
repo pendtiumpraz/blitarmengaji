@@ -2,12 +2,22 @@ import { CalendarPlus, FileText, MessageSquare, AlertTriangle } from "lucide-rea
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
+import { DataTable, type Column } from "@/components/ui/data-table";
+import { ConfirmSubmit } from "@/components/ui/confirm-submit";
+import { TitikField } from "@/components/map/titik-field";
 import { listPendingIngest, listRecentMessages, listTitikOptions } from "@/lib/queries/wa";
 import { aiConfigured } from "@/lib/ai";
 import { approveKajian, approveFaedah, rejectIngest } from "@/lib/actions/wa";
 
 export const dynamic = "force-dynamic";
+
+const messageColumns: Column[] = [
+  { key: "createdAt", label: "Waktu", type: "datetime", sortable: true },
+  { key: "groupName", label: "Grup", sortable: true, filter: true },
+  { key: "classification", label: "Klasifikasi", type: "badge", sortable: true, filter: true },
+  { key: "status", label: "Status", sortable: true, filter: true },
+  { key: "text", label: "Teks" },
+];
 
 const inputCls =
   "h-10 w-full rounded-sm border border-line bg-cream px-3 text-sm text-ink focus:border-brand-600 focus:outline-none";
@@ -24,6 +34,15 @@ export default async function AdminWaPage() {
     listTitikOptions(),
     aiConfigured("wa_extract"),
   ]);
+
+  const messageRows = messages.map((m) => ({
+    id: m.id,
+    createdAt: m.createdAt,
+    groupName: m.groupName ?? "—",
+    classification: m.classification ?? "—",
+    status: m.status,
+    text: `${m.hasImage ? "🖼 " : ""}${m.text ?? ""}`.trim() || "—",
+  }));
 
   return (
     <div>
@@ -73,15 +92,14 @@ export default async function AdminWaPage() {
                       <span className="mb-1 block text-xs font-bold text-muted">Penceramah</span>
                       <input name="ustadz" defaultValue={p.ustadz || ""} className={inputCls} />
                     </label>
-                    <label className="text-sm">
-                      <span className="mb-1 block text-xs font-bold text-muted">Titik Dakwah</span>
-                      <select name="titikDakwahId" defaultValue={item.titikDakwahId || ""} className={inputCls}>
-                        <option value="">— pilih titik —</option>
-                        {titik.map((t) => (
-                          <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                      </select>
-                    </label>
+                    <div className="text-sm">
+                      <TitikField
+                        name="titikDakwahId"
+                        options={titik}
+                        defaultValue={item.titikDakwahId ?? ""}
+                        label="Titik Dakwah"
+                      />
+                    </div>
                     <label className="text-sm">
                       <span className="mb-1 block text-xs font-bold text-muted">Waktu Mulai</span>
                       <input type="datetime-local" name="startAt" required className={inputCls} />
@@ -104,7 +122,14 @@ export default async function AdminWaPage() {
                   </form>
                   <form action={rejectIngest} className="mt-2">
                     <input type="hidden" name="id" value={item.id} />
-                    <button type="submit" className="text-xs font-semibold text-red-600 hover:underline">Tolak draft ini</button>
+                    <ConfirmSubmit
+                      title="Tolak draft ini?"
+                      text="Draft kajian ini akan ditandai ditolak dan tidak diproses."
+                      confirmText="Ya, tolak"
+                      className="text-xs font-semibold text-red-600 hover:underline"
+                    >
+                      Tolak draft ini
+                    </ConfirmSubmit>
                   </form>
                 </Card>
               );
@@ -131,7 +156,14 @@ export default async function AdminWaPage() {
                 </form>
                 <form action={rejectIngest} className="mt-2">
                   <input type="hidden" name="id" value={item.id} />
-                  <button type="submit" className="text-xs font-semibold text-red-600 hover:underline">Tolak draft ini</button>
+                  <ConfirmSubmit
+                    title="Tolak draft ini?"
+                    text="Draft faedah ini akan ditandai ditolak dan tidak diproses."
+                    confirmText="Ya, tolak"
+                    className="text-xs font-semibold text-red-600 hover:underline"
+                  >
+                    Tolak draft ini
+                  </ConfirmSubmit>
                 </form>
               </Card>
             );
@@ -142,26 +174,11 @@ export default async function AdminWaPage() {
       <h2 className="display mb-3 mt-8 flex items-center gap-2 text-lg text-ink">
         <MessageSquare className="h-5 w-5 text-brand-600" /> Pesan Masuk Terbaru
       </h2>
-      <Table>
-          <THead>
-            <TR><TH>Waktu</TH><TH>Grup</TH><TH>Klasifikasi</TH><TH>Status</TH><TH>Teks</TH></TR>
-          </THead>
-          <tbody>
-            {messages.length === 0 ? (
-              <TR><TD>Belum ada pesan masuk.</TD></TR>
-            ) : (
-              messages.map((m) => (
-                <TR key={m.id}>
-                  <TD><span className="text-xs text-muted">{new Date(m.createdAt).toLocaleString("id-ID")}</span></TD>
-                  <TD>{m.groupName ?? "—"}</TD>
-                  <TD>{m.classification ? <Badge tone="muted">{m.classification}</Badge> : "—"}</TD>
-                  <TD><span className="text-xs">{m.status}</span></TD>
-                  <TD><span className="line-clamp-1 max-w-xs text-xs text-muted">{m.hasImage ? "🖼 " : ""}{m.text ?? ""}</span></TD>
-                </TR>
-              ))
-            )}
-          </tbody>
-      </Table>
+      <DataTable
+        columns={messageColumns}
+        rows={messageRows}
+        emptyText="Belum ada pesan masuk."
+      />
     </div>
   );
 }

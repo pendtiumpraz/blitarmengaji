@@ -46,7 +46,8 @@ export async function createProduct(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data produk tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data produk tidak valid.";
+    redirect("/admin/lapak?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -64,14 +65,17 @@ export async function createProduct(formData: FormData): Promise<void> {
       .limit(1)
   )[0];
   if (!partner) {
-    throw new Error("Partner usaha tidak ditemukan.");
+    redirect("/admin/lapak?err=" + encodeURIComponent("Partner usaha tidak ditemukan."));
   }
 
   // Ownership: bila hanya manage_own, partner harus milik user login.
   if (!allowedAll) {
     const userId = (await auth())?.user?.id ?? null;
     if (!userId || partner.ownerUserId !== userId) {
-      throw new Error("Akses ditolak: Anda hanya bisa menambah produk untuk usaha sendiri.");
+      redirect(
+        "/admin/lapak?err=" +
+          encodeURIComponent("Akses ditolak: Anda hanya bisa menambah produk untuk usaha sendiri."),
+      );
     }
   }
 
@@ -88,8 +92,11 @@ export async function createProduct(formData: FormData): Promise<void> {
     );
   const activeCount = Number(activeRows[0]?.total ?? 0);
   if (activeCount >= MAX_ACTIVE_PRODUCTS) {
-    throw new Error(
-      `Batas tercapai: maksimal ${MAX_ACTIVE_PRODUCTS} produk aktif per partner usaha.`,
+    redirect(
+      "/admin/lapak?err=" +
+        encodeURIComponent(
+          `Batas tercapai: maksimal ${MAX_ACTIVE_PRODUCTS} produk aktif per partner usaha.`,
+        ),
     );
   }
 
@@ -112,7 +119,7 @@ export async function createProduct(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/lapak");
   revalidatePath("/lapak");
-  redirect("/admin/lapak");
+  redirect("/admin/lapak?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const updateSchema = createSchema
@@ -145,7 +152,8 @@ export async function updateProduct(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data produk tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data produk tidak valid.";
+    redirect("/admin/lapak?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -167,14 +175,17 @@ export async function updateProduct(formData: FormData): Promise<void> {
       .limit(1)
   )[0];
   if (!existing) {
-    throw new Error("Produk tidak ditemukan.");
+    redirect("/admin/lapak?err=" + encodeURIComponent("Produk tidak ditemukan."));
   }
 
   // Ownership: bila hanya manage_own, produk harus milik usaha user login.
   const userId = (await auth())?.user?.id ?? null;
   if (!allowedAll) {
     if (!userId || existing.ownerUserId !== userId) {
-      throw new Error("Akses ditolak: Anda hanya bisa mengubah produk usaha sendiri.");
+      redirect(
+        "/admin/lapak?err=" +
+          encodeURIComponent("Akses ditolak: Anda hanya bisa mengubah produk usaha sendiri."),
+      );
     }
   }
 
@@ -193,8 +204,11 @@ export async function updateProduct(formData: FormData): Promise<void> {
       );
     const activeCount = Number(activeRows[0]?.total ?? 0);
     if (activeCount >= MAX_ACTIVE_PRODUCTS) {
-      throw new Error(
-        `Batas tercapai: maksimal ${MAX_ACTIVE_PRODUCTS} produk aktif per partner usaha.`,
+      redirect(
+        "/admin/lapak?err=" +
+          encodeURIComponent(
+            `Batas tercapai: maksimal ${MAX_ACTIVE_PRODUCTS} produk aktif per partner usaha.`,
+          ),
       );
     }
   }
@@ -221,7 +235,7 @@ export async function updateProduct(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/lapak");
   revalidatePath("/lapak");
-  redirect("/admin/lapak");
+  redirect("/admin/lapak?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const deleteSchema = z.object({
@@ -236,7 +250,8 @@ export async function softDeleteProduct(formData: FormData): Promise<void> {
 
   const parsed = deleteSchema.safeParse({ id: opt(formData.get("id")) });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/lapak?err=" + encodeURIComponent(msg));
   }
 
   const userId = (await auth())?.user?.id ?? null;
@@ -253,7 +268,10 @@ export async function softDeleteProduct(formData: FormData): Promise<void> {
       .where(and(eq(schema.products.id, parsed.data.id), isNull(schema.products.deletedAt)))
       .limit(1);
     if (!rows[0] || !userId || rows[0].ownerUserId !== userId) {
-      throw new Error("Akses ditolak: Anda hanya bisa menghapus produk usaha sendiri.");
+      redirect(
+        "/admin/lapak?err=" +
+          encodeURIComponent("Akses ditolak: Anda hanya bisa menghapus produk usaha sendiri."),
+      );
     }
   }
 
@@ -264,4 +282,5 @@ export async function softDeleteProduct(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/lapak");
   revalidatePath("/lapak");
+  redirect("/admin/lapak?ok=" + encodeURIComponent("Dihapus."));
 }

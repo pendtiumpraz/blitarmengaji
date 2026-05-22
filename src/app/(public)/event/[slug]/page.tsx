@@ -17,6 +17,7 @@ import { Container } from "@/components/ui/container";
 import { OrnDivider } from "@/components/ui/orn-divider";
 import { auth } from "@/lib/auth";
 import { registerEvent } from "@/lib/actions/belajar";
+import { MiniMap } from "@/components/map/mini-map";
 import { countRegistrations, getEventBySlug } from "@/lib/queries/event-detail";
 
 export const dynamic = "force-dynamic";
@@ -109,6 +110,10 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     acara.capacity != null ? Math.max(acara.capacity - registeredCount, 0) : null;
   const penuh = sisaKuota === 0;
 
+  const tLat = acara.titikLat != null ? Number(acara.titikLat) : null;
+  const tLng = acara.titikLng != null ? Number(acara.titikLng) : null;
+  const hasTitikMap = tLat != null && tLng != null && Number.isFinite(tLat) && Number.isFinite(tLng);
+
   return (
     <Container className="py-6 lg:py-10">
       <Link
@@ -192,7 +197,19 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
               {offline ? (
                 <li className="flex items-start gap-2.5">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
-                  <span>{acara.location ?? "Lokasi menyusul"}</span>
+                  <span>
+                    {acara.titikName ? (
+                      acara.titikSlug ? (
+                        <Link href={`/titik/${acara.titikSlug}`} className="font-bold text-brand-700 hover:text-brand-600">
+                          {acara.titikName}
+                        </Link>
+                      ) : (
+                        <span className="font-bold text-ink">{acara.titikName}</span>
+                      )
+                    ) : null}
+                    {acara.location ? <span className="block text-xs text-muted">{acara.location}</span> : null}
+                    {!acara.titikName && !acara.location ? "Lokasi menyusul" : null}
+                  </span>
                 </li>
               ) : null}
 
@@ -265,6 +282,19 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
               </p>
             )}
           </div>
+
+          {hasTitikMap ? (
+            <div className="mt-4 overflow-hidden rounded-[3px] border border-line bg-surface">
+              <MiniMap
+                lat={tLat as number}
+                lng={tLng as number}
+                name={acara.titikName ?? acara.title}
+                slug={acara.titikSlug ?? ""}
+                gmapsUrl={acara.titikGmaps ?? undefined}
+                className="h-48"
+              />
+            </div>
+          ) : null}
         </aside>
       </div>
     </Container>

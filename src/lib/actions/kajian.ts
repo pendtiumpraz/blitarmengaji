@@ -38,7 +38,7 @@ const createSchema = z.object({
 export async function createKajian(formData: FormData): Promise<void> {
   await requirePermission("kajian.create");
 
-  const parsed = createSchema.parse({
+  const result = createSchema.safeParse({
     title: emptyToUndef(formData.get("title")),
     slug: emptyToUndef(formData.get("slug")),
     ustadzId: emptyToUndef(formData.get("ustadzId")),
@@ -48,6 +48,12 @@ export async function createKajian(formData: FormData): Promise<void> {
     type: emptyToUndef(formData.get("type")) ?? "offline",
     status: emptyToUndef(formData.get("status")) ?? "draft",
   });
+
+  if (!result.success) {
+    const msg = result.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/kajian?err=" + encodeURIComponent(msg));
+  }
+  const parsed = result.data;
 
   const cover = await uploadToBlob(formData.get("coverFile") as File | null, "kajian/cover");
 
@@ -65,7 +71,7 @@ export async function createKajian(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/kajian");
   revalidatePath("/kajian");
-  redirect("/admin/kajian");
+  redirect("/admin/kajian?ok=" + encodeURIComponent("Kajian tersimpan."));
 }
 
 const updateSchema = createSchema.extend({
@@ -80,7 +86,7 @@ const updateSchema = createSchema.extend({
 export async function updateKajian(formData: FormData): Promise<void> {
   await requirePermission("kajian.update");
 
-  const parsed = updateSchema.parse({
+  const result = updateSchema.safeParse({
     id: emptyToUndef(formData.get("id")),
     title: emptyToUndef(formData.get("title")),
     slug: emptyToUndef(formData.get("slug")),
@@ -91,6 +97,12 @@ export async function updateKajian(formData: FormData): Promise<void> {
     type: emptyToUndef(formData.get("type")) ?? "offline",
     status: emptyToUndef(formData.get("status")) ?? "draft",
   });
+
+  if (!result.success) {
+    const msg = result.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/kajian?err=" + encodeURIComponent(msg));
+  }
+  const parsed = result.data;
 
   const newCover = await uploadToBlob(formData.get("coverFile") as File | null, "kajian/cover");
 
@@ -113,7 +125,7 @@ export async function updateKajian(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/kajian");
   revalidatePath("/kajian");
-  redirect("/admin/kajian");
+  redirect("/admin/kajian?ok=" + encodeURIComponent("Kajian tersimpan."));
 }
 
 const deleteSchema = z.object({
@@ -128,7 +140,12 @@ export async function softDeleteKajian(formData: FormData): Promise<void> {
   await requirePermission("kajian.delete");
 
   const session = await auth();
-  const { id } = deleteSchema.parse({ id: formData.get("id") });
+  const result = deleteSchema.safeParse({ id: formData.get("id") });
+  if (!result.success) {
+    const msg = result.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/kajian?err=" + encodeURIComponent(msg));
+  }
+  const { id } = result.data;
 
   await db
     .update(kajian)
@@ -141,5 +158,5 @@ export async function softDeleteKajian(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/kajian");
   revalidatePath("/kajian");
-  redirect("/admin/kajian");
+  redirect("/admin/kajian?ok=" + encodeURIComponent("Kajian dihapus — ada di Recycle Bin."));
 }

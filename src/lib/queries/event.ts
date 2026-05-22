@@ -95,6 +95,7 @@ export type EventDetail = {
   capacity: number | null;
   needsRegistration: boolean;
   status: "draft" | "published";
+  titikDakwahId: string | null;
 };
 
 /** Ambil satu acara berdasarkan id (belum dihapus). Null bila tidak ada. */
@@ -115,6 +116,7 @@ export async function getEventById(id: string): Promise<EventDetail | null> {
       capacity: schema.events.capacity,
       needsRegistration: schema.events.needsRegistration,
       status: schema.events.status,
+      titikDakwahId: schema.events.titikDakwahId,
     })
     .from(schema.events)
     .where(and(eq(schema.events.id, id), isNull(schema.events.deletedAt)))

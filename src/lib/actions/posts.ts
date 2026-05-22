@@ -95,7 +95,8 @@ export async function createPost(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data catatan tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data catatan tidak valid.";
+    redirect("/admin/catatan?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -118,7 +119,8 @@ export async function createPost(formData: FormData): Promise<void> {
   revalidatePath("/ustadz/catatan");
   revalidatePath("/admin/catatan");
   revalidatePath("/catatan");
-  redirect(ref.includes("/ustadz") ? "/ustadz/catatan" : "/admin/catatan");
+  const base = ref.includes("/ustadz") ? "/ustadz/catatan" : "/admin/catatan";
+  redirect(base + "?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const updateSchema = createSchema.extend({
@@ -142,7 +144,8 @@ export async function updatePost(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data catatan tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data catatan tidak valid.";
+    redirect("/admin/catatan?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -154,7 +157,11 @@ export async function updatePost(formData: FormData): Promise<void> {
       .where(and(eq(posts.id, data.id), isNull(posts.deletedAt)))
       .limit(1)
   )[0];
-  if (!existing) throw new Error("Catatan tidak ditemukan atau sudah dihapus.");
+  if (!existing) {
+    redirect(
+      "/admin/catatan?err=" + encodeURIComponent("Catatan tidak ditemukan atau sudah dihapus."),
+    );
+  }
 
   // Upload cover BARU bila ada; pertahankan cover lama bila kosong.
   const newCover = await uploadToBlob(formData.get("coverFile") as File | null, "catatan/cover");
@@ -174,7 +181,7 @@ export async function updatePost(formData: FormData): Promise<void> {
   revalidatePath("/admin/catatan");
   revalidatePath(`/admin/catatan/${data.id}`);
   revalidatePath("/catatan");
-  redirect("/admin/catatan");
+  redirect("/admin/catatan?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const deleteSchema = z.object({
@@ -198,5 +205,5 @@ export async function softDeletePost(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/catatan");
   revalidatePath("/catatan");
-  redirect("/admin/catatan");
+  redirect("/admin/catatan?ok=" + encodeURIComponent("Dihapus."));
 }

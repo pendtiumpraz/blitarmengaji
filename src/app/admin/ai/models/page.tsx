@@ -1,22 +1,9 @@
-import Link from "next/link";
-import {
-  ArrowUpRight,
-  BrainCircuit,
-  Cpu,
-  Inbox,
-  Pencil,
-  PlusCircle,
-  Power,
-  ServerCog,
-  Trash2,
-} from "lucide-react";
+import { PlusCircle, ServerCog } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Field } from "@/components/ui/input";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
-import { cn } from "@/lib/cn";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { listAiModels, listProviderOptions } from "@/lib/queries/ai-admin";
 import {
   createModel,
@@ -40,14 +27,6 @@ const KINDS: { value: ModelKind; label: string }[] = [
   { value: "multimodal", label: "Multimodal" },
 ];
 
-const KIND_TONE: Record<ModelKind, "brand" | "gold" | "success" | "warning" | "muted"> = {
-  chat: "brand",
-  reasoning: "gold",
-  embedding: "success",
-  vision: "warning",
-  multimodal: "muted",
-};
-
 const KIND_LABEL: Record<ModelKind, string> = {
   chat: "Chat",
   reasoning: "Reasoning",
@@ -56,14 +35,27 @@ const KIND_LABEL: Record<ModelKind, string> = {
   multimodal: "Multimodal",
 };
 
-function formatContext(n: number | null) {
-  if (!n) return "—";
-  if (n >= 1000) return `${Math.round(n / 1000).toLocaleString("id-ID")}K`;
-  return n.toLocaleString("id-ID");
-}
+const columns: Column[] = [
+  { key: "id", label: "ID", type: "code" },
+  { key: "providerName", label: "Provider", sortable: true, filter: true },
+  { key: "modelId", label: "ID Model", type: "code" },
+  { key: "label", label: "Label", sortable: true },
+  { key: "kind", label: "Jenis", type: "badge", sortable: true, filter: true },
+  { key: "isActive", label: "Aktif", type: "bool", sortable: true },
+];
 
 export default async function AdminAiModelsPage() {
   const [models, providers] = await Promise.all([listAiModels(), listProviderOptions()]);
+  const rows = models.map((m) => ({
+    id: m.id,
+    providerName: m.providerName,
+    modelId: m.modelId,
+    label: m.label,
+    kind: KIND_LABEL[m.kind as ModelKind] ?? m.kind,
+    isActive: m.isActive,
+    // toggleModelActive butuh nilai status saat ini ("true"/"false") → dibalik di server.
+    current: String(m.isActive),
+  }));
 
   return (
     <div>
@@ -155,112 +147,21 @@ export default async function AdminAiModelsPage() {
 
           {/* Tabel model (kanan) */}
           <div className="lg:col-span-3">
-            <Card className="overflow-hidden">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-5 py-4">
-                <h2 className="flex items-center gap-2 font-bold text-ink">
-                  <BrainCircuit className="h-4 w-4 text-brand-600" /> Katalog Model
-                </h2>
-                <span className="text-[11px] text-muted">{models.length} model terdaftar</span>
-              </div>
-
-              {models.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 px-6 py-14 text-center">
-                  <Inbox className="h-9 w-9 text-brand-300" />
-                  <p className="font-bold text-ink">Belum ada model</p>
-                  <p className="max-w-xs text-sm text-muted">
-                    Daftarkan model pertama lewat formulir di samping. Model nonaktif tidak akan
-                    muncul di pilihan tugas AI.
-                  </p>
-                </div>
-              ) : (
-                <Table className="border-0">
-                  <THead>
-                    <TR className="border-0">
-                      <TH>Provider</TH>
-                      <TH>Model</TH>
-                      <TH>Jenis</TH>
-                      <TH className="text-right">Context</TH>
-                      <TH className="text-center">Status</TH>
-                      <TH className="text-center">Aksi</TH>
-                    </TR>
-                  </THead>
-                  <tbody>
-                    {models.map((m) => {
-                      const kind = m.kind as ModelKind;
-                      return (
-                        <TR key={m.id}>
-                          <TD className="whitespace-nowrap text-muted">{m.providerName}</TD>
-                          <TD>
-                            <span className="font-semibold text-ink">{m.label}</span>
-                            <span className="block font-mono text-[11px] text-muted">{m.modelId}</span>
-                          </TD>
-                          <TD>
-                            <Badge tone={KIND_TONE[kind]}>{KIND_LABEL[kind] ?? kind}</Badge>
-                          </TD>
-                          <TD className="whitespace-nowrap text-right tabular-nums text-ink">
-                            {formatContext(m.contextWindow)}
-                          </TD>
-                          <TD className="text-center">
-                            <Badge tone={m.isActive ? "success" : "muted"}>
-                              {m.isActive ? "Aktif" : "Nonaktif"}
-                            </Badge>
-                          </TD>
-                          <TD className="text-center">
-                            <div className="inline-flex items-center gap-1">
-                              <form action={toggleModelActive}>
-                                <input type="hidden" name="id" value={m.id} />
-                                <input type="hidden" name="current" value={String(m.isActive)} />
-                                <button
-                                  type="submit"
-                                  title={m.isActive ? "Nonaktifkan model" : "Aktifkan model"}
-                                  aria-label={m.isActive ? "Nonaktifkan model" : "Aktifkan model"}
-                                  className={cn(
-                                    "inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted transition-colors",
-                                    m.isActive
-                                      ? "hover:bg-amber-50 hover:text-amber-700"
-                                      : "hover:bg-brand-50 hover:text-brand-700",
-                                  )}
-                                >
-                                  <Power className="h-4 w-4" />
-                                </button>
-                              </form>
-                              <Link
-                                href={`/admin/ai/models/${m.id}`}
-                                title="Ubah model"
-                                aria-label="Ubah model"
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted transition-colors hover:bg-brand-50 hover:text-brand-700"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Link>
-                              <form action={softDeleteModel}>
-                                <input type="hidden" name="id" value={m.id} />
-                                <button
-                                  type="submit"
-                                  title="Hapus model"
-                                  aria-label="Hapus model"
-                                  className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted transition-colors hover:bg-red-50 hover:text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </form>
-                            </div>
-                          </TD>
-                        </TR>
-                      );
-                    })}
-                  </tbody>
-                </Table>
-              )}
-
-              <p className="flex items-center gap-1.5 border-t border-line px-5 py-3 text-[11px] text-muted">
-                <Cpu className="h-3.5 w-3.5 text-brand-400" />
-                Hapus = pindah ke recycle bin (soft delete). Tautkan model aktif ke tugas lewat{" "}
-                <Link href="/admin/ai/bindings" className="inline-flex items-center gap-0.5 font-bold text-brand-700 hover:underline">
-                  Pemetaan Tugas <ArrowUpRight className="h-3 w-3" />
-                </Link>
-                .
-              </p>
-            </Card>
+            <DataTable
+              columns={columns}
+              rows={rows}
+              editBase="/admin/ai/models"
+              deleteAction={softDeleteModel}
+              deleteConfirmText="Model akan dipindah ke recycle bin (soft delete)."
+              rowActions={[
+                {
+                  action: toggleModelActive,
+                  label: "Toggle",
+                  fields: ["current"],
+                },
+              ]}
+              emptyText="Belum ada model."
+            />
           </div>
         </div>
       )}

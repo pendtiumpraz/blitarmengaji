@@ -215,7 +215,8 @@ export async function createCourse(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data kelas tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data kelas tidak valid.";
+    redirect("/admin/kelas?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -239,7 +240,12 @@ export async function createCourse(formData: FormData): Promise<void> {
   revalidatePath("/ustadz/kelas");
   revalidatePath("/admin/kelas");
   revalidatePath("/kelas");
-  redirect(ref.includes("/ustadz") ? "/ustadz/kelas" : "/admin/kelas");
+  // Jalur ustadz dipertahankan; jalur admin diberi ?ok untuk toast.
+  redirect(
+    ref.includes("/ustadz")
+      ? "/ustadz/kelas"
+      : "/admin/kelas?ok=" + encodeURIComponent("Tersimpan."),
+  );
 }
 
 const updateCourseSchema = createCourseSchema.extend({
@@ -264,7 +270,8 @@ export async function updateCourse(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data kelas tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data kelas tidak valid.";
+    redirect("/admin/kelas?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -276,7 +283,11 @@ export async function updateCourse(formData: FormData): Promise<void> {
       .where(and(eq(schema.courses.id, data.id), isNull(schema.courses.deletedAt)))
       .limit(1)
   )[0];
-  if (!existing) throw new Error("Kelas tidak ditemukan atau sudah dihapus.");
+  if (!existing) {
+    redirect(
+      "/admin/kelas?err=" + encodeURIComponent("Kelas tidak ditemukan atau sudah dihapus."),
+    );
+  }
 
   // Upload cover BARU bila ada (pertahankan lama bila kosong).
   const newCover = await uploadToBlob(formData.get("coverFile") as File | null, "kelas/cover");
@@ -297,7 +308,7 @@ export async function updateCourse(formData: FormData): Promise<void> {
   revalidatePath("/admin/kelas");
   revalidatePath(`/admin/kelas/${data.id}`);
   revalidatePath("/kelas");
-  redirect("/admin/kelas");
+  redirect("/admin/kelas?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const softDeleteCourseSchema = z.object({
@@ -311,7 +322,8 @@ export async function softDeleteCourse(formData: FormData): Promise<void> {
 
   const parsed = softDeleteCourseSchema.safeParse({ id: formData.get("id") });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Kelas tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Kelas tidak valid.";
+    redirect("/admin/kelas?err=" + encodeURIComponent(msg));
   }
 
   // Pastikan kelas ada & belum dihapus.
@@ -322,7 +334,11 @@ export async function softDeleteCourse(formData: FormData): Promise<void> {
       .where(and(eq(schema.courses.id, parsed.data.id), isNull(schema.courses.deletedAt)))
       .limit(1)
   )[0];
-  if (!course) throw new Error("Kelas tidak ditemukan atau sudah dihapus.");
+  if (!course) {
+    redirect(
+      "/admin/kelas?err=" + encodeURIComponent("Kelas tidak ditemukan atau sudah dihapus."),
+    );
+  }
 
   await db
     .update(schema.courses)
@@ -331,5 +347,5 @@ export async function softDeleteCourse(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/kelas");
   revalidatePath("/kelas");
-  redirect("/admin/kelas");
+  redirect("/admin/kelas?ok=" + encodeURIComponent("Dihapus."));
 }

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db, schema } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { requirePermission } from "@/lib/rbac";
@@ -59,11 +60,15 @@ export async function approveKajian(formData: FormData): Promise<void> {
     isOnline: formData.get("isOnline") === "on" || formData.get("isOnline") === "true",
     streamUrl: formData.get("streamUrl") ?? "",
   });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Data kajian tidak valid.");
+  if (!parsed.success) {
+    redirect("/admin/wa?err=" + encodeURIComponent(parsed.error.issues[0]?.message ?? "Data kajian tidak valid."));
+  }
   const d = parsed.data;
   const titikId = d.titikDakwahId && d.titikDakwahId !== "" ? d.titikDakwahId : null;
   const start = new Date(d.startAt);
-  if (Number.isNaN(start.getTime())) throw new Error("Waktu mulai tidak valid.");
+  if (Number.isNaN(start.getTime())) {
+    redirect("/admin/wa?err=" + encodeURIComponent("Waktu mulai tidak valid."));
+  }
 
   const [kaj] = await db
     .insert(schema.kajian)
@@ -96,6 +101,7 @@ export async function approveKajian(formData: FormData): Promise<void> {
   revalidatePath("/admin/wa");
   revalidatePath("/jadwal");
   revalidatePath("/kajian");
+  redirect("/admin/wa?ok=" + encodeURIComponent("Kajian disetujui & jadwal dibuat."));
 }
 
 const faedahSchema = z.object({
@@ -114,7 +120,9 @@ export async function approveFaedah(formData: FormData): Promise<void> {
     title: formData.get("title"),
     body: formData.get("body"),
   });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Data faedah tidak valid.");
+  if (!parsed.success) {
+    redirect("/admin/wa?err=" + encodeURIComponent(parsed.error.issues[0]?.message ?? "Data faedah tidak valid."));
+  }
   const d = parsed.data;
 
   await db.insert(schema.posts).values({
@@ -135,6 +143,7 @@ export async function approveFaedah(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/wa");
   revalidatePath("/catatan");
+  redirect("/admin/wa?ok=" + encodeURIComponent("Faedah disetujui & catatan dibuat."));
 }
 
 /** Tolak draft. */
@@ -142,10 +151,13 @@ export async function rejectIngest(formData: FormData): Promise<void> {
   await requirePermission("kajian.create");
   const userId = await currentUserId();
   const id = String(formData.get("id") || "");
-  if (!id) throw new Error("ID tidak valid.");
+  if (!id) {
+    redirect("/admin/wa?err=" + encodeURIComponent("ID tidak valid."));
+  }
   await db
     .update(schema.waIngestQueue)
     .set({ status: "rejected", reviewedBy: userId, reviewedAt: new Date() })
     .where(eq(schema.waIngestQueue.id, id));
   revalidatePath("/admin/wa");
+  redirect("/admin/wa?ok=" + encodeURIComponent("Draft ditolak."));
 }

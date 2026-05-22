@@ -53,7 +53,8 @@ export async function createStorageConfig(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/storage?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -74,6 +75,7 @@ export async function createStorageConfig(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/storage");
+  redirect("/admin/storage?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 // ── updateStorageConfig ─────────────────────────────────────────────────────────
@@ -109,7 +111,8 @@ export async function updateStorageConfig(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/storage?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -144,7 +147,7 @@ export async function updateStorageConfig(formData: FormData): Promise<void> {
     );
 
   revalidatePath("/admin/storage");
-  redirect("/admin/storage");
+  redirect("/admin/storage?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 // ── softDeleteStorageConfig ─────────────────────────────────────────────────────
@@ -159,7 +162,8 @@ export async function softDeleteStorageConfig(formData: FormData): Promise<void>
 
   const parsed = deleteSchema.safeParse({ id: opt(formData.get("id")) });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/storage?err=" + encodeURIComponent(msg));
   }
 
   const deletedBy = (await auth())?.user?.id ?? null;
@@ -175,4 +179,5 @@ export async function softDeleteStorageConfig(formData: FormData): Promise<void>
     );
 
   revalidatePath("/admin/storage");
+  redirect("/admin/storage?ok=" + encodeURIComponent("Berhasil."));
 }

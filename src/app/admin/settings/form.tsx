@@ -9,6 +9,8 @@ import {
   Globe,
   Banknote,
   Inbox,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,7 +18,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input, Field } from "@/components/ui/input";
 import { FileUpload } from "@/components/ui/file-upload";
 import { cn } from "@/lib/cn";
-import { saveSettings, savePaymentMethod } from "@/lib/actions/settings";
+import {
+  saveSettings,
+  savePaymentMethod,
+  updatePaymentMethod,
+  deletePaymentMethod,
+} from "@/lib/actions/settings";
 import type {
   PaymentMethodRow,
   StorageConfigRow,
@@ -297,34 +304,124 @@ export function SettingsForm({
             {paymentMethods.map((m) => (
               <li
                 key={m.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-line bg-brand-50/30 px-4 py-3"
+                className="rounded-sm border border-line bg-brand-50/30 px-4 py-3"
               >
-                <div className="flex items-center gap-3">
-                  {m.qrisImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={m.qrisImage}
-                      alt="QRIS"
-                      className="h-12 w-12 shrink-0 rounded-sm border border-line bg-surface object-contain p-0.5"
-                    />
-                  ) : (
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-surface text-brand-600 ring-1 ring-line">
-                      {m.type === "qris" ? <QrCode className="h-4 w-4" /> : <Banknote className="h-4 w-4" />}
-                    </span>
-                  )}
-                  <div>
-                    <p className="flex items-center gap-2 text-sm font-bold text-ink">
-                      {m.bankName ?? PAYMENT_TYPE_LABEL[m.type]}
-                      <Badge tone="muted">{PAYMENT_TYPE_LABEL[m.type]}</Badge>
-                    </p>
-                    <p className="text-xs text-muted">
-                      {m.accountNo ? `${m.accountNo}` : "—"}
-                      {m.accountName ? ` · a.n. ${m.accountName}` : ""}
-                      {m.waNumber ? ` · WA ${m.waNumber}` : ""}
-                    </p>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    {m.qrisImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={m.qrisImage}
+                        alt="QRIS"
+                        className="h-12 w-12 shrink-0 rounded-sm border border-line bg-surface object-contain p-0.5"
+                      />
+                    ) : (
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-surface text-brand-600 ring-1 ring-line">
+                        {m.type === "qris" ? <QrCode className="h-4 w-4" /> : <Banknote className="h-4 w-4" />}
+                      </span>
+                    )}
+                    <div>
+                      <p className="flex items-center gap-2 text-sm font-bold text-ink">
+                        {m.bankName ?? PAYMENT_TYPE_LABEL[m.type]}
+                        <Badge tone="muted">{PAYMENT_TYPE_LABEL[m.type]}</Badge>
+                      </p>
+                      <p className="text-xs text-muted">
+                        {m.accountNo ? `${m.accountNo}` : "—"}
+                        {m.accountName ? ` · a.n. ${m.accountName}` : ""}
+                        {m.waNumber ? ` · WA ${m.waNumber}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={m.isActive ? "success" : "muted"}>{m.isActive ? "Aktif" : "Nonaktif"}</Badge>
+                    <form action={deletePaymentMethod}>
+                      <input type="hidden" name="id" value={m.id} />
+                      <button
+                        type="submit"
+                        title="Hapus metode"
+                        aria-label="Hapus metode"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-sm text-muted transition-colors hover:bg-red-50 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </form>
                   </div>
                 </div>
-                <Badge tone={m.isActive ? "success" : "muted"}>{m.isActive ? "Aktif" : "Nonaktif"}</Badge>
+
+                {/* Inline form ubah metode pembayaran (updatePaymentMethod) */}
+                <details className="mt-2">
+                  <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-[11px] font-bold text-brand-700 [&::-webkit-details-marker]:hidden">
+                    <Pencil className="h-3.5 w-3.5" /> Ubah detail metode ini
+                  </summary>
+                  <form
+                    action={updatePaymentMethod}
+                    encType="multipart/form-data"
+                    className="mt-3 space-y-3 border-t border-line pt-3"
+                  >
+                    <input type="hidden" name="id" value={m.id} />
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <Field label="Nama Bank" htmlFor={`bank_name-${m.id}`}>
+                        <Input
+                          id={`bank_name-${m.id}`}
+                          name="bank_name"
+                          defaultValue={m.bankName ?? ""}
+                          placeholder="mis. BSI"
+                        />
+                      </Field>
+                      <Field label="No. Rekening" htmlFor={`account_no-${m.id}`}>
+                        <Input
+                          id={`account_no-${m.id}`}
+                          name="account_no"
+                          inputMode="numeric"
+                          defaultValue={m.accountNo ?? ""}
+                          placeholder="000-000-0000"
+                        />
+                      </Field>
+                      <Field label="Atas Nama" htmlFor={`account_name-${m.id}`}>
+                        <Input
+                          id={`account_name-${m.id}`}
+                          name="account_name"
+                          defaultValue={m.accountName ?? ""}
+                          placeholder="Yayasan Blitar Mengaji"
+                        />
+                      </Field>
+                    </div>
+                    <Field
+                      label="No. WhatsApp Konfirmasi"
+                      htmlFor={`wa_number-${m.id}`}
+                      hint="Pembayar klik wa.me prefilled untuk konfirmasi manual."
+                    >
+                      <Input
+                        id={`wa_number-${m.id}`}
+                        name="wa_number"
+                        inputMode="tel"
+                        defaultValue={m.waNumber ?? ""}
+                        placeholder="0812-xxxx-xxxx"
+                      />
+                    </Field>
+                    {/* Re-upload QRIS opsional — kosongkan untuk pertahankan gambar lama. */}
+                    <FileUpload
+                      name="qrisFile"
+                      accept="image/*"
+                      label="Ganti Gambar QRIS (opsional)"
+                      defaultUrl={m.qrisImage ?? null}
+                    />
+                    <label className="flex items-center gap-2 text-xs font-bold text-muted">
+                      <input
+                        type="checkbox"
+                        name="is_active"
+                        defaultChecked={m.isActive}
+                        className="h-4 w-4 rounded-sm border-line text-brand-600 focus:ring-brand-600/20"
+                      />
+                      Aktif
+                    </label>
+                    <div className="flex justify-end">
+                      <Button type="submit" variant="outline" size="sm">
+                        <Check className="h-4 w-4" /> Simpan Perubahan
+                      </Button>
+                    </div>
+                  </form>
+                </details>
               </li>
             ))}
           </ul>

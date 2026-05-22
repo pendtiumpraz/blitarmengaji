@@ -6,9 +6,9 @@ import { KajianEditForm } from "./form";
 import {
   getKajianById,
   listUstadzOptions,
-  listTitikOptions,
   listKajianCategoryOptions,
 } from "@/lib/queries/kajian";
+import { listTitikActiveOptions } from "@/lib/queries/titik";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export default async function AdminKajianEditPage({
   const [kajian, ustadzOptions, titikOptions, categoryOptions] = await Promise.all([
     getKajianById(id),
     listUstadzOptions(),
-    listTitikOptions(),
+    listTitikActiveOptions(),
     listKajianCategoryOptions(),
   ]);
 

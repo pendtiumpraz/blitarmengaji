@@ -1,36 +1,40 @@
-import { FileText, Eye, Pencil, Trash2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input, Field } from "@/components/ui/input";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
 import { FileUpload } from "@/components/ui/file-upload";
-import { Pagination } from "@/components/ui/pagination";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { listPostsPaged, countPosts } from "@/lib/queries/konten";
 import { createPost, softDeletePost } from "@/lib/actions/posts";
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 10;
+const STATUS_LABEL: Record<string, string> = {
+  published: "Published",
+  draft: "Draft",
+};
 
-const dateFmt = new Intl.DateTimeFormat("id-ID", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
+const columns: Column[] = [
+  { key: "title", label: "Judul", sortable: true },
+  { key: "authorName", label: "Penulis", sortable: true, filter: true },
+  { key: "status", label: "Status", type: "badge", sortable: true, filter: true },
+  { key: "publishedAt", label: "Terbit", type: "date", sortable: true },
+];
 
-export default async function AdminCatatanPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
-  const { page: pageParam } = await searchParams;
-  const page = Math.max(1, Number(pageParam) || 1);
-  const [rows, total] = await Promise.all([
-    listPostsPaged(page, PAGE_SIZE),
-    countPosts(),
-  ]);
+export default async function AdminCatatanPage() {
+  // Ambil SEMUA catatan aktif (termasuk draft) dalam satu halaman; DataTable
+  // menangani pencarian, filter, sortir, & pagination di sisi klien.
+  const total = await countPosts();
+  const all = await listPostsPaged(1, Math.max(1, total));
+
+  const rows = all.map((r) => ({
+    id: r.id,
+    title: r.title,
+    authorName: r.authorName ?? "—",
+    status: STATUS_LABEL[r.status] ?? r.status,
+    publishedAt: r.publishedAt ?? r.createdAt,
+  }));
 
   return (
     <div>
@@ -91,107 +95,14 @@ export default async function AdminCatatanPage({
 
         {/* DAFTAR CATATAN */}
         <div className="lg:col-span-7">
-          {rows.length === 0 ? (
-            <Card className="px-6 py-16 text-center">
-              <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand-600">
-                <FileText className="h-7 w-7" />
-              </span>
-              <h2 className="display mt-4 text-lg text-ink">Belum ada catatan</h2>
-              <p className="mx-auto mt-1 max-w-sm text-sm text-muted">
-                Tulis catatan kajian atau artikel pertama lewat formulir di samping agar tampil untuk jamaah.
-              </p>
-            </Card>
-          ) : (
-            <>
-              <Table className="min-w-[560px]">
-                <THead>
-                  <TR>
-                    <TH>Judul</TH>
-                    <TH>Penulis</TH>
-                    <TH>Terbit</TH>
-                    <TH className="text-right">Aksi</TH>
-                  </TR>
-                </THead>
-                <tbody>
-                  {rows.map((r) => (
-                    <TR key={r.id} className="hover:bg-brand-50/50">
-                      <TD>
-                        <div className="flex items-center gap-3">
-                          {r.coverImage ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={r.coverImage}
-                              alt=""
-                              className="h-10 w-10 shrink-0 rounded object-cover"
-                            />
-                          ) : (
-                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded bg-brand-50 text-brand-600">
-                              <FileText className="h-4 w-4" />
-                            </span>
-                          )}
-                          <div>
-                            <div className="font-bold text-ink">{r.title}</div>
-                            <Badge tone="muted">
-                              {r.type === "artikel" ? "Artikel" : "Catatan"}
-                            </Badge>
-                          </div>
-                        </div>
-                      </TD>
-                      <TD className="text-ink">
-                        {r.authorName ?? <span className="text-muted">—</span>}
-                      </TD>
-                      <TD className="text-muted">
-                        {r.publishedAt ? dateFmt.format(r.publishedAt) : dateFmt.format(r.createdAt)}
-                      </TD>
-                      <TD className="text-right">
-                        <span className="inline-flex items-center gap-3 text-muted">
-                          <a
-                            href={`/catatan/${r.slug}`}
-                            aria-label={`Lihat ${r.title}`}
-                            title="Lihat"
-                            className="hover:text-brand-600"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </a>
-                          <a
-                            href={`/admin/catatan/${r.id}`}
-                            aria-label={`Edit ${r.title}`}
-                            title="Edit"
-                            className="hover:text-brand-600"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </a>
-                          <form action={softDeletePost} className="inline-flex">
-                            <input type="hidden" name="id" value={r.id} />
-                            <button
-                              type="submit"
-                              aria-label={`Hapus ${r.title}`}
-                              title="Hapus"
-                              className="hover:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </form>
-                        </span>
-                      </TD>
-                    </TR>
-                  ))}
-                </tbody>
-              </Table>
-
-              <Pagination
-                page={page}
-                pageSize={PAGE_SIZE}
-                total={total}
-                baseHref="/admin/catatan"
-              />
-
-              <p className="mt-3 text-xs text-muted">
-                Tombol Hapus melakukan <em>soft delete</em> (data masuk recycle bin, bukan
-                dihapus permanen).
-              </p>
-            </>
-          )}
+          <DataTable
+            columns={columns}
+            rows={rows}
+            editBase="/admin/catatan"
+            deleteAction={softDeletePost}
+            deleteConfirmText="Catatan akan dipindah ke Recycle Bin (bisa dipulihkan)."
+            emptyText="Belum ada catatan."
+          />
         </div>
       </div>
     </div>

@@ -1,42 +1,40 @@
 import { ScrollText } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
-import { Pagination } from "@/components/ui/pagination";
-import { listAuditLogs, countAuditLogs } from "@/lib/queries/audit";
+import { DataTable, type Column } from "@/components/ui/data-table";
+import { listAuditLogs } from "@/lib/queries/audit";
 
 /**
  * Viewer AUDIT LOG (admin). Guard akses sudah ditangani admin layout
  * (super admin '*' atau dashboard.view). Permission 'audit.view' bersifat
  * opsional dan dipakai untuk menampilkan menu di sidebar — super admin '*'
  * tetap bisa melihat halaman ini meski permission belum di-seed.
+ *
+ * UX: tabel pakai <DataTable> (search/sort/filter + pagination client-side).
  */
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 25;
+const columns: Column[] = [
+  { key: "createdAt", label: "Waktu", type: "datetime", sortable: true, className: "whitespace-nowrap" },
+  { key: "actorName", label: "Pelaku", sortable: true, filter: true },
+  { key: "action", label: "Aksi", type: "badge", sortable: true, filter: true },
+  { key: "entity", label: "Entitas", sortable: true, filter: true },
+  { key: "entityId", label: "ID Entitas", type: "code" },
+];
 
-const waktuFmt = new Intl.DateTimeFormat("id-ID", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+export default async function AdminAuditPage() {
+  // DataTable melakukan paginasi/sort/filter di client → ambil himpunan terbaru.
+  const logs = await listAuditLogs(1, 500);
 
-export default async function AdminAuditPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
-  const { page: pageParam } = await searchParams;
-  const page = Math.max(1, Number(pageParam) || 1);
-
-  const [rows, total] = await Promise.all([
-    listAuditLogs(page, PAGE_SIZE),
-    countAuditLogs(),
-  ]);
+  const rows = logs.map((r) => ({
+    id: r.id,
+    createdAt: r.createdAt,
+    actorName: r.actorName ?? "Sistem",
+    action: r.action,
+    entity: r.entity ?? "—",
+    entityId: r.entityId ?? "—",
+  }));
 
   return (
     <div>
@@ -56,42 +54,11 @@ export default async function AdminAuditPage({
           </p>
         </Card>
       ) : (
-        <>
-          <Table className="min-w-[640px]">
-            <THead>
-              <TR>
-                <TH>Waktu</TH>
-                <TH>Pelaku</TH>
-                <TH>Aksi</TH>
-                <TH>Entitas</TH>
-                <TH>ID Entitas</TH>
-              </TR>
-            </THead>
-            <tbody>
-              {rows.map((r) => (
-                <TR key={r.id} className="hover:bg-brand-50/50">
-                  <TD className="whitespace-nowrap text-muted">{waktuFmt.format(r.createdAt)}</TD>
-                  <TD className="text-ink">
-                    {r.actorName ? (
-                      <span className="font-bold">{r.actorName}</span>
-                    ) : (
-                      <span className="text-muted">Sistem</span>
-                    )}
-                  </TD>
-                  <TD>
-                    <Badge tone="muted">{r.action}</Badge>
-                  </TD>
-                  <TD className="text-ink">{r.entity ?? <span className="text-muted">—</span>}</TD>
-                  <TD className="font-mono text-[11px] text-muted">
-                    {r.entityId ?? "—"}
-                  </TD>
-                </TR>
-              ))}
-            </tbody>
-          </Table>
-
-          <Pagination page={page} pageSize={PAGE_SIZE} total={total} baseHref="/admin/audit" />
-        </>
+        <DataTable
+          columns={columns}
+          rows={rows}
+          emptyText="Belum ada catatan audit."
+        />
       )}
     </div>
   );

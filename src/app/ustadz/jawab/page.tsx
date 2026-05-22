@@ -8,7 +8,7 @@ import {
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import { auth } from "@/lib/auth";
 import { answerQuestion } from "@/lib/actions/tanya";
 import { listPendingQuestions } from "@/lib/queries/ustadz";
@@ -112,9 +112,15 @@ export default async function UstadzJawabPage() {
                   <p className="text-[11px] text-muted">
                     Jawaban tampil publik atas nama Anda.
                   </p>
-                  <Button type="submit">
+                  <ConfirmSubmit
+                    danger={false}
+                    title="Kirim jawaban ini?"
+                    text="Jawaban akan tampil publik atas nama Anda dan tidak bisa anonim."
+                    confirmText="Ya, kirim"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-sm bg-brand-600 px-5 text-sm font-bold tracking-[0.01em] text-white transition-colors hover:bg-brand-700"
+                  >
                     <Send className="h-4 w-4" /> Kirim Jawaban
-                  </Button>
+                  </ConfirmSubmit>
                 </div>
               </form>
             </Card>

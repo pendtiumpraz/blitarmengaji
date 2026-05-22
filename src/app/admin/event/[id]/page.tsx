@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { FileUpload } from "@/components/ui/file-upload";
+import { TitikField } from "@/components/map/titik-field";
 import { getEventById } from "@/lib/queries/event";
+import { listTitikActiveOptions } from "@/lib/queries/titik";
 import { updateEvent } from "@/lib/actions/event";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +29,7 @@ export default async function AdminEventEditPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const event = await getEventById(id);
+  const [event, titikOptions] = await Promise.all([getEventById(id), listTitikActiveOptions()]);
   if (!event) notFound();
 
   return (
@@ -109,11 +111,18 @@ export default async function AdminEventEditPage({
               </Field>
             </div>
 
-            <Field label="Lokasi" htmlFor="location" hint="Untuk acara offline / hybrid.">
+            <TitikField
+              name="titikDakwahId"
+              options={titikOptions}
+              defaultValue={event.titikDakwahId ?? ""}
+              label="Titik Dakwah / Lokasi"
+            />
+
+            <Field label="Detail alamat (opsional)" htmlFor="location" hint="Pelengkap titik.">
               <Input
                 id="location"
                 name="location"
-                placeholder="Mis. Masjid Agung Blitar"
+                placeholder="Mis. Aula lantai 2"
                 defaultValue={event.location ?? ""}
               />
             </Field>

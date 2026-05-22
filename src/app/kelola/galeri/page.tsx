@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { FileUpload } from "@/components/ui/file-upload";
+import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import { auth } from "@/lib/auth";
 import { getUserPermissions } from "@/lib/rbac";
 import { myTitikOptions, listGallery } from "@/lib/queries/media";
@@ -141,13 +142,13 @@ export default async function KelolaGaleriPage() {
                       <div className="absolute inset-0 grid place-items-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                         <form action={deleteMedia}>
                           <input type="hidden" name="id" value={p.id} />
-                          <button
-                            type="submit"
+                          <ConfirmSubmit
                             aria-label="Hapus foto"
+                            text="Foto akan dipindah ke Recycle Bin (bisa dipulihkan)."
                             className="grid h-10 w-10 place-items-center rounded-full bg-red-600 text-white transition-colors hover:bg-red-700"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </ConfirmSubmit>
                         </form>
                       </div>
                     </div>

@@ -51,7 +51,8 @@ export async function createTransaction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data transaksi tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data transaksi tidak valid.";
+    redirect("/admin/keuangan?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -73,6 +74,7 @@ export async function createTransaction(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/keuangan");
   revalidatePath("/keuangan");
+  redirect("/admin/keuangan?ok=" + encodeURIComponent("Transaksi tersimpan."));
 }
 
 const updateSchema = createSchema.extend({
@@ -96,7 +98,8 @@ export async function updateTransaction(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data transaksi tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data transaksi tidak valid.";
+    redirect("/admin/keuangan?err=" + encodeURIComponent(msg));
   }
 
   const data = parsed.data;
@@ -123,7 +126,7 @@ export async function updateTransaction(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/keuangan");
   revalidatePath("/keuangan");
-  redirect("/admin/keuangan");
+  redirect("/admin/keuangan?ok=" + encodeURIComponent("Transaksi tersimpan."));
 }
 
 const categorySchema = z.object({
@@ -140,7 +143,8 @@ export async function createFinanceCategory(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data kategori tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data kategori tidak valid.";
+    redirect("/admin/keuangan?err=" + encodeURIComponent(msg));
   }
 
   await db.insert(financeCategories).values({
@@ -150,6 +154,62 @@ export async function createFinanceCategory(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/keuangan");
   revalidatePath("/keuangan");
+  redirect("/admin/keuangan?ok=" + encodeURIComponent("Kategori ditambahkan."));
+}
+
+const updateCategorySchema = categorySchema.extend({
+  id: z.string().uuid("ID kategori tidak valid."),
+});
+
+export async function updateFinanceCategory(formData: FormData): Promise<void> {
+  await requirePermission("finance.update");
+
+  const parsed = updateCategorySchema.safeParse({
+    id: formData.get("id") ?? "",
+    name: formData.get("name") ?? "",
+    type: formData.get("type") ?? "",
+  });
+
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Data kategori tidak valid.";
+    redirect("/admin/keuangan?err=" + encodeURIComponent(msg));
+  }
+
+  await db
+    .update(financeCategories)
+    .set({ name: parsed.data.name, type: parsed.data.type })
+    .where(
+      and(eq(financeCategories.id, parsed.data.id), isNull(financeCategories.deletedAt)),
+    );
+
+  revalidatePath("/admin/keuangan");
+  revalidatePath("/keuangan");
+  redirect("/admin/keuangan?ok=" + encodeURIComponent("Kategori diperbarui."));
+}
+
+const deleteCategorySchema = z.object({ id: z.string().uuid("ID kategori tidak valid.") });
+
+export async function deleteFinanceCategory(formData: FormData): Promise<void> {
+  await requirePermission("finance.update");
+
+  const parsed = deleteCategorySchema.safeParse({ id: formData.get("id") ?? "" });
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "ID kategori tidak valid.";
+    redirect("/admin/keuangan?err=" + encodeURIComponent(msg));
+  }
+
+  const session = await auth();
+
+  await db
+    .update(financeCategories)
+    .set({ deletedAt: new Date(), deletedBy: session?.user?.id ?? null })
+    .where(
+      and(eq(financeCategories.id, parsed.data.id), isNull(financeCategories.deletedAt)),
+    );
+
+  revalidatePath("/admin/keuangan");
+  revalidatePath("/keuangan");
+  redirect("/admin/keuangan?ok=" + encodeURIComponent("Kategori dihapus."));
 }
 
 const deleteSchema = z.object({ id: z.string().uuid("ID transaksi tidak valid.") });
@@ -159,7 +219,8 @@ export async function softDeleteTransaction(formData: FormData): Promise<void> {
 
   const parsed = deleteSchema.safeParse({ id: formData.get("id") ?? "" });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "ID transaksi tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "ID transaksi tidak valid.";
+    redirect("/admin/keuangan?err=" + encodeURIComponent(msg));
   }
 
   const session = await auth();
@@ -176,4 +237,5 @@ export async function softDeleteTransaction(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/keuangan");
   revalidatePath("/keuangan");
+  redirect("/admin/keuangan?ok=" + encodeURIComponent("Transaksi dihapus."));
 }

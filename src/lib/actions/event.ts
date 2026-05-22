@@ -42,6 +42,7 @@ const createSchema = z.object({
   // organizerId opsional: bila diisi (mis. dari /kelola/event) → acara atas nama
   // partner usaha (organizerType 'partner'); bila kosong (admin) → internal.
   organizerId: z.string().uuid("Usaha penyelenggara tidak valid.").optional(),
+  titikDakwahId: z.string().uuid("Titik dakwah tidak valid.").optional(),
 });
 
 /** Buat acara baru. status default 'published'; upload coverFile → coverImage. */
@@ -60,10 +61,12 @@ export async function createEvent(formData: FormData): Promise<void> {
     capacity: opt(formData.get("capacity")),
     needsRegistration: formData.get("needsRegistration") != null,
     organizerId: opt(formData.get("organizerId")),
+    titikDakwahId: opt(formData.get("titikDakwahId")),
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data acara tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data acara tidak valid.";
+    redirect("/admin/event?err=" + encodeURIComponent(msg));
   }
   const data = parsed.data;
 
@@ -88,13 +91,20 @@ export async function createEvent(formData: FormData): Promise<void> {
         .limit(1)
     )[0];
     if (!partner) {
-      throw new Error("Usaha penyelenggara tidak ditemukan.");
+      redirect(
+        "/admin/event?err=" + encodeURIComponent("Usaha penyelenggara tidak ditemukan."),
+      );
     }
     const allowedAll = await can("event.manage");
     if (!allowedAll) {
       const userId = (await auth())?.user?.id ?? null;
       if (!userId || partner.ownerUserId !== userId) {
-        throw new Error("Akses ditolak: Anda hanya bisa membuat acara untuk usaha sendiri.");
+        redirect(
+          "/admin/event?err=" +
+            encodeURIComponent(
+              "Akses ditolak: Anda hanya bisa membuat acara untuk usaha sendiri.",
+            ),
+        );
       }
     }
     organizerType = "partner";
@@ -121,6 +131,7 @@ export async function createEvent(formData: FormData): Promise<void> {
     onlineUrl: data.onlineUrl ?? null,
     capacity: data.capacity ?? null,
     needsRegistration: data.needsRegistration ?? false,
+    titikDakwahId: data.titikDakwahId ?? null,
     status: "published",
   });
 
@@ -128,7 +139,12 @@ export async function createEvent(formData: FormData): Promise<void> {
   revalidatePath("/admin/event");
   revalidatePath("/kelola/event");
   revalidatePath("/event");
-  redirect(organizerType === "partner" ? "/kelola/event" : "/admin/event");
+  // Jalur /kelola/event dipertahankan; jalur admin diberi ?ok untuk toast.
+  redirect(
+    organizerType === "partner"
+      ? "/kelola/event"
+      : "/admin/event?ok=" + encodeURIComponent("Tersimpan."),
+  );
 }
 
 const updateSchema = createSchema.extend({
@@ -155,10 +171,12 @@ export async function updateEvent(formData: FormData): Promise<void> {
     onlineUrl: opt(formData.get("onlineUrl")),
     capacity: opt(formData.get("capacity")),
     needsRegistration: formData.get("needsRegistration") != null,
+    titikDakwahId: opt(formData.get("titikDakwahId")),
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data acara tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data acara tidak valid.";
+    redirect("/admin/event?err=" + encodeURIComponent(msg));
   }
   const { id, ...data } = parsed.data;
 
@@ -171,7 +189,7 @@ export async function updateEvent(formData: FormData): Promise<void> {
       .limit(1)
   )[0];
   if (!existing) {
-    throw new Error("Acara tidak ditemukan.");
+    redirect("/admin/event?err=" + encodeURIComponent("Acara tidak ditemukan."));
   }
 
   // Upload sampul baru bila ada; jika tidak, pertahankan yang lama.
@@ -195,13 +213,14 @@ export async function updateEvent(formData: FormData): Promise<void> {
       onlineUrl: data.onlineUrl ?? null,
       capacity: data.capacity ?? null,
       needsRegistration: data.needsRegistration ?? false,
+      titikDakwahId: data.titikDakwahId ?? null,
       updatedAt: new Date(),
     })
     .where(and(eq(schema.events.id, id), isNull(schema.events.deletedAt)));
 
   revalidatePath("/admin/event");
   revalidatePath("/event");
-  redirect("/admin/event");
+  redirect("/admin/event?ok=" + encodeURIComponent("Tersimpan."));
 }
 
 const deleteSchema = z.object({
@@ -214,7 +233,8 @@ export async function softDeleteEvent(formData: FormData): Promise<void> {
 
   const parsed = deleteSchema.safeParse({ id: opt(formData.get("id")) });
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    const msg = parsed.error.issues[0]?.message ?? "Data tidak valid.";
+    redirect("/admin/event?err=" + encodeURIComponent(msg));
   }
 
   const deletedBy = (await auth())?.user?.id ?? null;
@@ -226,4 +246,5 @@ export async function softDeleteEvent(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/event");
   revalidatePath("/event");
+  redirect("/admin/event?ok=" + encodeURIComponent("Dihapus."));
 }

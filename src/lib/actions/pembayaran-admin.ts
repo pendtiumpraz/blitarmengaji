@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db, schema } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { requirePermission } from "@/lib/rbac";
@@ -92,6 +93,7 @@ export async function verifyPayment(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/pembayaran");
   revalidatePath("/donasi");
+  redirect("/admin/pembayaran?ok=" + encodeURIComponent("Pembayaran diverifikasi."));
 }
 
 /** Tolak pembayaran: set status 'rejected' + confirmedBy/confirmedAt. */
@@ -133,4 +135,5 @@ export async function rejectPayment(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/pembayaran");
+  redirect("/admin/pembayaran?ok=" + encodeURIComponent("Pembayaran ditolak."));
 }

@@ -1,8 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { requirePermission } from "@/lib/rbac";
 import { uploadToBlob } from "@/lib/blob";
 
@@ -63,7 +66,7 @@ export async function saveSettings(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    redirect("/admin/settings?err=" + encodeURIComponent(parsed.error.issues[0]?.message ?? "Data tidak valid."));
   }
 
   const d = parsed.data;
@@ -85,6 +88,7 @@ export async function saveSettings(formData: FormData): Promise<void> {
   ]);
 
   revalidatePath("/admin/settings");
+  redirect("/admin/settings?ok=" + encodeURIComponent("Pengaturan tersimpan."));
 }
 
 const paymentSchema = z
@@ -118,7 +122,7 @@ export async function savePaymentMethod(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    redirect("/admin/settings?err=" + encodeURIComponent(parsed.error.issues[0]?.message ?? "Data tidak valid."));
   }
 
   const d = parsed.data;
@@ -137,4 +141,97 @@ export async function savePaymentMethod(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/settings");
+  redirect("/admin/settings?ok=" + encodeURIComponent("Metode pembayaran ditambahkan."));
+}
+
+const updatePaymentSchema = z.object({
+  id: z.string().uuid("ID metode pembayaran tidak valid."),
+  bankName: z.string().trim().optional(),
+  accountNo: z.string().trim().optional(),
+  accountName: z.string().trim().optional(),
+  waNumber: z.string().trim().optional(),
+  isActive: z.boolean(),
+});
+
+/**
+ * Ubah metode pembayaran global. Butuh permission settings.manage.
+ * Gambar QRIS bisa di-upload ulang (opsional): bila ada berkas baru -> ganti
+ * & ubah type ke 'qris'; bila tidak -> pertahankan gambar lama. Set updatedAt,
+ * hanya untuk baris aktif (deleted_at IS NULL).
+ */
+export async function updatePaymentMethod(formData: FormData): Promise<void> {
+  await requirePermission("settings.manage");
+
+  // Re-upload gambar QRIS (opsional) -> Vercel Blob. null = tidak ada unggahan baru.
+  const newQris = await uploadToBlob(formData.get("qrisFile") as File | null, "payment");
+
+  const parsed = updatePaymentSchema.safeParse({
+    id: opt(formData.get("id")),
+    bankName: opt(formData.get("bank_name")),
+    accountNo: opt(formData.get("account_no")),
+    accountName: opt(formData.get("account_name")),
+    waNumber: opt(formData.get("wa_number")),
+    isActive: formData.get("is_active") != null,
+  });
+
+  if (!parsed.success) {
+    redirect("/admin/settings?err=" + encodeURIComponent(parsed.error.issues[0]?.message ?? "Data tidak valid."));
+  }
+
+  const d = parsed.data;
+
+  await db
+    .update(schema.paymentMethods)
+    .set({
+      bankName: d.bankName ?? null,
+      accountNo: d.accountNo ?? null,
+      accountName: d.accountName ?? null,
+      waNumber: d.waNumber ?? null,
+      isActive: d.isActive,
+      // Hanya timpa QRIS & ubah type bila ada berkas baru diunggah.
+      ...(newQris ? { qrisImage: newQris, type: "qris" as const } : {}),
+      updatedAt: new Date(),
+    })
+    .where(
+      and(eq(schema.paymentMethods.id, d.id), isNull(schema.paymentMethods.deletedAt)),
+    );
+
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?ok=" + encodeURIComponent("Metode pembayaran diperbarui."));
+}
+
+const deletePaymentSchema = z.object({
+  id: z.string().uuid("ID metode pembayaran tidak valid."),
+});
+
+/**
+ * Soft delete metode pembayaran: set deleted_at = now() & deleted_by = user saat ini.
+ * Butuh permission settings.manage. Tidak menghapus baris secara fisik.
+ */
+export async function deletePaymentMethod(formData: FormData): Promise<void> {
+  await requirePermission("settings.manage");
+
+  const parsed = deletePaymentSchema.safeParse({ id: formData.get("id") });
+  if (!parsed.success) {
+    redirect("/admin/settings?err=" + encodeURIComponent(parsed.error.issues[0]?.message ?? "ID metode pembayaran tidak valid."));
+  }
+
+  const session = await auth();
+
+  await db
+    .update(schema.paymentMethods)
+    .set({
+      deletedAt: new Date(),
+      deletedBy: session?.user?.id ?? null,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(schema.paymentMethods.id, parsed.data.id),
+        isNull(schema.paymentMethods.deletedAt),
+      ),
+    );
+
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?ok=" + encodeURIComponent("Metode pembayaran dihapus."));
 }

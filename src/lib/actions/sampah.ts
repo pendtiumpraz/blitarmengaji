@@ -2,6 +2,8 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/rbac";
 import { logAudit } from "@/lib/audit";
@@ -33,35 +35,60 @@ function readId(formData: FormData): string {
   return id;
 }
 
-/** Pulihkan item ter-soft-delete: deletedAt=null, deletedBy=null, updatedAt=now. */
+/**
+ * Pulihkan item ter-soft-delete: deletedAt=null, deletedBy=null.
+ * `updatedAt` HANYA diset bila tabel terkait punya kolom tersebut
+ * (sebagian tabel ber-soft-delete tidak punya updated_at).
+ */
 export async function restoreItem(formData: FormData): Promise<void> {
-  await requirePermission("trash.manage");
+  try {
+    await requirePermission("trash.manage");
 
-  const type = readType(formData);
-  const id = readId(formData);
-  const meta = TYPES[type];
+    const type = readType(formData);
+    const id = readId(formData);
+    const meta = TYPES[type];
 
-  await db
-    .update(meta.table)
-    .set({ deletedAt: null, deletedBy: null, updatedAt: new Date() })
-    .where(eq(meta.table.id, id));
+    const patch: Record<string, unknown> = { deletedAt: null, deletedBy: null };
+    if (meta.table.updatedAt) {
+      patch.updatedAt = new Date();
+    }
 
-  await logAudit({ action: "restore", entity: type, entityId: id });
+    await db
+      .update(meta.table)
+      .set(patch)
+      .where(eq(meta.table.id, id));
 
-  revalidatePath("/admin/sampah");
+    await logAudit({ action: "restore", entity: type, entityId: id });
+
+    revalidatePath("/admin/sampah");
+  } catch (e) {
+    if (isRedirectError(e)) throw e;
+    const msg = e instanceof Error ? e.message : "Gagal memulihkan data.";
+    redirect("/admin/sampah?err=" + encodeURIComponent(msg));
+  }
+
+  redirect("/admin/sampah?ok=" + encodeURIComponent("Dipulihkan."));
 }
 
 /** Hapus PERMANEN (fisik) item dari Recycle Bin. Tindakan tidak bisa dibatalkan. */
 export async function hardDeleteItem(formData: FormData): Promise<void> {
-  await requirePermission("trash.manage");
+  try {
+    await requirePermission("trash.manage");
 
-  const type = readType(formData);
-  const id = readId(formData);
-  const meta = TYPES[type];
+    const type = readType(formData);
+    const id = readId(formData);
+    const meta = TYPES[type];
 
-  await db.delete(meta.table).where(eq(meta.table.id, id));
+    await db.delete(meta.table).where(eq(meta.table.id, id));
 
-  await logAudit({ action: "hard_delete", entity: type, entityId: id });
+    await logAudit({ action: "hard_delete", entity: type, entityId: id });
 
-  revalidatePath("/admin/sampah");
+    revalidatePath("/admin/sampah");
+  } catch (e) {
+    if (isRedirectError(e)) throw e;
+    const msg = e instanceof Error ? e.message : "Gagal menghapus permanen.";
+    redirect("/admin/sampah?err=" + encodeURIComponent(msg));
+  }
+
+  redirect("/admin/sampah?ok=" + encodeURIComponent("Dihapus permanen."));
 }
