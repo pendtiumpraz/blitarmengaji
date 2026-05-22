@@ -63,10 +63,19 @@ function gmapsLink(m: TitikMarker): string {
 function FitBounds({ markers }: { markers: TitikMarker[] }) {
   const map = useMap();
   useEffect(() => {
-    if (markers.length < 2) return;
+    if (markers.length === 0) return;
     const bounds = L.latLngBounds(markers.map((m) => [m.lat, m.lng] as [number, number]));
     if (!bounds.isValid()) return;
-    map.fitBounds(bounds, { padding: [56, 56], maxZoom: 14 });
+    // Tunggu container ter-ukur (Leaflet sering salah hitung saat mount) → invalidateSize → fit.
+    const t = setTimeout(() => {
+      map.invalidateSize();
+      if (markers.length === 1) {
+        map.setView([markers[0].lat, markers[0].lng], 14);
+      } else {
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+      }
+    }, 220);
+    return () => clearTimeout(t);
   }, [map, markers]);
   return null;
 }
@@ -74,7 +83,7 @@ function FitBounds({ markers }: { markers: TitikMarker[] }) {
 export function MapView({
   markers,
   center,
-  zoom = 13,
+  zoom = 11,
   className = "h-[460px]",
 }: {
   markers: TitikMarker[];
