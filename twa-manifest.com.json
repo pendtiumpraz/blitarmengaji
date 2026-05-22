@@ -1,0 +1,32 @@
+{
+  "packageId": "com.blitarmengaji.twa",
+  "host": "blitarmengaji.com",
+  "name": "Blitar Mengaji — Majelis Ilmu Blitar Raya",
+  "launcherName": "Blitar Mengaji",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#0E5C46",
+  "themeColorDark": "#0E5C46",
+  "navigationColor": "#0E5C46",
+  "navigationColorDark": "#0E5C46",
+  "navigationDividerColor": "#0E5C46",
+  "navigationDividerColorDark": "#0E5C46",
+  "backgroundColor": "#F4EEE1",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://blitarmengaji.com/icons/icon-512.png",
+  "maskableIconUrl": "https://blitarmengaji.com/icons/maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "appVersionName": "2.0.0",
+  "appVersionCode": 2,
+  "shortcuts": [
+    { "name": "Jadwal Kajian", "shortName": "Jadwal", "url": "/jadwal", "chosenIconUrl": "https://blitarmengaji.com/icons/icon-192.png" },
+    { "name": "Peta Dakwah", "shortName": "Peta", "url": "/peta", "chosenIconUrl": "https://blitarmengaji.com/icons/icon-192.png" }
+  ],
+  "signingKey": { "path": "./android-keystore.jks", "alias": "blitarmengaji" },
+  "fallbackType": "customtabs",
+  "enableSiteSettingsShortcut": true,
+  "fullScopeUrl": "https://blitarmengaji.com/",
+  "minSdkVersion": 21,
+  "webManifestUrl": "https://blitarmengaji.com/manifest.webmanifest"
+}
