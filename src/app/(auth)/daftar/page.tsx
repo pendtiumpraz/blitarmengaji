@@ -27,27 +27,22 @@ export default function DaftarPage() {
       {/* Form register (server action registerUser via useActionState) */}
       <RegisterForm />
 
-      {/* Pemisah */}
-      <div className="flex items-center gap-3 text-[11px] text-muted">
-        <div className="h-px flex-1 bg-line" />
-        atau
-        <div className="h-px flex-1 bg-line" />
-      </div>
-
-      {/* OAuth Google — hanya aktif bila kredensial dikonfigurasi */}
+      {/* OAuth Google — hanya tampil bila kredensial dikonfigurasi */}
       {googleEnabled ? (
-        <form action={googleSignIn}>
-          <Button type="submit" variant="outline" size="lg" className="w-full">
-            <Globe className="h-4 w-4" />
-            Lanjut dengan Google
-          </Button>
-        </form>
-      ) : (
-        <Button type="button" variant="outline" size="lg" className="w-full" disabled>
-          <Globe className="h-4 w-4" />
-          Google OAuth belum dikonfigurasi
-        </Button>
-      )}
+        <>
+          <div className="flex items-center gap-3 text-[11px] text-muted">
+            <div className="h-px flex-1 bg-line" />
+            atau
+            <div className="h-px flex-1 bg-line" />
+          </div>
+          <form action={googleSignIn}>
+            <Button type="submit" variant="outline" size="lg" className="w-full">
+              <Globe className="h-4 w-4" />
+              Lanjut dengan Google
+            </Button>
+          </form>
+        </>
+      ) : null}
 
       <p className="text-center text-sm text-muted">
         Sudah punya akun?{" "}
@@ -55,8 +50,6 @@ export default function DaftarPage() {
           Masuk di sini
         </Link>
       </p>
-
-      <p className="text-center text-[11px] text-muted">Auth via NextAuth (Credentials + secret).</p>
     </div>
   );
 }

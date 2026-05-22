@@ -32,29 +32,22 @@ export default function MasukPage() {
         </Link>
       </div>
 
-      {/* Pemisah */}
-      <div className="flex items-center gap-3 text-[11px] text-muted">
-        <div className="h-px flex-1 bg-line" />
-        atau
-        <div className="h-px flex-1 bg-line" />
-      </div>
-
-      {/* OAuth Google — hanya aktif bila kredensial dikonfigurasi */}
+      {/* OAuth Google — hanya tampil bila kredensial dikonfigurasi */}
       {googleEnabled ? (
-        <form action={googleSignIn}>
-          <Button type="submit" variant="outline" size="lg" className="w-full">
-            <Globe className="h-4 w-4" />
-            Lanjut dengan Google
-          </Button>
-        </form>
-      ) : (
-        <Button type="button" variant="outline" size="lg" className="w-full" disabled>
-          <Globe className="h-4 w-4" />
-          Google OAuth belum dikonfigurasi
-        </Button>
-      )}
-
-      <p className="text-center text-[11px] text-muted">Auth via NextAuth (Credentials + secret). OAuth opsional nanti.</p>
+        <>
+          <div className="flex items-center gap-3 text-[11px] text-muted">
+            <div className="h-px flex-1 bg-line" />
+            atau
+            <div className="h-px flex-1 bg-line" />
+          </div>
+          <form action={googleSignIn}>
+            <Button type="submit" variant="outline" size="lg" className="w-full">
+              <Globe className="h-4 w-4" />
+              Lanjut dengan Google
+            </Button>
+          </form>
+        </>
+      ) : null}
     </div>
   );
 }
