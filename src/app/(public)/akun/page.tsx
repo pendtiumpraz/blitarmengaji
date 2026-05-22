@@ -17,6 +17,7 @@ import {
   XCircle,
   Palette,
   Check,
+  KeyRound,
 } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
@@ -27,6 +28,7 @@ import { db, schema } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions/auth";
 import { updateAvatar } from "@/lib/actions/profile";
+import { changeOwnPassword, changeOwnEmail } from "@/lib/actions/akun";
 import { setTheme } from "@/lib/actions/theme";
 import { myEntities, type MyEntity, type MyEntityType } from "@/lib/queries/akun";
 import { listActiveThemes } from "@/lib/queries/themes";
@@ -105,6 +107,8 @@ export default async function AkunPage({
         email: schema.users.email,
         image: schema.users.image,
         themePref: schema.users.themePref,
+        emailChangedAt: schema.users.emailChangedAt,
+        passwordChangedAt: schema.users.passwordChangedAt,
       })
       .from(schema.users)
       .where(and(eq(schema.users.id, userId), isNull(schema.users.deletedAt)))
@@ -139,6 +143,15 @@ export default async function AkunPage({
   const questionCount = qCount[0]?.c ?? 0;
   const enrollmentCount = eCount[0]?.c ?? 0;
   const initial = (user.name?.trim()?.[0] ?? "J").toUpperCase();
+
+  // Keamanan: email maks 1x; password berikutnya butuh jeda 14 hari.
+  const emailLocked = !!user.emailChangedAt;
+  const pwNext = user.passwordChangedAt
+    ? new Date(new Date(user.passwordChangedAt).getTime() + 14 * 24 * 60 * 60 * 1000)
+    : null;
+  const pwLocked = pwNext ? Date.now() < pwNext.getTime() : false;
+  const inputCls =
+    "h-10 w-full rounded-sm border border-line bg-cream px-3 text-sm text-ink focus:border-brand-600 focus:outline-none";
 
   const primaryMenu: MenuItem[] = [
     {
@@ -221,6 +234,60 @@ export default async function AkunPage({
             <Button type="submit" size="sm" className="w-full">
               Simpan Foto
             </Button>
+          </form>
+        </Card>
+
+        {/* Keamanan Akun — ganti password (jeda 14 hari) & email (maks 1x) */}
+        <Card className="space-y-4 p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <KeyRound className="h-5 w-5 text-brand-600" />
+            <p className="display text-base text-ink">Keamanan Akun</p>
+          </div>
+
+          <form action={changeOwnPassword} className="space-y-2">
+            <p className="text-sm font-semibold text-ink">Ganti Password</p>
+            <input type="password" name="current" placeholder="Password saat ini" required className={inputCls} />
+            <input
+              type="password"
+              name="next"
+              placeholder="Password baru (min. 8 karakter)"
+              minLength={8}
+              required
+              className={inputCls}
+            />
+            {pwLocked && pwNext ? (
+              <p className="text-xs text-muted">
+                Bisa diubah lagi setelah {pwNext.toLocaleDateString("id-ID", { dateStyle: "long" })} (jeda 14 hari).
+              </p>
+            ) : (
+              <p className="text-xs text-muted">Setelah diubah, ganti berikutnya butuh jeda 14 hari.</p>
+            )}
+            <Button type="submit" size="sm" className="w-full" disabled={pwLocked}>
+              Ubah Password
+            </Button>
+          </form>
+
+          <div className="h-px bg-line" />
+
+          <form action={changeOwnEmail} className="space-y-2">
+            <p className="text-sm font-semibold text-ink">
+              Ganti Email <span className="text-xs font-normal text-muted">(maksimal 1×)</span>
+            </p>
+            <p className="text-xs text-muted">
+              Email saat ini: <span className="font-semibold text-ink">{user.email}</span>
+            </p>
+            {emailLocked ? (
+              <p className="rounded-sm bg-cream px-3 py-2 text-xs text-muted">
+                Email sudah pernah diubah — tidak dapat diubah lagi.
+              </p>
+            ) : (
+              <>
+                <input type="email" name="email" placeholder="Email baru" required className={inputCls} />
+                <Button type="submit" size="sm" variant="outline" className="w-full">
+                  Ubah Email
+                </Button>
+              </>
+            )}
           </form>
         </Card>
 

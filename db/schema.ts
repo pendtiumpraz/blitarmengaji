@@ -133,6 +133,8 @@ export const users = pgTable(
     status: userStatusEnum('status').notNull().default('active'),
     themePref: varchar('theme_pref', { length: 64 }), // null = ikuti default global
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
+    emailChangedAt: timestamp('email_changed_at', { withTimezone: true }), // email maks 1x ubah (null = belum pernah)
+    passwordChangedAt: timestamp('password_changed_at', { withTimezone: true }), // ganti berikutnya butuh jeda 14 hari
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     ...softDelete,
