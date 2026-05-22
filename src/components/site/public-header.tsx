@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { NotifBell } from "@/components/site/notif-bell";
+import { SiteMobileNav } from "@/components/site/mobile-nav";
 import { listActiveThemes } from "@/lib/queries/themes";
 
 const nav: [string, string][] = [
@@ -43,12 +44,10 @@ export async function PublicHeader() {
         <div className="ml-auto flex items-center gap-2 lg:ml-0">
           <NotifBell />
           <ThemeSwitch themes={themes} current={current} />
-          <Button href="/gabung" variant="outline" size="sm" className="hidden sm:inline-flex lg:hidden">
-            Gabung
-          </Button>
-          <Button href="/masuk" size="sm">
+          <Button href="/masuk" size="sm" className="hidden sm:inline-flex">
             Masuk
           </Button>
+          <SiteMobileNav nav={nav} />
         </div>
       </Container>
     </header>

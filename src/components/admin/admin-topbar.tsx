@@ -1,13 +1,17 @@
 import { Bell, Search, LogOut } from "lucide-react";
 import { logoutAction } from "@/lib/actions/auth";
+import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 
 export function AdminTopbar({ userName = "Admin" }: { userName?: string }) {
   const initial = userName.trim().charAt(0).toUpperCase() || "A";
   return (
-    <header className="flex items-center justify-between border-b border-line bg-surface px-6 py-3">
-      <div className="flex h-9 w-72 max-w-[60vw] items-center gap-2 rounded-sm bg-cream px-3">
-        <Search className="h-4 w-4 text-muted" />
-        <span className="text-sm text-muted">Cari…</span>
+    <header className="flex items-center justify-between gap-2 border-b border-line bg-surface px-4 py-3 sm:px-6">
+      <div className="flex min-w-0 items-center gap-2">
+        <AdminMobileNav />
+        <div className="hidden h-9 w-72 max-w-[50vw] items-center gap-2 rounded-sm bg-cream px-3 sm:flex">
+          <Search className="h-4 w-4 text-muted" />
+          <span className="text-sm text-muted">Cari…</span>
+        </div>
       </div>
       <div className="flex items-center gap-4">
         <button type="button" aria-label="Notifikasi" className="text-muted hover:text-ink">

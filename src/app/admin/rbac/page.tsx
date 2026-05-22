@@ -1,9 +1,10 @@
-import { ListTree, Lock, Plus, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { ListTree, Plus, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import Link from "next/link";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { Field, Input } from "@/components/ui/input";
-import { Table, THead, TH, TR, TD } from "@/components/ui/table";
 import {
   getRolePermissionKeys,
   listMenuItems,
@@ -17,9 +18,12 @@ import { PermissionMatrix } from "./permission-matrix";
 // Modul sensitif & data DB → render dinamis (jangan cache statis).
 export const dynamic = "force-dynamic";
 
-function fmtUsers(n: number) {
-  return new Intl.NumberFormat("id-ID").format(n);
-}
+const roleColumns: Column[] = [
+  { key: "name", label: "Role", sortable: true },
+  { key: "userCount", label: "Jumlah User", sortable: true },
+  { key: "permissionCount", label: "Permission", sortable: true },
+  { key: "type", label: "Tipe", type: "badge", sortable: true, filter: true },
+];
 
 export default async function AdminRbacPage({
   searchParams,
@@ -37,6 +41,16 @@ export default async function AdminRbacPage({
   // Role terpilih: dari query ?role=slug, default role pertama.
   const selectedRole = roles.find((r) => r.slug === roleSlugParam) ?? roles[0] ?? null;
   const checkedKeys = selectedRole ? await getRolePermissionKeys(selectedRole.id) : [];
+
+  // Baris DataTable. Role sistem (is_system) hanya boleh diatur permission-nya,
+  // tidak boleh di-rename → sembunyikan tombol edit (editBase) untuk baris itu.
+  const roleRows = roles.map((r) => ({
+    id: r.id,
+    name: r.name,
+    userCount: r.userCount,
+    permissionCount: r.permissionCount,
+    type: r.isSystem ? "Sistem" : "Kustom",
+  }));
 
   return (
     <div className="space-y-8">
@@ -74,75 +88,17 @@ export default async function AdminRbacPage({
           </Button>
         </form>
 
-        {roles.length === 0 ? (
-          <div className="rounded-[3px] border border-dashed border-line bg-surface px-5 py-12 text-center">
-            <span className="mx-auto grid h-12 w-12 place-items-center rounded-sm bg-brand-50">
-              <ShieldCheck className="h-6 w-6 text-brand-600" />
-            </span>
-            <p className="mt-3 font-bold text-ink">Belum ada role</p>
-            <p className="mt-1 text-sm text-muted">Tambahkan role pertama lewat form di atas.</p>
-          </div>
-        ) : (
-          <Table className="min-w-[680px]">
-            <THead>
-              <TR>
-                <TH>Role</TH>
-                <TH>Deskripsi</TH>
-                <TH className="text-center">Jumlah User</TH>
-                <TH className="text-center">Permission</TH>
-                <TH className="text-center">Tipe</TH>
-                <TH className="text-right">Aksi</TH>
-              </TR>
-            </THead>
-            <tbody>
-              {roles.map((r) => (
-                <TR key={r.id} className="hover:bg-brand-50/60">
-                  <TD>
-                    <span className="font-bold text-ink">{r.name}</span>
-                    {selectedRole && r.id === selectedRole.id ? (
-                      <span className="ml-2 text-[10px] font-bold text-brand-600">
-                        ← sedang diedit
-                      </span>
-                    ) : null}
-                  </TD>
-                  <TD className="text-muted">{r.description ?? "—"}</TD>
-                  <TD className="text-center font-bold text-ink">{fmtUsers(r.userCount)}</TD>
-                  <TD className="text-center font-bold text-ink">{r.permissionCount}</TD>
-                  <TD className="text-center">
-                    {r.isSystem ? (
-                      <Badge tone="gold">Sistem</Badge>
-                    ) : (
-                      <Badge tone="muted">Kustom</Badge>
-                    )}
-                  </TD>
-                  <TD className="text-right">
-                    {r.slug === "super-admin" ? (
-                      <span
-                        className="inline-flex justify-end text-muted"
-                        title="Role sistem terkunci"
-                      >
-                        <Lock className="h-4 w-4" aria-label="Terkunci" />
-                      </span>
-                    ) : (
-                      <Button
-                        href={`/admin/rbac?role=${r.slug}`}
-                        variant="outline"
-                        size="sm"
-                        className="ml-auto"
-                      >
-                        Edit permission
-                      </Button>
-                    )}
-                  </TD>
-                </TR>
-              ))}
-            </tbody>
-          </Table>
-        )}
+        <DataTable
+          columns={roleColumns}
+          rows={roleRows}
+          editBase="/admin/rbac"
+          emptyText="Belum ada role — tambahkan role pertama lewat form di atas."
+        />
+
         <p className="mt-2 text-[11px] text-muted">
           Role <Badge tone="gold">Sistem</Badge> (
           <code className="rounded bg-brand-50 px-1 py-0.5">is_system</code>) tak bisa dihapus;
-          proteksi di-enforce pada service layer.
+          proteksi di-enforce pada service layer. Tombol edit mengubah nama/deskripsi role.
         </p>
       </section>
 
@@ -158,6 +114,29 @@ export default async function AdminRbacPage({
           Untuk role terpilih: centang permission per grup modul. Centang di sini menentukan menu
           &amp; aksi yang dirender per role.
         </p>
+
+        {/* Pemilih role untuk matriks (mempertahankan ?role=slug). */}
+        {roles.length > 0 ? (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {roles.map((r) => {
+              const active = selectedRole?.id === r.id;
+              return (
+                <Link
+                  key={r.id}
+                  href={`/admin/rbac?role=${r.slug}`}
+                  className={
+                    active
+                      ? "rounded-sm border border-brand-600 bg-brand-50 px-3 py-1.5 text-xs font-bold text-brand-700"
+                      : "rounded-sm border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-muted hover:bg-brand-50"
+                  }
+                >
+                  {r.name}
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
+
         {selectedRole ? (
           <PermissionMatrix
             roleId={selectedRole.id}
