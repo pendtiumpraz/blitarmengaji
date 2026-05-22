@@ -68,26 +68,12 @@ export async function askQuestion(formData: FormData): Promise<void> {
   });
 
   if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+    redirect("/tanya-ustadz/ajukan?err=" + encodeURIComponent(parsed.error.issues[0]?.message ?? "Data tidak valid."));
   }
   const data = parsed.data;
 
-  // Jika anonim -> nama tidak disimpan (tampil "Hamba Allah").
-  // Jika tidak anonim & guest -> nama WAJIB.
-  let askerName: string | null = null;
-  if (!data.isAnonymous) {
-    if (userId) {
-      askerName = null; // nama diambil dari relasi user saat render
-    } else {
-      const name = data.askerName?.trim();
-      if (!name) {
-        throw new Error(
-          'Mohon isi nama Anda, atau aktifkan opsi "Hamba Allah".',
-        );
-      }
-      askerName = name;
-    }
-  }
+  // Login wajib → nama penanya diambil dari relasi user saat render; anonim tampil "Hamba Allah".
+  const askerName: string | null = null;
 
   await db.insert(questions).values({
     userId,
@@ -101,7 +87,7 @@ export async function askQuestion(formData: FormData): Promise<void> {
 
   revalidatePath("/tanya-ustadz");
   revalidatePath("/admin/tanya");
-  redirect("/tanya-ustadz");
+  redirect("/tanya-ustadz?ok=" + encodeURIComponent("Pertanyaan terkirim. Tunggu jawaban ustadz."));
 }
 
 const answerSchema = z.object({
@@ -194,4 +180,54 @@ export async function answerQuestion(formData: FormData): Promise<void> {
   revalidatePath("/admin/tanya");
   revalidatePath("/tanya-ustadz");
   redirect("/admin/tanya?ok=" + encodeURIComponent("Jawaban terkirim."));
+}
+
+const idSchema = z.object({ id: z.string().uuid("ID tidak valid.") });
+
+/** Hapus (soft delete) pertanyaan → hilang dari depan & admin (bisa dipulihkan di Recycle Bin). */
+export async function deleteQuestion(formData: FormData): Promise<void> {
+  await requirePermission("qa.answer");
+  const userId = (await auth())?.user?.id ?? null;
+  const parsed = idSchema.safeParse({ id: String(formData.get("id") ?? "") });
+  if (!parsed.success) redirect("/admin/tanya?err=" + encodeURIComponent("Pertanyaan tidak valid."));
+  await db
+    .update(questions)
+    .set({ deletedAt: new Date(), deletedBy: userId, updatedAt: new Date() })
+    .where(and(eq(questions.id, parsed.data.id), isNull(questions.deletedAt)));
+  revalidatePath("/admin/tanya");
+  revalidatePath("/tanya-ustadz");
+  redirect("/admin/tanya?ok=" + encodeURIComponent("Pertanyaan dihapus."));
+}
+
+/** Hapus (soft delete) satu jawaban. */
+export async function deleteAnswer(formData: FormData): Promise<void> {
+  await requirePermission("qa.answer");
+  const userId = (await auth())?.user?.id ?? null;
+  const parsed = idSchema.safeParse({ id: String(formData.get("id") ?? "") });
+  if (!parsed.success) redirect("/admin/tanya?err=" + encodeURIComponent("Jawaban tidak valid."));
+  await db
+    .update(answers)
+    .set({ deletedAt: new Date(), deletedBy: userId, updatedAt: new Date() })
+    .where(and(eq(answers.id, parsed.data.id), isNull(answers.deletedAt)));
+  revalidatePath("/admin/tanya");
+  revalidatePath("/tanya-ustadz");
+  redirect("/admin/tanya?ok=" + encodeURIComponent("Jawaban dihapus."));
+}
+
+/** Tampil / sembunyikan pertanyaan dari halaman depan (tanpa hapus). */
+export async function toggleQuestionPublic(formData: FormData): Promise<void> {
+  await requirePermission("qa.answer");
+  const parsed = idSchema.safeParse({ id: String(formData.get("id") ?? "") });
+  if (!parsed.success) redirect("/admin/tanya?err=" + encodeURIComponent("Pertanyaan tidak valid."));
+  const rows = await db
+    .select({ isPublic: questions.isPublic })
+    .from(questions)
+    .where(and(eq(questions.id, parsed.data.id), isNull(questions.deletedAt)))
+    .limit(1);
+  if (!rows[0]) redirect("/admin/tanya?err=" + encodeURIComponent("Pertanyaan tidak ditemukan."));
+  const next = !rows[0].isPublic;
+  await db.update(questions).set({ isPublic: next, updatedAt: new Date() }).where(eq(questions.id, parsed.data.id));
+  revalidatePath("/admin/tanya");
+  revalidatePath("/tanya-ustadz");
+  redirect("/admin/tanya?ok=" + encodeURIComponent(next ? "Pertanyaan ditampilkan di depan." : "Pertanyaan disembunyikan dari depan."));
 }

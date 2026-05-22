@@ -1,4 +1,5 @@
 import { Send } from "lucide-react";
+import { redirect } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Field, Input } from "@/components/ui/input";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -11,8 +12,11 @@ import { CategoryPicker } from "./category-picker";
 export const dynamic = "force-dynamic";
 
 export default async function AjukanPertanyaanPage() {
-  const [session, categories] = await Promise.all([auth(), listQaCategories()]);
-  const isGuest = !session?.user?.id;
+  const session = await auth();
+  // Hanya pengguna berakun yang boleh bertanya.
+  if (!session?.user?.id) redirect("/masuk?next=" + encodeURIComponent("/tanya-ustadz/ajukan"));
+  const categories = await listQaCategories();
+  const isGuest = false;
 
   return (
     <Container className="max-w-2xl py-10">

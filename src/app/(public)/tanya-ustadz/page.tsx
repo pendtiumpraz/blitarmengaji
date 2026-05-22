@@ -3,10 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { listQuestions, type QuestionFilter } from "@/lib/queries/tanya";
-import { FilterTabs } from "./filter-tabs";
+import { listQuestionsPaged } from "@/lib/queries/tanya";
+import { Pagination } from "@/components/ui/pagination";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 10;
 
 /** Format waktu relatif sederhana dalam Bahasa Indonesia. */
 function waktuRelatif(date: Date): string {
@@ -26,11 +28,11 @@ function waktuRelatif(date: Date): string {
 export default async function TanyaUstadzPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const { filter } = await searchParams;
-  const active = filter === "pending" || filter === "answered" ? filter : "";
-  const list = await listQuestions((active || "all") as QuestionFilter);
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const { rows: list, total } = await listQuestionsPaged(page, PAGE_SIZE, { publicOnly: true });
 
   return (
     <Container className="py-10">
@@ -46,18 +48,12 @@ export default async function TanyaUstadzPage({
         <Plus className="h-5 w-5" /> Ajukan Pertanyaan
       </Button>
 
-      <FilterTabs active={active} />
-
       {list.length === 0 ? (
         <div className="rounded-[3px] border border-dashed border-line bg-surface px-6 py-14 text-center">
           <MessageCircleQuestion className="mx-auto h-10 w-10 text-brand-600/60" />
           <p className="mt-3 text-sm font-bold text-ink">Belum ada pertanyaan</p>
           <p className="mx-auto mt-1 max-w-sm text-xs text-muted">
-            {active === "answered"
-              ? "Belum ada pertanyaan yang terjawab. Cek lagi nanti, ya."
-              : active === "pending"
-                ? "Tidak ada pertanyaan yang menunggu jawaban saat ini."
-                : "Jadilah yang pertama mengajukan pertanyaan kepada ustadz."}
+            Jadilah yang pertama mengajukan pertanyaan kepada ustadz.
           </p>
           <Button href="/tanya-ustadz/ajukan" variant="primary" size="md" className="mt-5">
             <Plus className="h-4 w-4" /> Ajukan Pertanyaan
@@ -104,6 +100,12 @@ export default async function TanyaUstadzPage({
           })}
         </div>
       )}
+
+      {total > PAGE_SIZE ? (
+        <div className="mt-6">
+          <Pagination page={page} pageSize={PAGE_SIZE} total={total} baseHref="/tanya-ustadz" />
+        </div>
+      ) : null}
     </Container>
   );
 }

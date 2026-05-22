@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   answers,
@@ -28,6 +28,7 @@ export type QuestionListItem = {
   title: string;
   body: string;
   status: "pending" | "answered" | "published";
+  isPublic: boolean;
   isAnonymous: boolean;
   /** Nama penanya siap-tampil ("Hamba Allah" bila anonim / tanpa nama). */
   askerDisplay: string;
@@ -52,8 +53,10 @@ function resolveAsker(
  */
 export async function listQuestions(
   filter: QuestionFilter = "all",
+  publicOnly = false,
 ): Promise<QuestionListItem[]> {
   const conds = [isNull(questions.deletedAt)];
+  if (publicOnly) conds.push(eq(questions.isPublic, true));
   if (filter === "pending") conds.push(eq(questions.status, "pending"));
   if (filter === "answered") {
     // 'answered' mencakup status answered & published (sudah ada jawaban).
@@ -66,6 +69,7 @@ export async function listQuestions(
       title: questions.title,
       body: questions.body,
       status: questions.status,
+      isPublic: questions.isPublic,
       isAnonymous: questions.isAnonymous,
       askerName: questions.askerName,
       userName: users.name,
@@ -116,6 +120,7 @@ export async function listQuestions(
     title: r.title,
     body: r.body,
     status: r.status,
+    isPublic: r.isPublic,
     isAnonymous: r.isAnonymous,
     askerDisplay: resolveAsker(r.isAnonymous, r.askerName, r.userName),
     categoryName: r.categoryName,
@@ -139,6 +144,7 @@ export async function getQuestion(
       title: questions.title,
       body: questions.body,
       status: questions.status,
+      isPublic: questions.isPublic,
       isAnonymous: questions.isAnonymous,
       askerName: questions.askerName,
       userName: users.name,
@@ -172,6 +178,7 @@ export async function getQuestion(
     title: q.title,
     body: q.body,
     status: q.status,
+    isPublic: q.isPublic,
     isAnonymous: q.isAnonymous,
     askerDisplay: resolveAsker(q.isAnonymous, q.askerName, q.userName),
     categoryName: q.categoryName,
@@ -195,4 +202,89 @@ export async function listQaCategories(): Promise<QaCategory[]> {
     .from(categories)
     .where(and(eq(categories.type, "qa"), isNull(categories.deletedAt)))
     .orderBy(categories.name);
+}
+
+/** Daftar pertanyaan per halaman (+ total) lengkap dgn jawaban. publicOnly → hanya is_public. */
+export async function listQuestionsPaged(
+  page: number,
+  pageSize: number,
+  opts: { publicOnly?: boolean } = {},
+): Promise<{ rows: QuestionListItem[]; total: number }> {
+  const safePage = Math.max(1, Math.floor(page) || 1);
+  const safeSize = Math.max(1, Math.floor(pageSize) || 10);
+  const conds = [isNull(questions.deletedAt)];
+  if (opts.publicOnly) conds.push(eq(questions.isPublic, true));
+
+  const [totalRow] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(questions)
+    .where(and(...conds));
+  const total = totalRow?.c ?? 0;
+
+  const rows = await db
+    .select({
+      id: questions.id,
+      title: questions.title,
+      body: questions.body,
+      status: questions.status,
+      isPublic: questions.isPublic,
+      isAnonymous: questions.isAnonymous,
+      askerName: questions.askerName,
+      userName: users.name,
+      categoryName: categories.name,
+      createdAt: questions.createdAt,
+    })
+    .from(questions)
+    .leftJoin(users, eq(questions.userId, users.id))
+    .leftJoin(categories, eq(questions.categoryId, categories.id))
+    .where(and(...conds))
+    .orderBy(desc(questions.createdAt))
+    .limit(safeSize)
+    .offset((safePage - 1) * safeSize);
+
+  if (rows.length === 0) return { rows: [], total };
+
+  const ids = rows.map((r) => r.id);
+  const answerRows = await db
+    .select({
+      id: answers.id,
+      questionId: answers.questionId,
+      body: answers.body,
+      ustadzName: ustadzProfiles.name,
+      ustadzSpecialization: ustadzProfiles.specialization,
+      createdAt: answers.createdAt,
+    })
+    .from(answers)
+    .innerJoin(ustadzProfiles, eq(answers.ustadzId, ustadzProfiles.id))
+    .where(isNull(answers.deletedAt))
+    .orderBy(desc(answers.createdAt));
+
+  const byQuestion = new Map<string, AnswerItem[]>();
+  for (const a of answerRows) {
+    if (!ids.includes(a.questionId)) continue;
+    const list = byQuestion.get(a.questionId) ?? [];
+    list.push({
+      id: a.id,
+      body: a.body,
+      ustadzName: a.ustadzName,
+      ustadzSpecialization: a.ustadzSpecialization,
+      createdAt: a.createdAt,
+    });
+    byQuestion.set(a.questionId, list);
+  }
+
+  const mapped: QuestionListItem[] = rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    body: r.body,
+    status: r.status,
+    isPublic: r.isPublic,
+    isAnonymous: r.isAnonymous,
+    askerDisplay: resolveAsker(r.isAnonymous, r.askerName, r.userName),
+    categoryName: r.categoryName,
+    createdAt: r.createdAt,
+    answers: byQuestion.get(r.id) ?? [],
+  }));
+
+  return { rows: mapped, total };
 }

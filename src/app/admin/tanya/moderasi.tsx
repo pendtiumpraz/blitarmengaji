@@ -13,7 +13,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
-import { answerQuestion } from "@/lib/actions/tanya";
+import { answerQuestion, deleteQuestion, deleteAnswer, toggleQuestionPublic } from "@/lib/actions/tanya";
+import { ConfirmSubmit } from "@/components/ui/confirm-submit";
 import type { QuestionListItem } from "@/lib/queries/tanya";
 
 type Tab = "menunggu" | "terjawab";
@@ -193,11 +194,49 @@ export function Moderasi({
                   <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-ink/80">{terpilih.body}</p>
                 </div>
 
+                {/* Aksi moderasi: tampil/sembunyi & hapus pertanyaan */}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Badge tone={terpilih.isPublic ? "success" : "muted"}>
+                    {terpilih.isPublic ? "Tampil di depan" : "Disembunyikan"}
+                  </Badge>
+                  <form action={toggleQuestionPublic}>
+                    <input type="hidden" name="id" value={terpilih.id} />
+                    <button
+                      type="submit"
+                      className="rounded-sm border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-brand-50"
+                    >
+                      {terpilih.isPublic ? "Sembunyikan dari depan" : "Tampilkan di depan"}
+                    </button>
+                  </form>
+                  <form action={deleteQuestion}>
+                    <input type="hidden" name="id" value={terpilih.id} />
+                    <ConfirmSubmit
+                      title="Hapus pertanyaan ini?"
+                      text="Pertanyaan dihapus dari depan & admin (bisa dipulihkan di Recycle Bin)."
+                      className="rounded-sm border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+                    >
+                      Hapus pertanyaan
+                    </ConfirmSubmit>
+                  </form>
+                </div>
+
                 {/* Jawaban yang sudah ada */}
                 {terpilih.answers.map((a) => (
                   <div key={a.id} className="mt-4 rounded-sm border-l-2 border-brand-500 bg-cream p-4">
                     <p className="whitespace-pre-line text-sm leading-relaxed text-ink/85">{a.body}</p>
-                    <p className="mt-2 text-[11px] font-bold text-brand-700">— {a.ustadzName}</p>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <p className="text-[11px] font-bold text-brand-700">— {a.ustadzName}</p>
+                      <form action={deleteAnswer}>
+                        <input type="hidden" name="id" value={a.id} />
+                        <ConfirmSubmit
+                          title="Hapus jawaban ini?"
+                          text="Jawaban akan dihapus (bisa dipulihkan di Recycle Bin)."
+                          className="text-[11px] font-semibold text-red-600 hover:underline"
+                        >
+                          Hapus jawaban
+                        </ConfirmSubmit>
+                      </form>
+                    </div>
                   </div>
                 ))}
 
