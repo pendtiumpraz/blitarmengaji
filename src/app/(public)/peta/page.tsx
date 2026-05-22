@@ -60,53 +60,49 @@ export default async function PetaPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-3">
-          {/* PETA Leaflet + OpenStreetMap (gratis) */}
-          <div className="lg:col-span-2">
-            <PetaMap markers={markers} className="h-[460px]" />
-            <p className="mt-2 text-[11px] text-muted">
-              Klik pin untuk lihat detail & buka di Google Maps. Peta dari OpenStreetMap.
-            </p>
+        <div>
+          {/* PETA Leaflet + OpenStreetMap (gratis) — lebar penuh */}
+          <PetaMap markers={markers} className="h-[480px] w-full" />
+          <p className="mt-2 text-[11px] text-muted">
+            Klik pin untuk lihat detail & buka di Google Maps. Peta dari OpenStreetMap.
+          </p>
+
+          {/* DAFTAR titik — grid 3 kolom */}
+          <div className="mb-3 mt-8 flex items-center justify-between">
+            <p className="text-sm font-bold text-ink">{titikList.length} Titik Dakwah</p>
+            <span className="text-xs text-muted">Urutkan: Terbaru</span>
           </div>
-
-          {/* sidebar daftar titik */}
-          <aside>
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-bold text-ink">{titikList.length} Titik Dakwah</p>
-              <span className="text-xs text-muted">Urutkan: Terbaru</span>
-            </div>
-            <div className="space-y-3">
-              {titikList.map((t) => {
-                const s = statusTone(t.status);
-                return (
-                  <div key={t.slug} className="rounded-[3px] border border-line bg-surface p-3">
-                    <div className="flex gap-3">
-                      <div className="grid h-16 w-16 shrink-0 place-items-center rounded-[3px] bg-brand-50">
-                        <Building2 className="h-6 w-6 text-brand-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-ink">{t.name}</p>
-                        <p className="text-xs text-muted">
-                          {t.kecamatan ? `${t.kecamatan}, Blitar Raya` : "Blitar Raya"}
-                        </p>
-                        <Badge tone={s.tone} className="mt-1.5">
-                          {s.label}
-                        </Badge>
-                      </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {titikList.map((t) => {
+              const s = statusTone(t.status);
+              return (
+                <div key={t.slug} className="flex flex-col rounded-[3px] border border-line bg-surface p-4">
+                  <div className="flex gap-3">
+                    <div className="grid h-14 w-14 shrink-0 place-items-center rounded-[3px] bg-brand-50">
+                      <Building2 className="h-6 w-6 text-brand-600" />
                     </div>
-
-                    {t.address ? (
-                      <p className="mt-3 rounded-[3px] bg-cream px-3 py-2 text-xs text-muted">{t.address}</p>
-                    ) : null}
-
-                    <Button href={`/titik/${t.slug}`} variant="outline" size="sm" className="mt-3 w-full">
-                      Lihat Detail
-                    </Button>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold leading-snug text-ink">{t.name}</p>
+                      <p className="mt-0.5 text-xs text-muted">
+                        {t.kecamatan ? `${t.kecamatan}, Blitar Raya` : "Blitar Raya"}
+                      </p>
+                      <Badge tone={s.tone} className="mt-1.5">
+                        {s.label}
+                      </Badge>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          </aside>
+
+                  {t.address ? (
+                    <p className="mt-3 line-clamp-2 rounded-[3px] bg-cream px-3 py-2 text-xs text-muted">{t.address}</p>
+                  ) : null}
+
+                  <Button href={`/titik/${t.slug}`} variant="outline" size="sm" className="mt-3 w-full sm:mt-auto sm:pt-3">
+                    Lihat Detail
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </Container>
