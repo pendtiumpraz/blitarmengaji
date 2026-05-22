@@ -53,8 +53,9 @@ const PROVIDERS: Prov[] = [
   {
     name: "DeepSeek", slug: "deepseek", baseUrl: "https://api.deepseek.com", docsUrl: "https://api-docs.deepseek.com",
     models: [
-      { modelId: "deepseek-chat", label: "DeepSeek V3 (chat)", kind: "chat", ctx: 131072 },
-      { modelId: "deepseek-reasoner", label: "DeepSeek R1 (reasoning)", kind: "reasoning", ctx: 131072 },
+      { modelId: "deepseek-v4-flash", label: "DeepSeek V4 Flash", kind: "chat", ctx: 131072 },
+      { modelId: "deepseek-chat", label: "DeepSeek Chat (V3)", kind: "chat", ctx: 131072 },
+      { modelId: "deepseek-reasoner", label: "DeepSeek Reasoner (R1)", kind: "reasoning", ctx: 131072 },
     ],
   },
   {
@@ -101,12 +102,13 @@ const PROVIDERS: Prov[] = [
 ];
 
 // Binding default task -> model (key kosong → belum jalan sampai diisi & dipilih di UI).
-const DEFAULT_BINDINGS: { task: "chat" | "agent" | "doc" | "summarize" | "embedding"; provider: string; modelId: string }[] = [
-  { task: "chat", provider: "deepseek", modelId: "deepseek-chat" },
+const DEFAULT_BINDINGS: { task: "chat" | "agent" | "doc" | "summarize" | "embedding" | "wa_extract"; provider: string; modelId: string }[] = [
+  { task: "chat", provider: "deepseek", modelId: "deepseek-v4-flash" },
   { task: "agent", provider: "deepseek", modelId: "deepseek-reasoner" },
   { task: "doc", provider: "openai", modelId: "gpt-5.1" },
   { task: "summarize", provider: "google", modelId: "gemini-2.5-flash" },
   { task: "embedding", provider: "openai", modelId: "text-embedding-3-large" },
+  { task: "wa_extract", provider: "deepseek", modelId: "deepseek-v4-flash" },
 ];
 
 async function main() {

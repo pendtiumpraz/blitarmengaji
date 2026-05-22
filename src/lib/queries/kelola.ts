@@ -68,6 +68,8 @@ export type MyScheduleItem = {
   status: "scheduled" | "ongoing" | "done" | "cancelled";
   kajianTitle: string | null;
   titikName: string | null;
+  titikDakwahId: string | null;
+  kajianId: string | null;
 };
 
 /**
@@ -89,6 +91,8 @@ export async function mySchedules(userId: string): Promise<MyScheduleItem[]> {
       status: kajianSchedules.status,
       kajianTitle: kajian.title,
       titikName: titikDakwah.name,
+      titikDakwahId: kajianSchedules.titikDakwahId,
+      kajianId: kajianSchedules.kajianId,
     })
     .from(kajianSchedules)
     .leftJoin(kajian, eq(kajianSchedules.kajianId, kajian.id))
@@ -100,6 +104,43 @@ export async function mySchedules(userId: string): Promise<MyScheduleItem[]> {
       ),
     )
     .orderBy(asc(kajianSchedules.startAt));
+}
+
+export type ScheduleDetail = {
+  id: string;
+  titikDakwahId: string | null;
+  kajianId: string | null;
+  title: string | null;
+  startAt: Date;
+  isOnline: boolean;
+  streamUrl: string | null;
+  status: "scheduled" | "ongoing" | "done" | "cancelled";
+  ownerUserId: string | null;
+};
+
+/**
+ * Ambil satu jadwal (aktif) beserta pemilik titiknya untuk keperluan prefill
+ * form edit & cek ownership. Mengembalikan null bila tidak ditemukan / terhapus.
+ */
+export async function getScheduleById(id: string): Promise<ScheduleDetail | null> {
+  const rows = await db
+    .select({
+      id: kajianSchedules.id,
+      titikDakwahId: kajianSchedules.titikDakwahId,
+      kajianId: kajianSchedules.kajianId,
+      title: kajianSchedules.title,
+      startAt: kajianSchedules.startAt,
+      isOnline: kajianSchedules.isOnline,
+      streamUrl: kajianSchedules.streamUrl,
+      status: kajianSchedules.status,
+      ownerUserId: titikDakwah.ownerUserId,
+    })
+    .from(kajianSchedules)
+    .leftJoin(titikDakwah, eq(kajianSchedules.titikDakwahId, titikDakwah.id))
+    .where(and(eq(kajianSchedules.id, id), isNull(kajianSchedules.deletedAt)))
+    .limit(1);
+
+  return rows[0] ?? null;
 }
 
 /** Daftar id titik dakwah milik user (aktif saja). Helper internal. */

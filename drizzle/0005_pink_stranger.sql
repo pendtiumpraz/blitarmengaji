@@ -1,0 +1,1 @@
+ALTER TABLE "titik_dakwah" ADD COLUMN "is_active" boolean DEFAULT true NOT NULL;

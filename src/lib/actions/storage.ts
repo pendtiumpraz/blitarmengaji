@@ -2,6 +2,7 @@
 
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db, schema } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -73,6 +74,77 @@ export async function createStorageConfig(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/admin/storage");
+}
+
+// ── updateStorageConfig ─────────────────────────────────────────────────────────
+
+const updateSchema = z.object({
+  id: z.string().uuid("ID konfigurasi storage tidak valid."),
+  label: z.string().trim().min(2, "Label minimal 2 karakter."),
+  baseUrl: z.string().trim().url("Base URL tidak valid.").optional(),
+  ownerType: ownerTypeEnum,
+  ownerId: z.string().uuid("ID pemilik tidak valid.").optional(),
+  isDefault: z.boolean(),
+  status: z.enum(["active", "disabled"], { message: "Status storage tidak valid." }),
+  token: z.string().trim().min(8, "Token Blob terlalu pendek.").optional(),
+});
+
+/**
+ * Ubah konfigurasi storage. Field non-rahasia selalu di-update. Bila field
+ * `token` diisi (non-kosong) → re-encrypt (AES-256-GCM) & ganti key lama. Bila
+ * `token` KOSONG → key lama dibiarkan (tidak diubah).
+ */
+export async function updateStorageConfig(formData: FormData): Promise<void> {
+  await requirePermission("storage.manage");
+
+  const parsed = updateSchema.safeParse({
+    id: opt(formData.get("id")),
+    label: opt(formData.get("label")),
+    baseUrl: opt(formData.get("baseUrl")),
+    ownerType: opt(formData.get("ownerType")) ?? "global",
+    ownerId: opt(formData.get("ownerId")),
+    isDefault: formData.get("isDefault") != null,
+    status: opt(formData.get("status")) ?? "active",
+    token: opt(formData.get("token")),
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Data tidak valid.");
+  }
+
+  const data = parsed.data;
+
+  // Selalu update field non-rahasia.
+  const set: Partial<typeof schema.storageConfigs.$inferInsert> = {
+    label: data.label,
+    baseUrl: data.baseUrl ?? null,
+    ownerType: data.ownerType,
+    ownerId: data.ownerType === "global" ? null : (data.ownerId ?? null),
+    isDefault: data.isDefault,
+    status: data.status,
+    updatedAt: new Date(),
+  };
+
+  // Hanya re-encrypt & ganti key bila token diisi; kosong = biarkan key lama.
+  if (data.token) {
+    const { ciphertext, iv, tag } = encryptToken(data.token);
+    set.tokenCiphertext = ciphertext;
+    set.tokenIv = iv;
+    set.tokenTag = tag;
+  }
+
+  await db
+    .update(schema.storageConfigs)
+    .set(set)
+    .where(
+      and(
+        eq(schema.storageConfigs.id, data.id),
+        isNull(schema.storageConfigs.deletedAt),
+      ),
+    );
+
+  revalidatePath("/admin/storage");
+  redirect("/admin/storage");
 }
 
 // ── softDeleteStorageConfig ─────────────────────────────────────────────────────

@@ -298,6 +298,7 @@ export const titikDakwah = pgTable(
     contactEmail: varchar('contact_email', { length: 255 }),
     ownerUserId: uuid('owner_user_id').references(() => users.id, { onDelete: 'set null' }),
     status: entityStatusEnum('status').notNull().default('pending'),
+    isActive: boolean('is_active').notNull().default(true), // nonaktifkan tanpa hapus
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -694,6 +695,7 @@ export const questions = pgTable('questions', {
   body: text('body').notNull(),
   categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
   status: questionStatusEnum('status').notNull().default('pending'),
+  isPublic: boolean('is_public').notNull().default(true), // tampil/sembunyi di halaman depan
   assignedUstadzId: uuid('assigned_ustadz_id').references(() => ustadzProfiles.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -843,9 +845,10 @@ export const events = pgTable(
     organizerId: uuid('organizer_id'), // FK polymorphic (business_partners.id atau null untuk internal)
     kind: eventKindEnum('kind').notNull().default('offline'),
     coverImage: text('cover_image'),
+    titikDakwahId: uuid('titik_dakwah_id').references(() => titikDakwah.id, { onDelete: 'set null' }),
     startAt: timestamp('start_at', { withTimezone: true }),
     endAt: timestamp('end_at', { withTimezone: true }),
-    location: text('location'),
+    location: text('location'), // detail alamat opsional (pelengkap titik)
     onlineUrl: text('online_url'),
     capacity: integer('capacity'),
     needsRegistration: boolean('needs_registration').notNull().default(false),

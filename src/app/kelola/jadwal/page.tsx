@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { CalendarDays, CalendarPlus, Radio, Save, Trash2, Link as LinkIcon } from "lucide-react";
+import { CalendarDays, CalendarPlus, Pencil, Radio, Save, Trash2, Link as LinkIcon } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { AdminPageHeader } from "@/components/admin/page-header";
 import { Card } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import {
   myKajianOptions,
   type MyScheduleItem,
 } from "@/lib/queries/kelola";
-import { createSchedule, deleteSchedule } from "@/lib/actions/jadwal";
+import { createSchedule, deleteSchedule, updateSchedule } from "@/lib/actions/jadwal";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +34,21 @@ const timeFmt = new Intl.DateTimeFormat("id-ID", {
 
 const selectCls =
   "h-11 w-full rounded-sm border border-line bg-surface px-3 text-sm text-ink focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20";
+
+// Format Date -> "YYYY-MM-DDTHH:mm" pada zona WIB untuk prefill <input type="datetime-local">.
+const dtLocalParts = new Intl.DateTimeFormat("en-CA", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: TZ,
+});
+function toDatetimeLocal(d: Date): string {
+  const p = Object.fromEntries(dtLocalParts.formatToParts(d).map((x) => [x.type, x.value]));
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
+}
 
 function StatusBadge({ item }: { item: MyScheduleItem }) {
   if (item.status === "ongoing") return <Badge tone="danger">● Berlangsung</Badge>;
@@ -126,18 +141,138 @@ export default async function KelolaJadwalPage() {
                         <TD>
                           <StatusBadge item={r} />
                         </TD>
-                        <TD className="text-right">
-                          <form action={deleteSchedule} className="inline-flex">
-                            <input type="hidden" name="id" value={r.id} />
-                            <button
-                              type="submit"
-                              aria-label={`Hapus jadwal ${r.title ?? r.kajianTitle ?? ""}`}
-                              title="Hapus"
-                              className="text-muted hover:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </form>
+                        <TD className="text-right align-top">
+                          <div className="inline-flex items-start gap-3">
+                            <details className="group relative">
+                              <summary
+                                aria-label={`Edit jadwal ${r.title ?? r.kajianTitle ?? ""}`}
+                                title="Edit"
+                                className="inline-flex cursor-pointer list-none items-center text-muted hover:text-brand-700 [&::-webkit-details-marker]:hidden"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </summary>
+                              <div className="absolute right-0 z-20 mt-2 w-80 rounded-sm border border-line bg-surface p-4 text-left shadow-lg">
+                                <p className="mb-3 flex items-center gap-2 text-sm font-bold text-ink">
+                                  <Pencil className="h-4 w-4 text-brand-600" /> Edit Jadwal
+                                </p>
+                                <form action={updateSchedule} className="space-y-3">
+                                  <input type="hidden" name="id" value={r.id} />
+
+                                  <Field label="Titik Dakwah" htmlFor={`edit-titik-${r.id}`}>
+                                    <select
+                                      id={`edit-titik-${r.id}`}
+                                      name="titikDakwahId"
+                                      className={selectCls}
+                                      defaultValue={r.titikDakwahId ?? ""}
+                                      required
+                                    >
+                                      <option value="" disabled>
+                                        Pilih titik milik Anda…
+                                      </option>
+                                      {titikOptions.map((t) => (
+                                        <option key={t.id} value={t.id}>
+                                          {t.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </Field>
+
+                                  {kajianOptions.length > 0 ? (
+                                    <Field label="Kajian (opsional)" htmlFor={`edit-kajian-${r.id}`}>
+                                      <select
+                                        id={`edit-kajian-${r.id}`}
+                                        name="kajianId"
+                                        className={selectCls}
+                                        defaultValue={r.kajianId ?? ""}
+                                      >
+                                        <option value="">Tanpa kajian / acara lepas…</option>
+                                        {kajianOptions.map((k) => (
+                                          <option key={k.id} value={k.id}>
+                                            {k.title}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </Field>
+                                  ) : null}
+
+                                  <Field label="Judul Jadwal" htmlFor={`edit-title-${r.id}`}>
+                                    <Input
+                                      id={`edit-title-${r.id}`}
+                                      name="title"
+                                      defaultValue={r.title ?? ""}
+                                      placeholder="Mis. Kajian Tafsir Ba'da Subuh"
+                                      required
+                                    />
+                                  </Field>
+
+                                  <Field label="Mulai (tanggal & jam)" htmlFor={`edit-startAt-${r.id}`}>
+                                    <Input
+                                      id={`edit-startAt-${r.id}`}
+                                      name="startAt"
+                                      type="datetime-local"
+                                      defaultValue={toDatetimeLocal(r.startAt)}
+                                      required
+                                    />
+                                  </Field>
+
+                                  <Field label="Status" htmlFor={`edit-status-${r.id}`}>
+                                    <select
+                                      id={`edit-status-${r.id}`}
+                                      name="status"
+                                      className={selectCls}
+                                      defaultValue={r.status}
+                                    >
+                                      <option value="scheduled">Terjadwal</option>
+                                      <option value="ongoing">Berlangsung</option>
+                                      <option value="done">Selesai</option>
+                                      <option value="cancelled">Dibatalkan</option>
+                                    </select>
+                                  </Field>
+
+                                  <label className="flex items-center gap-2 rounded-sm border border-line bg-cream/60 px-3 py-2.5 text-sm text-ink">
+                                    <input
+                                      type="checkbox"
+                                      name="isOnline"
+                                      defaultChecked={r.isOnline}
+                                      className="h-4 w-4 accent-[var(--c-brand-600)]"
+                                    />
+                                    <Radio className="h-4 w-4 text-brand-600" />
+                                    <span className="font-semibold">Kajian online / livestream</span>
+                                  </label>
+
+                                  <Field label="Link Streaming" htmlFor={`edit-streamUrl-${r.id}`}>
+                                    <div className="flex items-center gap-2 rounded-sm border border-line bg-surface px-3 focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/20">
+                                      <LinkIcon className="h-4 w-4 shrink-0 text-muted" />
+                                      <input
+                                        id={`edit-streamUrl-${r.id}`}
+                                        name="streamUrl"
+                                        type="url"
+                                        defaultValue={r.streamUrl ?? ""}
+                                        placeholder="https://youtu.be/…"
+                                        className="h-11 w-full bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none"
+                                      />
+                                    </div>
+                                  </Field>
+
+                                  <Button type="submit" variant="primary" className="w-full">
+                                    <Save className="h-4 w-4" /> Simpan Perubahan
+                                  </Button>
+                                </form>
+                              </div>
+                            </details>
+
+                            <form action={deleteSchedule} className="inline-flex">
+                              <input type="hidden" name="id" value={r.id} />
+                              <button
+                                type="submit"
+                                aria-label={`Hapus jadwal ${r.title ?? r.kajianTitle ?? ""}`}
+                                title="Hapus"
+                                className="text-muted hover:text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </form>
+                          </div>
                         </TD>
                       </TR>
                     ))}

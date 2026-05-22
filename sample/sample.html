@@ -1,0 +1,1347 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal Donasi & Wakaf</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    
+    <style>
+        /* Reset dan Style Dasar */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            
+                }
+
+        body {
+            background-color: #f5f5f5;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #00796b, #004d40);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+          color: white;
+        }
+
+        /* Container */
+        .container {
+    max-width: 1200px;
+    width: 95%; /* Ensure container takes full width of its parent */
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+        /* Card Donasi */
+        .donation-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .donation-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .donation-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .donation-card h3 {
+            color: #00796b;
+            margin-bottom: 1rem;
+        }
+
+        .donation-info {
+            margin: 1rem 0;
+        }
+
+        .bank-info {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background: linear-gradient(90deg, #00796b, #009688);
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Map Container */
+        #wakaf-map {
+            height: 400px;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            background: #00796b;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #004d40;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128C7E;
+        }
+
+        /* Thank You Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h2 {
+    margin: 1.5rem 0;
+    font-size: 1.5rem;
+}
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .donation-cards {
+                grid-template-columns: 1fr;
+            }
+            h2 {
+        font-size: 1.25rem;
+        margin: 1rem 0;
+    }
+    
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+        }
+
+        #map { height: 600px; }
+        #wakaf-map { height: 600px; }
+        .filters { margin: 10px; }
+
+        .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin: 15px 0;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .filters label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .filters select {
+        padding: 0.8rem 1.2rem;
+        font-size: 1rem;
+        border: 2px solid #00796b;
+        border-radius: 5px;
+        background-color: #fff;
+        color: #00796b;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .filters select:hover {
+        border-color: #004d40;
+        background-color: #f5f5f5;
+    }
+
+    .filters select:focus {
+        outline: none;
+        border-color: #004d40;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Optional: Styling the filter container to add spacing */
+    .filters {
+        padding: 15px;
+        background-color: #e0f2f1;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Custom styling for the Leaflet popup */
+.leaflet-popup-content {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.5;
+    padding: 12px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    color: #333;
+    min-width: 300px; /* Tambahkan minimum width */
+    width: auto !important; /* Override default width */
+    max-width: 350px; /* Maksimum width */
+}
+
+/* Title style (event name and location) */
+.leaflet-popup-content b {
+    font-size: 18px;
+    color: #1E5163;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Subtitle style (event topic) */
+.leaflet-popup-content i {
+    font-size: 14px;
+    color: #8AAF4A;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Date and time section */
+.leaflet-popup-content .event-date {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+/* Address and map link style */
+.leaflet-popup-content a {
+    color: #D17707;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 8px;
+}
+
+.leaflet-popup-content a:hover {
+    text-decoration: underline;
+}
+
+/* Donation section */
+.leaflet-popup-content .donation-info {
+    font-size: 14px;
+    color: #555;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.leaflet-popup-content .donation-info span {
+    margin-right: 5px;
+}
+
+/* Dua and Contact information */
+.leaflet-popup-content small {
+    font-size: 12px;
+    color: #777;
+    display: block;
+    margin-top: 12px;
+}
+
+/* Ensure text looks clean on mobile */
+.event-content b {
+    font-size: 1.2em;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.event-content i {
+    font-size: 1em;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.event-speaker,
+.event-date,
+.donation-info {
+    margin-bottom: 10px;
+}
+
+.event-content a {
+    color: #1E5163;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.event-content a:hover {
+    text-decoration: underline;
+}
+
+#map {
+    width: 100%;
+    height: 600px; /* Default height, adjust as needed */
+    max-height: 800px; /* Maximum height */
+    margin-bottom: 20px;
+}
+
+/* Event popup content */
+.event-content {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    color: #333;
+    line-height: 1.6;
+    text-align: left;
+}
+
+@media (max-width: 768px) {
+    #map {
+        height: 300px; /* Smaller height on smaller screens */
+    }
+
+    .event-content {
+        padding: 15px;
+    }
+
+    .event-content b {
+        font-size: 1.1em; /* Slightly smaller font size for mobile */
+    }
+
+    .event-content i {
+        font-size: 0.95em;
+    }
+
+    .donation-info span {
+        display: block;
+        margin-top: 5px;
+    }
+    #wakaf-map {
+        height: 400px;
+    }
+    .header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .header p {
+        font-size: 0.9rem;
+    }
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filters label {
+        margin-bottom: 5px;
+    }
+    
+    .filters select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .container {
+        width: 100%;
+        padding: 0 10px;
+    }
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.leaflet-popup-content b {
+    font-size: 16px;
+    color: #1E5163;
+    margin-bottom: 8px;
+    display: block;
+    width: 100%;
+}
+
+.leaflet-popup-content .event-speaker,
+.leaflet-popup-content .event-date,
+.leaflet-popup-content .donation-info {
+    width: 100%;
+    word-wrap: break-word;
+    margin: 8px 0;
+}
+
+/* Pastikan semua teks dalam popup bisa wrap dengan baik */
+.leaflet-popup-content div {
+    width: 100%;
+    word-wrap: break-word;
+}
+
+/* Mobile-first styles for smaller screens */
+@media (max-width: 480px) {
+    .leaflet-popup-content {
+        min-width: 260px;
+        max-width: 300px;
+        padding: 12px;
+    }
+    .leaflet-popup {
+        margin-left: 0;
+    }
+    .event-content {
+        padding: 10px;
+    }
+
+    .event-date,
+    .donation-info {
+        font-size: 0.9em;
+    }
+
+    .event-speaker,
+    .event-date,
+    .donation-info {
+        font-size: 0.95em;
+    }
+
+    .event-content small {
+        font-size: 0.85em;
+        display: block;
+        margin-top: 10px;
+    }
+    body {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    p {
+        margin-bottom: 0.8em;
+    }
+    .leaflet-popup-content {
+        max-width: 300px;
+        padding: 10px;
+    }
+    
+    .leaflet-popup-content b {
+        font-size: 14px;
+    }
+    
+    .leaflet-popup-content i {
+        font-size: 12px;
+    }
+    
+    .event-speaker,
+    .event-date,
+    .donation-info {
+        font-size: 12px;
+    }
+    #wakaf-map {
+        height: 500px;
+        border-radius: 5px;
+        margin: 1rem 0;
+    }
+    .header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Portal Kajian Blitar Mengaji</h1>
+        <p>Mari menuntut ilmu, Tebarkan Tauhid & Sunnah di Blitar Raya</p>
+    </header>
+
+    <div class="container">
+        
+
+        <h2>Lokasi Kajian Blitar Mengaji</h2>
+        <div id="wakaf-map"></div>
+
+        <div class="filters">
+            <label for="filterUstadz">Filter Ustadz: </label>
+            <select id="filterUstadz">
+                <option value="">Semua Ustadz</option>
+            </select>
+            <label for="filterHari">Filter Hari: </label>
+            <select id="filterHari">
+                <option value="">Semua Hari</option>
+                <option value="Senin">Senin</option>
+                <option value="Selasa">Selasa</option>
+                <option value="Rabu">Rabu</option>
+                <option value="Kamis">Kamis</option>
+                <option value="Jumat">Jumat</option>
+                <option value="Sabtu">Sabtu</option>
+                <option value="Ahad">Ahad</option>
+            </select>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        // Inisialisasi Map
+        const map = L.map('wakaf-map').setView([-8.102106, 112.2467435], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Data lokasi wakaf (contoh)
+        const wakafLocations = [
+            {
+                name: "Masjid Al-Ihsan",
+                lat: -6.200000,
+                lng: 106.816666,
+                type: "Masjid"
+            },
+            {
+                name: "Pesantren Nurul Iman",
+                lat: -6.190000,
+                lng: 106.826666,
+                type: "Pesantren"
+            }
+        ];
+
+        // Menambahkan marker untuk setiap lokasi
+        wakafLocations.forEach(location => {
+            const marker = L.marker([location.lat, location.lng]).addTo(map);
+            marker.bindPopup(`<b>${location.name}</b><br>Jenis: ${location.type}`);
+        });
+
+       
+      
+      const masjidEvents = [
+    {
+        name: "Kajian Ilmiah BLITAR MENGAJI",
+        topic: "Kitab Riyadhus Shalihin",
+        speaker: "Ustadz Ayyub Nofel Baya'syut حفظه الله",
+        position: "Pembina Blitar Mengaji",
+        date: "Selasa",
+        keterangan: "Pekan ke-3",
+        time: "Ba'da Maghrib",
+        location: {
+            name: "Masjid Baitul Manan",
+            description: "Belakang Jagal Sapi Muhsin - Utara RSI AMINAH",
+            mapsLink: "https://maps.app.goo.gl/Wq1tF6HEz5rMU1se6",
+            lat: -8.1259654,
+            lng: 112.1555732
+        },
+        donation: {
+            bank: "BSI",
+            accountNumber: "7270252286",
+            accountName: "Masjid Baitul Manan"
+        },
+        contact: "https://wa.me/6287755670041",
+        dua: "Semoga Allah Azza wa Jalla memudahkan langkah kita untuk menghadiri majlis ilmu...Aamiin"
+    },
+        {
+        name: "Kajian Kitab Umdatul Ahkam",
+        topic: "Kumpulan Hadist-Hadist Fiqh Riwayat Imam Bukhari dan Muslim",
+        speaker: "Ustadz Abu Haitsam Iqbal حفظه الله",
+        position: "Pengajar Ponpes Imam Syafi'i Blitar",
+        date: "Selasa",
+        keterangan: "Pekan ke-1 & ke-3 setiap bulan",
+        time: "Ba'da Maghrib - Selesai",
+        location: {
+            name: "Masjid Muhammad",
+            description: "MTT Al Qudwah Tugurante",
+            mapsLink: "https://maps.app.goo.gl/5krG4qcvMhJGBvqg9",
+            lat: -8.090052,
+            lng: 112.1102272
+        },
+        donation: {
+            bank: "BSI",
+            accountNumber: "7188934298",
+            accountName: "YPI AL QUDWAH AL ATSARIYYAH"
+        },
+        contact: "https://wa.me/6281232974779",
+        dua: "Jangan lupa informasikan ke teman-teman yang lain sebagai ladang pahala jariyah kita."
+    },
+    {
+      
+    "name": "Kajian Ilmiah Syarah Kitab Lum'atul I'tiqad",
+    "topic": "Syarah Kitab Lum'atul I'tiqad",
+    "speaker": "Ustadz Ayyub Nofel Baya'syut حفظه الله",
+    "position": "Pemateri",
+    "date": "Senin",
+    "keterangan": "Ba'da Maghrib - Selesai",
+    "time": "Ba'da Maghrib - Selesai",
+    "location": {
+        "name": "Masjid Muhammad",
+        "description": "MTT Al Qudwah Tugurante",
+        "mapsLink": "https://maps.app.goo.gl/5krG4qcvMhJGBvqg9",
+        "lat": -8.090052,
+        "lng": 112.1102272
+    },
+    "donation": {
+        "bank": "BSI",
+        "accountNumber": "7188934298",
+        "accountName": "YPI AL QUDWAH AL ATSARIYYAH",
+        "donationLink": "http://Linktr.ee/donasi.alqudwahblitar"
+    },
+    "contact": "https://wa.me/6281232974779",
+    "dua": "Jangan lupa infokan ke teman-teman yang lain sebagai ladang pahala jariyah kita.",
+    "liveLink": "https://t.me/alqudwahalastariyyah",
+    "confirmation": {
+        "text": "Konfirmasi Transfer: Akhi Wendy 081232974779"
+    }
+},
+{
+"name": "Kajian Ahad Ke-3 Blitar Kota",
+    "topic": "Hilyati Thalibil Ilmi (Adab Penuntut Ilmu)",
+    "speaker": "Ustadz Ahmad Syarifuddin حفظه الله",
+    "position": "Pengasuh Ma'had Al Qudwah Kediri",
+    "date": "Ahad",
+    "keterangan": "Pekan Ke-3",
+    "time": "Pukul 09.00 - Selesai",
+    "location": {
+        "name": "Masjid Ar Rohmah",
+        "description": "Jl. A. Yani, Kota Blitar",
+        "mapsLink": "https://goo.gl/maps/4JQJ8znKPfC2",
+        "lat": -8.0994661,
+        "lng": 112.1747329
+    },
+    "donation": {
+        "bank": "Bank Muamalat",
+        "accountNumber": "7450000211",
+        "accountName": "Andhika Sulistiawan",
+        "donationLink": "http://Linktr.ee/donasi.alqudwahblitar"
+    },
+    "contact": "https://wa.me/6281330429262",
+    "dua": "Rasulullah shallallahu ‘alaihi wasallam bersabda: \"Wahai sekalian manusia, belajarlah. Ilmu hanya bisa didapatkan dengan belajar. Pemahaman didapatkan dengan cara berusaha memahami. Barangsiapa yg Allah kehendaki baginya kebaikan, Allah pahamkan ia dalam (ilmu) Dien.\"",
+    "liveLink": "https://t.me/alqudwahalastariyyah",
+    "confirmation": {
+        "text": "Konfirmasi nama#alamat#jumlah# kirim ke 0823 3169 4062"
+    }
+},
+{
+    "name": "Kajian Tahsin Tilawah Al-Qur'an (Ngaji Perbaikan Bacaan Al-Qur'an)",
+    "topic": "Perbaikan Bacaan Al-Qur'an sesuai Makhraj, Sifat & Hukum Tajwidnya",
+    "speaker": "Ustadz Mohammad Zaenal Arifin حفظه الله",
+    "position": "Pengajar Tahsin Al-Qur'an SDI Dinuna Jatinom dan Umum",
+    "date": "Jum'at",
+    "keterangan": "Malam Sabtu, 13 Desember 2024 (Sementara Tiap Jum'at ke-1, 3 dan 5)",
+    "time": "Ba'da Maghrib s.d. Selesai",
+    "location": {
+        "name": "Mushalla Wakaf Ali Shalih Al-Khudhairi",
+        "description": "Dusun Sumber RT3/RW2, Desa Slorok, Garum, Kab. Blitar (mushalla masuk gang)",
+        "mapsLink": "https://bit.ly/4fZdpmV",
+        "lat": -8.0470682,
+        "lng": 112.2450252
+    },
+    "donation": {
+        "bank": "BRI",
+        "accountNumber": "6163-01-030475-53-0",
+        "accountName": "Moh. Zaenal Arifin",
+        "donationLink": "http://Linktr.ee/donasi.alqudwahblitar"
+    },
+    "contact": "https://wa.me/6281357112296",
+    "dua": "Semoga Allah memudahkan langkah kita untuk menghadiri majelis ilmu dan membaguskan bacaan Al-Qur'an karena Allah 🤲🏻",
+    "liveLink": "",
+    "confirmation": {
+        "text": "Konfirmasi ke: 0813 5711 2296"
+    }
+},
+{
+    "name": "Kajian Kamis Ke_2 dan 4 Kota Blitar",
+    "topic": "Khulashah Ta'zhim al Ilmi - Ringkasan Pengagungan Ilmu",
+    "speaker": "Ustadz Arif Darmawan حفظه الله",
+    "position": "Staf Pengajar Ma'had Al Qudwah Sambi, Kediri",
+    "date": "Kamis",
+    "keterangan": "",
+    "time": "Ba'da Maghrib - selesai",
+    "location": {
+        "name": "Mushola TK/SD DINUNA",
+        "description": "Jl. Kiai Arfan - Jatinom, Kec. Kanigoro, Kab. Blitar",
+        "mapsLink": "https://maps.app.goo.gl/zfkPF7EAp73EKMdS9",
+        "lat": -8.1265279,
+        "lng": 112.1755271
+    },
+    "donation": {
+        "bank": "Bank Muamalat",
+        "accountNumber": "7450000211",
+        "accountName": "Andhika Sulistiawan",
+        "donationLink": "http://Linktr.ee/donasi.alqudwahblitar"
+    },
+    "contact": "0823 3169 4062",
+    "dua": "Semoga Allah memberikan kita pemahaman yang lebih dalam tentang ilmu dan agama, serta memberikan kebaikan dalam setiap langkah kita.",
+    "liveLink": "",
+    "confirmation": {
+        "text": "Konfirmasi nama#alamat#jumlah# kirim ke 0823 3169 4062"
+    }
+},
+{
+    "name": "Kajian Kitab Al Kabaair - Dosa-Dosa Besar yang Dianggap Remeh",
+    "topic": "Kitab Al Kabaair - Dosa-Dosa Besar yang Dianggap Remeh",
+    "speaker": "Ustadz Ayyub Nofel Baya'syut حفظه الله",
+    "position": "Pemateri",
+    "date": "Rabu",
+    "keterangan": "Setiap Pekan",
+    "time": "Ba'da Maghrib - Selesai",
+    "location": {
+        "name": "Masjid Muhammad",
+        "description": "MTT Al Qudwah Tugurante",
+        "mapsLink": "https://maps.app.goo.gl/5krG4qcvMhJGBvqg9",
+        "lat": -8.090052,
+        "lng": 112.1102272
+    },
+    "donation": {
+        "bank": "Linktr.ee",
+        "accountNumber": "",
+        "accountName": "Al Qudwah Blitar",
+        "donationLink": "http://Linktr.ee/donasi.alqudwahblitar"
+    },
+    "contact": "t.me/alqudwahalatsariyyah",
+    "dua": "Semoga Allah memudahkan kita untuk menjauhi dosa besar dan memberikan hidayah dalam setiap langkah kita.",
+    "liveLink": "http://t.me/alqudwahalatsariyyah",
+    "confirmation": {
+        "text": "Sebarkan ke teman-teman untuk mendapatkan pahala jariyah"
+    }
+},
+{
+    "name": "Majlis Taklim Firqotun Najiyah",
+    "topic": "Kitab Riyadhus Shalihin",
+    "speaker": "Ustadz Ayyub Nofel Baya'syut حفظه الله",
+    "position": "Pemateri",
+    "date": "Selasa",
+    "keterangan": "10 Desember 2024",
+    "time": "Ba'da Sholat Maghrib - Selesai",
+    "location": {
+        "name": "Mushola Al Ikhram",
+        "description": "Tempat majlis taklim di Mushola Al Ikhram, Blitar. Bagi yang membawa mobil, parkir di halaman depan rumah sisi utara Mushola.",
+        "mapsLink": "https://maps.app.goo.gl/eKZK3nfbpg9rcTGL9",
+        "lat": -8.0953845,
+        "lng": 112.169064
+    },
+    "donation": {
+        "bank": "",
+        "accountNumber": "",
+        "accountName": "",
+        "donationLink": ""
+    },
+    "contact": "",
+    "dua": "Semoga Allah Azza wa Jalla memudahkan langkah kita untuk menghadiri majlis ilmu... Aamiin",
+    "liveLink": "",
+    "confirmation": {
+        "text": "Ikatlah Ilmu dengan Mencatat. Usahakan Hadir Tepat Waktu"
+    }
+},
+{
+    "name": "Kajian Tafsir Al-Qur'an",
+    "topic": "Tafsir Al-Qur'an Juz 28 - Tafsir As Sa'dy",
+    "speaker": "Ustadz Abu Haitsam Iqbal حفظه الله",
+    "position": "Staff Pengajar Ma'had Imam Asy Syafi'i Blitar",
+    "date": "Selasa",
+    "keterangan": "",
+    "time": "Ba'da Maghrib",
+    "location": {
+        "name": "Masjid Muhammad",
+        "description": "MTT Al Qudwah Tugurante",
+        "mapsLink": "https://maps.app.goo.gl/5krG4qcvMhJGBvqg9",
+        "lat": -8.090052,
+        "lng": 112.1102272
+    },
+    "donation": {
+        "bank": "",
+        "accountNumber": "",
+        "accountName": "",
+        "donationLink": "http://Linktr.ee/donasi.alqudwahblitar"
+    },
+    "contact": "",
+    "dua": "Semoga Allah Azza wa Jalla memudahkan langkah kita untuk menghadiri majlis ilmu... Aamiin",
+    "liveLink": "t.me/alqudwahalatsariyyah",
+    "confirmation": {
+        "text": "Usahakan hadir tepat waktu dan ikatlah ilmu dengan mencatat."
+    }
+},
+{
+    "name": "Kajian Rutin Ahad Pagi",
+    "topic": "Pohon Keimanan",
+    "speaker": "Ustadz Anwar Zaen حفظه الله",
+    "position": "",
+    "date": "Ahad",
+    "keterangan": "",
+    "time": "07.00 - 08.30",
+    "location": {
+        "name": "Saung Gunung Gamping",
+        "description": "Lokasi kajian di perbatasan Blitar - Tulung Agung, tempat yang nyaman dan terbuka untuk umum.",
+        "mapsLink": "https://maps.app.goo.gl/TKdRbukX67vtByJEA",
+        "lat": -8.127514,
+        "lng": 112.120145
+    },
+    "donation": {
+        "bank": "Bank BSI",
+        "accountNumber": "7131454192",
+        "accountName": "Anam Saiful Mu'arif",
+        "donationLink": ""
+    },
+    "contact": "https://wa.me/6285648415346",
+    "dua": "Semoga Allah Azza wa Jalla memudahkan langkah kita untuk menghadiri majlis ilmu... Aamiin",
+    "liveLink": "https://www.facebook.com/yayasan.imamsyafiie.blitar",
+    "confirmation": {
+        "text": "Dukung dakwah kami dengan taawun donasi."
+    }
+},
+{
+        "name": "Kajian Kitab Kun Salafiyyan 'Alal Jaddati",
+        "topic": "Kitab Kun Salafiyyan 'Alal Jaddati",
+        "speaker": "Ustadz M. Anwar Samuri, Lc حفظه الله",
+        "position": "",
+        "date": "Ahad",
+        "keterangan": "07.30 WIB - Selesai",
+        "time": "07.30 WIB - Selesai",
+        "location": {
+            "name": "Masjid At-Taqwa Sanggrahan",
+            "description": "Masjid At-Taqwa Sanggrahan, tempat kajian yang terbuka untuk umum.",
+            "mapsLink": "https://maps.app.goo.gl/FSAmwdWWDwK7mimP8",
+            "lat": -8.160525,
+            "lng": 112.367884
+        },
+        "donation": {
+            "bank": "BSI (451)",
+            "accountNumber": "7253333612",
+            "accountName": "Yayasan Sanggrahan Tunas Mulia",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6282228607398",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": "Kajian untuk umum."
+        }
+    },
+    {
+        "name": "Kajian Nahwu & Shorof, Durusul Lughoh Al-Arobiyyati",
+        "topic": "Nahwu & Shorof, Durusul Lughoh Al-Arobiyyati",
+        "speaker": "Ustadz Rahmad Susanto حفظه الله",
+        "position": "",
+        "date": "Selasa",
+        "keterangan": "Kajian mengenai Nahwu & Shorof dan Durusul Lughoh Al-Arobiyyati.",
+        "time": "16.30 WIB - Selesai",
+        "location": {
+            "name": "Masjid At-Taqwa Sanggrahan",
+            "description": "Masjid At-Taqwa Sanggrahan, tempat kajian yang terbuka untuk umum.",
+            "mapsLink": "https://maps.app.goo.gl/FSAmwdWWDwK7mimP8",
+            "lat": -8.160525,
+            "lng": 112.367884
+        },
+        "donation": {
+            "bank": "BSI (451)",
+            "accountNumber": "7253333612",
+            "accountName": "Yayasan Sanggrahan Tunas Mulia",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6282228607398",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": "Kajian untuk umum."
+        }
+    },
+    {
+        "name": "Kajian Al Mumti' Syarah Al Jurumiyyah",
+        "topic": "Al Mumti' Syarah Al Jurumiyyah",
+        "speaker": "Ustadz Rahmad Susanto حفظه الله",
+        "position": "",
+        "date": "Selasa",
+        "keterangan": "Kajian mengenai Al Mumti' Syarah Al Jurumiyyah.",
+        "time": "Ba'da Maghrib",
+        "location": {
+            "name": "Masjid At-Taqwa Sanggrahan",
+            "description": "Masjid At-Taqwa Sanggrahan, tempat kajian yang terbuka untuk umum.",
+            "mapsLink": "https://maps.app.goo.gl/FSAmwdWWDwK7mimP8",
+            "lat": -8.160525,
+            "lng": 112.367884
+        },
+        "donation": {
+            "bank": "BSI (451)",
+            "accountNumber": "7253333612",
+            "accountName": "Yayasan Sanggrahan Tunas Mulia",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6282228607398",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": "Kajian untuk umum."
+        }
+    },
+    {
+        "name": "Kajian Kitab Fiqih Shalat",
+        "topic": "Kitab Fiqih Shalat",
+        "speaker": "Ustadz Abdullah bin Hamzah حفظه الله",
+        "position": "",
+        "date": "Kamis",
+        "keterangan": "Kajian mengenai Kitab Fiqih Shalat.",
+        "time": "Ba'da Maghrib",
+        "location": {
+            "name": "Masjid At-Taqwa Sanggrahan",
+            "description": "Masjid At-Taqwa Sanggrahan, tempat kajian yang terbuka untuk umum.",
+            "mapsLink": "https://maps.app.goo.gl/FSAmwdWWDwK7mimP8",
+            "lat": -8.160525,
+            "lng": 112.367884
+        },
+        "donation": {
+           "bank": "BSI (451)",
+            "accountNumber": "7253333612",
+            "accountName": "Yayasan Sanggrahan Tunas Mulia",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6282228607398",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": "Kajian untuk umum."
+        }
+    },
+    {
+        "name": "Kajian Kitab Tafsir Al-Quran, Tafsir Al-Baghowi",
+        "topic": "Kitab Tafsir Al-Quran, Tafsir Al-Baghowi",
+        "speaker": "Ustadz Izzu Abdil Barr حفظه الله",
+        "position": "",
+        "date": "Kamis",
+        "keterangan": "Kajian mengenai Tafsir Al-Quran dan Tafsir Al-Baghowi.",
+        "time": "Ba'da Maghrib",
+        "location": {
+            "name": "Masjid At-Taqwa Sanggrahan",
+            "description": "Masjid At-Taqwa Sanggrahan, tempat kajian yang terbuka untuk umum.",
+            "mapsLink": "https://maps.app.goo.gl/FSAmwdWWDwK7mimP8",
+            "lat": -8.160525,
+            "lng": 112.367884
+        },
+        "donation": {
+            "bank": "BSI (451)",
+            "accountNumber": "7253333612",
+            "accountName": "Yayasan Sanggrahan Tunas Mulia",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6282228607398",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": "Kajian untuk umum."
+        }
+    },
+    {
+        "name": "Kajian Kitab Ianatul Mustafiid, Syarah Kitabut Tauhid",
+        "topic": "Kitab Ianatul Mustafiid, Syarah Kitabut Tauhid",
+        "speaker": "Ustadz Ayyub Nofel Baya'syut حفظه الله",
+        "position": "",
+        "date": "Sabtu",
+        "keterangan": "Kajian mengenai Kitab Ianatul Mustafiid dan Syarah Kitabut Tauhid.",
+        "time": "Ba'da Maghrib",
+        "location": {
+            "name": "Masjid At-Taqwa Sanggrahan",
+            "description": "Masjid At-Taqwa Sanggrahan, tempat kajian yang terbuka untuk umum.",
+            "mapsLink": "https://maps.app.goo.gl/FSAmwdWWDwK7mimP8",
+            "lat": -8.160525,
+            "lng": 112.367884
+        },
+        "donation": {
+            "bank": "BSI (451)",
+            "accountNumber": "7253333612",
+            "accountName": "Yayasan Sanggrahan Tunas Mulia",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6282228607398",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": "Kajian untuk umum."
+        }
+    },
+    {
+        "name": "Kajian Kitab Al-Kabair",
+        "topic": "Kitab Al-Kabair",
+        "speaker": "Ustadz Ayyub Nofel Baya'syut حفظه الله",
+        "position": "",
+        "date": "Sabtu",
+        "keterangan": "Setiap Pekan.",
+        "time": "Ba'da Maghrib",
+        "location": {
+            "name": "Masjid At-Taqwa Sanggrahan",
+            "description": "Masjid At-Taqwa Sanggrahan, tempat kajian yang terbuka untuk umum.",
+            "mapsLink": "https://maps.app.goo.gl/FSAmwdWWDwK7mimP8",
+            "lat": -8.160525,
+            "lng": 112.367884
+        },
+        "donation": {
+            "bank": "BSI (451)",
+            "accountNumber": "7253333612",
+            "accountName": "Yayasan Sanggrahan Tunas Mulia",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6282228607398",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": "Kajian untuk umum."
+        }
+    },
+    {
+        "name": "Kajian Tahsin Al-Quran",
+        "topic": "Tahsin Al-Quran",
+        "speaker": "Ustadz Abdul Hadi Karaman حفظه الله",
+        "position": "",
+        "date": "Sabtu",
+        "keterangan": "Setiap Pekan.",
+        "time": "Ba'da Ashar",
+        "location": {
+            "name": "Masjid At-Taqwa Sanggrahan",
+            "description": "Masjid At-Taqwa Sanggrahan, tempat kajian yang terbuka untuk umum.",
+            "mapsLink": "https://maps.app.goo.gl/FSAmwdWWDwK7mimP8",
+            "lat": -8.160525,
+            "lng": 112.367884
+        },
+        "donation": {
+            "bank": "BSI (451)",
+            "accountNumber": "7253333612",
+            "accountName": "Yayasan Sanggrahan Tunas Mulia",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6282228607398",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": "Kajian untuk ikhwan."
+        }
+    },
+    {
+    "name": "Kajian Rutin Shahih Bukhari",
+    "topic": "Shahih Bukhari",
+    "speaker": "Ustadz Abu Haitsam Iqbal حفظه الله",
+    "position": "Pemateri",
+    "date": "Rabu",
+    "keterangan": "Setiap Pekan in Syaa Allah",
+    "time": "Ba'da Maghrib - Selesai",
+    "location": {
+        "name": "Masjid Cahaya Tauhid",
+        "description": "Sukorejo, Bumirejo",
+        "mapsLink": "https://maps.app.goo.gl/C3cSwibfD8W2fLar9",
+        "lat": -8.0682905,
+        "lng": 112.4144563
+    },
+    "donation": {
+        "bank": "BRI (002)",
+        "accountNumber": "6158-01-018538-53-7",
+        "accountName": "Wasit Hardono",
+        "donationLink": ""
+    },
+    "contact": "https://wa.me/6285708497139",
+    "dua": "",
+    "liveLink": "",
+    "confirmation": {
+        "text": ""
+    }
+},
+{
+    "name": "Kajian Rutin Mukhtashor Fiqhil Islami",
+    "topic": "Mukhtashor Fiqhil Islami",
+    "speaker": "Ustadz Ayyub Nofel Baya'syut حفظه الله",
+    "position": "Pemateri",
+    "date": "Jum'at",
+    "keterangan": "Pekan ke-2 dan ke-4",
+    "time": "Ba'da Maghrib - Selesai",
+    "location": {
+        "name": "Masjid Cahaya Tauhid",
+        "description": "Sukorejo, Bumirejo",
+        "mapsLink": "https://maps.app.goo.gl/C3cSwibfD8W2fLar9",
+        "lat": -8.0682905,
+        "lng": 112.4144563
+    },
+    "donation": {
+        "bank": "BRI (002)",
+        "accountNumber": "6158-01-018538-53-7",
+        "accountName": "Wasit Hardono",
+        "donationLink": ""
+    },
+    "contact": "https://wa.me/6285708497139",
+    "dua": "",
+    "liveLink": "",
+    "confirmation": {
+        "text": ""
+    }
+},
+{
+        "name": "Kajian Rutin Arbain Nawawi",
+        "topic": "Kitab Arbain Nawawi",
+        "speaker": "Ustadz Ayyub Nofel Baya'syut حفظه الله",
+        "position": "Pemateri",
+        "date": "Jumat",
+        "keterangan": "Kajian umum pekan ke-1 & ke-3",
+        "time": "Ba'da Maghrib - Selesai",
+        "location": {
+            "name": "Rumah Belajar Imam Syafi'i Kendalrejo",
+            "description": "Kendalrejo, Talun, Kab. Blitar",
+            "mapsLink": "https://maps.app.goo.gl/Zh2SdvSTFppsEVgSA",
+            "lat": -8.0824895,
+            "lng": 112.251157
+        },
+        "donation": {
+            "bank": "BCA",
+            "accountNumber": "0902435679",
+            "accountName": "Wahyudi",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/62818055408236",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": ""
+        }
+    },
+    {
+        "name": "Kajian Rutin Khudz Aqidataka",
+        "topic": "Kitab Khudz Aqidataka",
+        "speaker": "Ustadz Abu Haitsam Iqbal حفظه الله",
+        "position": "Pemateri",
+        "date": "Sabtu",
+        "keterangan": "Kajian umum Pekan ke-2 & ke-4",
+        "time": "Ba'da Maghrib - Selesai",
+        "location": {
+            "name": "Rumah Belajar Imam Syafi'i Kendalrejo",
+            "description": "Kendalrejo, Talun, Kab. Blitar",
+            "mapsLink": "https://maps.app.goo.gl/Zh2SdvSTFppsEVgSA",
+            "lat": -8.0824895,
+            "lng": 112.251157
+        },
+        "donation": {
+            "bank": "BCA",
+            "accountNumber": "0902435679",
+            "accountName": "Wahyudi",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/62818055408236",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": ""
+        }
+    },
+    {
+        "name": "Tahsin Al-Qur'an Ikhwan",
+        "topic": "Tahsin Al-Qur'an Ikhwan",
+        "speaker": "Ustadz Mohammad Zaenal Arifin حفظه الله",
+        "position": "Pemateri",
+        "date": "Jumat",
+        "keterangan": "Pekan ke-2 & ke-4 Khusus ikhwan",
+        "time": "Ba'da Maghrib - Selesai",
+        "location": {
+            "name": "Rumah Belajar Imam Syafi'i Kendalrejo",
+            "description": "Kendalrejo, Talun, Kab. Blitar",
+            "mapsLink": "https://maps.app.goo.gl/Zh2SdvSTFppsEVgSA",
+            "lat": -8.0824895,
+            "lng": 112.251157
+        },
+        "donation": {
+            "bank": "BCA",
+            "accountNumber": "0902435679",
+            "accountName": "Wahyudi",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/62818055408236",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": ""
+        }
+    },
+    {
+        "name": "Pelatihan Bahasa Arab Akhwat",
+        "topic": "Bahasa Arab Khusus Akhwat",
+        "speaker": "Ustadzah Ummu Haitsam حفظها الله",
+        "position": "Pemateri",
+        "date": "Jumat",
+        "keterangan": "Setiap Pekan",
+        "time": "15.30 - 17.00",
+        "location": {
+            "name": "Rumah Belajar Imam Syafi'i Kendalrejo",
+            "description": "Kendalrejo, Talun, Kab. Blitar",
+            "mapsLink": "https://maps.app.goo.gl/Zh2SdvSTFppsEVgSA",
+            "lat": -8.0824895,
+            "lng": 112.251157
+        },
+        "donation": {
+            "bank": "BCA",
+            "accountNumber": "0902435679",
+            "accountName": "Wahyudi",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6289696892791",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": ""
+        }
+    },
+    {
+        "name": "Tahsin Akhwat",
+        "topic": "Tahsin Al-Qur'an",
+        "speaker": "Ustadzah Ummu Uwais حفظها الله",
+        "position": "Pemateri",
+        "date": "Jumat",
+        "keterangan": "Setiap Pekan, Khusus akhwat",
+        "time": "13.30 - Selesai",
+        "location": {
+            "name": "Rumah Belajar Imam Syafi'i Kendalrejo",
+            "description": "Kendalrejo, Talun, Kab. Blitar",
+            "mapsLink": "https://maps.app.goo.gl/Zh2SdvSTFppsEVgSA",
+            "lat": -8.0824895,
+            "lng": 112.251157
+        },
+        "donation": {
+            "bank": "BCA",
+            "accountNumber": "0902435679",
+            "accountName": "Wahyudi",
+            "donationLink": ""
+        },
+        "contact": "https://wa.me/6289696892791",
+        "dua": "",
+        "liveLink": "",
+        "confirmation": {
+            "text": ""
+        }
+    }
+];
+      
+      
+
+        let markers = [];
+
+        function renderMarkers(events, showDetails = false) {
+            // Hapus semua marker dari peta
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            // Tambahkan marker baru berdasarkan acara yang difilter
+            events.forEach(event => {
+    const marker = L.marker([event.location.lat, event.location.lng]).addTo(map);
+
+    const popupContent = showDetails
+        ? `
+            <b>${event.name}</b>
+            <i>${event.topic}</i>
+            <div class="event-speaker">👤 ${event.speaker}</div>
+            <div class="event-date">📅 ${event.date} | ⏰ ${event.time} | ${event.keterangan}</div>
+            <div>🕌 ${event.location.name}</div>
+            <div>📍 ${event.location.description}</div>
+            <a href="${event.location.mapsLink}" target="_blank">Lihat di Maps</a>
+            <div class="donation-info">
+                💵 Donasi: 
+                <span>${event.donation.bank} ${event.donation.accountNumber}</span>
+            </div>
+            <small>${event.dua}</small>
+            <div>📞 <a href="${event.contact}" target="_blank">Hubungi</a></div>
+        `
+        : `
+            <b>${event.location.name}</b>
+            <div>📍 ${event.location.description}</div>
+            <a href="${event.location.mapsLink}" target="_blank">Lihat di Maps</a>
+        `;
+    marker.bindPopup(popupContent);
+    markers.push(marker);
+});
+        }
+
+        // Filter function
+        function filterEvents() {
+            const selectedUstadz = document.getElementById('filterUstadz').value;
+            const selectedHari = document.getElementById('filterHari').value;
+
+            const filtered = masjidEvents.filter(event => {
+                const ustadzMatch = selectedUstadz ? event.speaker === selectedUstadz : true;
+                const hariMatch = selectedHari ? event.date === selectedHari : true;
+                return ustadzMatch && hariMatch;
+            });
+
+            const showDetails = selectedUstadz || selectedHari;
+            renderMarkers(filtered, showDetails);
+        }
+
+        // Populate dropdowns
+        const ustadzDropdown = document.getElementById('filterUstadz');
+        const uniqueUstadz = [...new Set(masjidEvents.map(event => event.speaker))];
+        uniqueUstadz.forEach(ustadz => {
+            const option = document.createElement('option');
+            option.value = ustadz;
+            option.textContent = ustadz;
+            ustadzDropdown.appendChild(option);
+        });
+
+        // Event listeners for filters
+        document.getElementById('filterUstadz').addEventListener('change', filterEvents);
+        document.getElementById('filterHari').addEventListener('change', filterEvents);
+
+        // Initial render
+        renderMarkers(masjidEvents);
+          // Prevent keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.keyCode == 123) { // Prevent Ctrl+key and F12
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Prevent right click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    </script>
+</body>
+</html>
+
+

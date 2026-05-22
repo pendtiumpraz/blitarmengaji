@@ -108,6 +108,96 @@ export async function createSchedule(formData: FormData): Promise<void> {
   redirect("/kelola/jadwal");
 }
 
+const updateSchema = z.object({
+  id: z.string().uuid("ID jadwal tidak valid."),
+  titikDakwahId: z.string().uuid("Titik dakwah wajib dipilih."),
+  kajianId: z.string().uuid("ID kajian tidak valid.").optional(),
+  title: z.string().trim().min(3, "Judul jadwal minimal 3 karakter.").max(255),
+  startAt: z.coerce.date({ message: "Tanggal & jam mulai tidak valid." }),
+  isOnline: z.boolean(),
+  streamUrl: z.string().trim().url("Link streaming tidak valid.").optional(),
+  status: z.enum(["scheduled", "ongoing", "done", "cancelled"], {
+    message: "Status jadwal tidak valid.",
+  }),
+});
+
+/**
+ * Ubah jadwal kajian yang sudah ada. Cek RBAC (jadwal.manage) atau ownership
+ * (titik.manage_own): jadwal lama DAN titik tujuan harus milik user.
+ */
+export async function updateSchedule(formData: FormData): Promise<void> {
+  const allowedAll = await can("jadwal.manage");
+  const userId = (await auth())?.user?.id ?? null;
+
+  // Bila bukan pengelola penuh, butuh permission titik.manage_own.
+  if (!allowedAll && !(await can("titik.manage_own"))) {
+    throw new Error("Akses ditolak: butuh permission 'jadwal.manage' atau 'titik.manage_own'.");
+  }
+
+  const parsed = updateSchema.safeParse({
+    id: opt(formData.get("id")),
+    titikDakwahId: opt(formData.get("titikDakwahId")),
+    kajianId: opt(formData.get("kajianId")),
+    title: opt(formData.get("title")),
+    startAt: opt(formData.get("startAt")),
+    isOnline: formData.get("isOnline") === "on" || formData.get("isOnline") === "true",
+    streamUrl: opt(formData.get("streamUrl")),
+    status: opt(formData.get("status")),
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Data jadwal tidak valid.");
+  }
+  const data = parsed.data;
+
+  // Ownership (kecuali pengelola penuh): jadwal lama harus terikat ke titik milik
+  // user, DAN titik tujuan (yang baru) juga harus milik user.
+  if (!allowedAll) {
+    const rows = await db
+      .select({ ownerUserId: titikDakwah.ownerUserId })
+      .from(kajianSchedules)
+      .leftJoin(titikDakwah, eq(kajianSchedules.titikDakwahId, titikDakwah.id))
+      .where(and(eq(kajianSchedules.id, data.id), isNull(kajianSchedules.deletedAt)))
+      .limit(1);
+    if (!rows[0] || !userId || rows[0].ownerUserId !== userId) {
+      throw new Error("Akses ditolak: Anda hanya bisa mengubah jadwal titik milik sendiri.");
+    }
+    await assertOwnsTitik(data.titikDakwahId, userId);
+  }
+
+  // Bila kajian dipilih, pastikan kajian aktif & terikat ke titik yang sama.
+  if (data.kajianId) {
+    const krows = await db
+      .select({ titikDakwahId: kajian.titikDakwahId })
+      .from(kajian)
+      .where(and(eq(kajian.id, data.kajianId), isNull(kajian.deletedAt)))
+      .limit(1);
+    if (!krows[0]) throw new Error("Kajian tidak ditemukan.");
+    if (krows[0].titikDakwahId && krows[0].titikDakwahId !== data.titikDakwahId) {
+      throw new Error("Kajian yang dipilih bukan milik titik tersebut.");
+    }
+  }
+
+  await db
+    .update(kajianSchedules)
+    .set({
+      titikDakwahId: data.titikDakwahId,
+      kajianId: data.kajianId ?? null,
+      title: data.title,
+      startAt: data.startAt,
+      isOnline: data.isOnline,
+      streamUrl: data.isOnline ? data.streamUrl ?? null : null,
+      status: data.status,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(kajianSchedules.id, data.id), isNull(kajianSchedules.deletedAt)));
+
+  revalidatePath("/kelola/jadwal");
+  revalidatePath("/kelola");
+  revalidatePath("/jadwal");
+  redirect("/kelola/jadwal");
+}
+
 const deleteSchema = z.object({
   id: z.string().uuid("ID jadwal tidak valid."),
 });
