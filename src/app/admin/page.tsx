@@ -1,7 +1,15 @@
 import { count } from "drizzle-orm";
-import { Users, ShieldCheck, KeyRound, Palette } from "lucide-react";
+import { Users, ShieldCheck, KeyRound, Palette, FileDown } from "lucide-react";
 import { db, schema } from "@/lib/db";
 import { Card } from "@/components/ui/card";
+
+const DOCS: { label: string; href: string; note: string }[] = [
+  { label: "Panduan Pengguna", href: "/api/guide/user", note: "Untuk jamaah — cara pakai platform" },
+  { label: "Panduan Admin", href: "/api/guide/admin", note: "Operasional panel admin" },
+  { label: "Panduan Partner Usaha", href: "/api/guide/partner", note: "Daftar partner, lapak, promo" },
+  { label: "Daftar Akun Ustadz", href: "/api/guide/akun-ustadz", note: "Kredensial login ustadz" },
+  { label: "Daftar Akun Titik", href: "/api/guide/akun-titik", note: "Kredensial pengelola titik" },
+];
 
 export default async function AdminDashboard() {
   // Baca data nyata dari Neon (membuktikan koneksi DB + RBAC seed).
@@ -43,6 +51,32 @@ export default async function AdminDashboard() {
           Skema sudah ter-migrasi & ter-seed di Neon. Modul-modul (Kajian, Keuangan, Donasi, RBAC, dst) tinggal disambung
           ke server action untuk CRUD nyata. Login & guard admin sudah berbasis sesi + permission.
         </p>
+      </Card>
+
+      <Card className="mt-6 p-6">
+        <h2 className="display flex items-center gap-2 text-lg text-ink">
+          <FileDown className="h-5 w-5 text-brand-600" /> Panduan & Dokumen (PDF)
+        </h2>
+        <p className="mt-1 text-sm text-muted">
+          Dokumen berdesain untuk diunduh/cetak. Daftar akun memuat kredensial — hanya admin.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {DOCS.map((d) => (
+            <a
+              key={d.href}
+              href={d.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 rounded-sm border border-line bg-cream p-3 transition-colors hover:border-brand-600 hover:bg-brand-50"
+            >
+              <FileDown className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
+              <span>
+                <span className="block text-sm font-bold text-ink">{d.label}</span>
+                <span className="block text-xs text-muted">{d.note}</span>
+              </span>
+            </a>
+          ))}
+        </div>
       </Card>
     </div>
   );
