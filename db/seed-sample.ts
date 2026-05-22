@@ -24,6 +24,18 @@ const slugify = (s: string) =>
   s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").slice(0, 60) || "x";
 const genPw = () => "bm-" + crypto.randomBytes(3).toString("hex");
 
+// Enkripsi AES-256-GCM (sama dgn src/lib/storage.ts) — simpan kredensial di DB utk produksi.
+function encKey(): Buffer {
+  const hex = (process.env.STORAGE_ENC_KEY ?? "").padEnd(64, "0").slice(0, 64);
+  return Buffer.from(hex, "hex");
+}
+function encryptStr(plain: string): { ciphertext: string; iv: string; tag: string } {
+  const iv = crypto.randomBytes(12);
+  const c = crypto.createCipheriv("aes-256-gcm", encKey(), iv);
+  const ct = Buffer.concat([c.update(plain, "utf8"), c.final()]);
+  return { ciphertext: ct.toString("base64"), iv: iv.toString("base64"), tag: c.getAuthTag().toString("base64") };
+}
+
 const DAY: Record<string, number> = { minggu: 0, ahad: 0, senin: 1, selasa: 2, rabu: 3, kamis: 4, "jum'at": 5, jumat: 5, sabtu: 6 };
 function nextDate(dayName: string, hour: number): Date {
   const target = DAY[dayName.toLowerCase()] ?? 2;
@@ -181,8 +193,15 @@ async function main() {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "sample-credentials.json"), JSON.stringify(creds, null, 2));
 
+  // Simpan terenkripsi ke DB → PDF akun bisa diakses di produksi (tanpa file lokal).
+  const enc = encryptStr(JSON.stringify(creds));
+  await db
+    .insert(schema.settings)
+    .values({ key: "sample_credentials", valueJson: enc })
+    .onConflictDoUpdate({ target: schema.settings.key, set: { valueJson: enc, updatedAt: new Date() } });
+
   console.log(`Selesai: ${TITIK.length} titik (+akun), ${USTADZ.length} ustadz (+akun), ${KAJIAN.length} kajian.`);
-  console.log(`Kredensial → data/sample-credentials.json`);
+  console.log(`Kredensial → data/sample-credentials.json + DB (settings.sample_credentials, terenkripsi)`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
