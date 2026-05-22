@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -33,8 +34,8 @@ export function SiteMobileNav({ nav }: { nav: [string, string][] }) {
         <Menu className="h-6 w-6" />
       </button>
 
-      {open ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
+      {open && typeof document !== "undefined" ? createPortal(
+        <div className="fixed inset-0 z-[100] lg:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} aria-hidden />
           <aside className="absolute right-0 top-0 h-full w-72 max-w-[82vw] overflow-y-auto bg-cream shadow-2xl">
             <div className="flex items-center justify-between border-b border-line p-4">
@@ -72,8 +73,10 @@ export function SiteMobileNav({ nav }: { nav: [string, string][] }) {
               </Link>
             </nav>
           </aside>
-        </div>
-      ) : null}
+        </div>,
+          document.body,
+        )
+        : null}
     </>
   );
 }

@@ -27,11 +27,11 @@ export async function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-cream/85 backdrop-blur">
       <Container className="flex h-[72px] items-center gap-6">
-        <Link href="/" className="flex items-center gap-3">
-          <Crest className="h-10 w-10" />
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          <Crest className="h-9 w-9 sm:h-10 sm:w-10" />
           <span className="leading-none">
-            <b className="font-kufi block text-[18px] tracking-wide text-brand-600">Blitar Mengaji</b>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">Majelis Ilmu Blitar Raya</span>
+            <b className="font-kufi block whitespace-nowrap text-[17px] tracking-wide text-brand-600 sm:text-[18px]">Blitar Mengaji</b>
+            <span className="hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-muted sm:block">Majelis Ilmu Blitar Raya</span>
           </span>
         </Link>
         <nav aria-label="Navigasi utama" className="ml-auto hidden gap-7 text-[13px] font-semibold uppercase tracking-wide text-ink/70 lg:flex">
