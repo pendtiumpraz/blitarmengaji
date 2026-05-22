@@ -30,3 +30,10 @@ tsconfig.tsbuildinfo
 
 # kredensial seed sample (berisi password plaintext)
 data/sample-credentials.json
+
+# Android TWA build (keystore & output — jangan commit)
+android-keystore.jks
+*.keystore
+*.apk
+*.aab
+/app

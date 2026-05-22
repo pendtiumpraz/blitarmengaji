@@ -1,7 +1,7 @@
 {
   "packageId": "com.blitarmengaji.twa",
-  "host": "GANTI-DENGAN-DOMAIN-ANDA.vercel.app",
-  "name": "Blitar Mengaji",
+  "host": "blitarmengaji.vercel.app",
+  "name": "Blitar Mengaji — Majelis Ilmu Blitar Raya",
   "launcherName": "Blitar Mengaji",
   "display": "standalone",
   "orientation": "portrait",
@@ -9,20 +9,24 @@
   "themeColorDark": "#0E5C46",
   "navigationColor": "#0E5C46",
   "navigationColorDark": "#0E5C46",
+  "navigationDividerColor": "#0E5C46",
+  "navigationDividerColorDark": "#0E5C46",
   "backgroundColor": "#F4EEE1",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/icon-512.png",
-  "maskableIconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/maskable-512.png",
+  "iconUrl": "https://blitarmengaji.vercel.app/icons/icon-512.png",
+  "maskableIconUrl": "https://blitarmengaji.vercel.app/icons/maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
   "appVersionName": "1.0.0",
   "appVersionCode": 1,
   "shortcuts": [
-    { "name": "Jadwal", "url": "/jadwal", "iconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/icon-192.png" },
-    { "name": "Peta", "url": "/peta", "iconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/icon-192.png" },
-    { "name": "Tanya AI", "url": "/tanya-ai", "iconUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/icons/icon-192.png" }
+    { "name": "Jadwal Kajian", "shortName": "Jadwal", "url": "/jadwal", "chosenIconUrl": "https://blitarmengaji.vercel.app/icons/icon-192.png" },
+    { "name": "Peta Dakwah", "shortName": "Peta", "url": "/peta", "chosenIconUrl": "https://blitarmengaji.vercel.app/icons/icon-192.png" }
   ],
-  "signingKey": { "path": "./android.keystore", "alias": "blitarmengaji" },
+  "signingKey": { "path": "./android-keystore.jks", "alias": "blitarmengaji" },
   "fallbackType": "customtabs",
-  "features": {},
-  "webManifestUrl": "https://GANTI-DENGAN-DOMAIN-ANDA.vercel.app/manifest.webmanifest"
+  "enableSiteSettingsShortcut": true,
+  "fullScopeUrl": "https://blitarmengaji.vercel.app/",
+  "minSdkVersion": 21,
+  "webManifestUrl": "https://blitarmengaji.vercel.app/manifest.webmanifest"
 }
