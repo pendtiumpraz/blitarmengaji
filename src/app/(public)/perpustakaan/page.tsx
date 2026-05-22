@@ -1,4 +1,5 @@
-import { Download, FileText, Library } from "lucide-react";
+import Link from "next/link";
+import { Download, FileText, Library, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
@@ -97,16 +98,22 @@ export default async function PerpustakaanPage() {
                         <Download className="h-3 w-3" /> {formatDownloads(doc.downloads)}
                       </span>
                     </div>
-                    {/* Anchor langsung ke pdf_url (Vercel Blob) — buka/unduh PDF. */}
-                    <a
-                      href={doc.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
-                      className="mt-3 inline-flex h-9 items-center justify-center gap-2 self-start rounded-full bg-brand-50 px-4 text-xs font-bold tracking-[0.01em] text-brand-700 transition-colors hover:bg-brand-100"
-                    >
-                      <Download className="h-3.5 w-3.5" /> Unduh
-                    </a>
+                    {/* Baca (viewer in-app) + Unduh */}
+                    <div className="mt-3 flex items-center gap-2">
+                      <Link
+                        href={`/perpustakaan/baca?url=${encodeURIComponent(doc.pdfUrl)}&judul=${encodeURIComponent(doc.title)}`}
+                        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-brand-600 px-4 text-xs font-bold tracking-[0.01em] text-white transition-colors hover:bg-brand-700"
+                      >
+                        <BookOpen className="h-3.5 w-3.5" /> Baca
+                      </Link>
+                      <a
+                        href={doc.pdfUrl}
+                        download
+                        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-brand-50 px-4 text-xs font-bold tracking-[0.01em] text-brand-700 transition-colors hover:bg-brand-100"
+                      >
+                        <Download className="h-3.5 w-3.5" /> Unduh
+                      </a>
+                    </div>
                   </div>
                 </Card>
               );
