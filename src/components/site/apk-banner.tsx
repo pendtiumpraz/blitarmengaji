@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X, Download, Smartphone } from "lucide-react";
+import { APK_DOWNLOAD_URL } from "@/lib/apk";
 
 /**
  * Banner ajakan unduh APK.
@@ -16,7 +17,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function ApkBanner() {
   const [show, setShow] = useState(false);
-  const apkUrl = process.env.NEXT_PUBLIC_APK_URL || "/unduh-apk";
+  const apkUrl = APK_DOWNLOAD_URL;
   const isFile = apkUrl.toLowerCase().endsWith(".apk");
 
   useEffect(() => {

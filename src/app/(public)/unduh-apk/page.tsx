@@ -2,11 +2,12 @@ import { Smartphone, Download, ShieldCheck, Globe } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Card } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { APK_DOWNLOAD_URL } from "@/lib/apk";
 
 export const metadata = { title: "Unduh Aplikasi (APK)" };
 
 export default function UnduhApkPage() {
-  const apkUrl = process.env.NEXT_PUBLIC_APK_URL;
+  const apkUrl = APK_DOWNLOAD_URL;
 
   const steps = [
     "Ketuk tombol Unduh APK di atas — berkas .apk akan tersimpan di HP.",

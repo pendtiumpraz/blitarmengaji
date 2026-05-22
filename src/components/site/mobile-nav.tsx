@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Download } from "lucide-react";
 import { Crest } from "@/components/Crest";
 import { cn } from "@/lib/cn";
+import { APK_DOWNLOAD_URL } from "@/lib/apk";
 
 /** Hamburger + drawer navigasi untuk layar < lg (menu utama disembunyikan di mobile). */
 export function SiteMobileNav({ nav }: { nav: [string, string][] }) {
@@ -71,6 +72,13 @@ export function SiteMobileNav({ nav }: { nav: [string, string][] }) {
               <Link href="/masuk" className="mt-2 rounded-sm bg-brand-600 px-4 py-3 text-center text-white">
                 Masuk
               </Link>
+              <a
+                href={APK_DOWNLOAD_URL}
+                download
+                className="mt-2 flex items-center justify-center gap-2 rounded-sm border border-brand-600 px-4 py-3 font-bold text-brand-700"
+              >
+                <Download className="h-4 w-4" /> Unduh APK
+              </a>
             </nav>
           </aside>
         </div>,
