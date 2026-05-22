@@ -27,3 +27,6 @@ npm-debug.log*
 
 # build artifact
 tsconfig.tsbuildinfo
+
+# kredensial seed sample (berisi password plaintext)
+data/sample-credentials.json

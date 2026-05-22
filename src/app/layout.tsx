@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
@@ -48,6 +50,9 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <PwaRegister />
+        <Suspense fallback={null}>
+          <Toaster />
+        </Suspense>
         {children}
       </body>
     </html>

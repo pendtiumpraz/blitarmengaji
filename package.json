@@ -15,6 +15,7 @@
     "db:seed:ai": "tsx db/seed-ai.ts",
     "db:seed:uat": "tsx db/seed-uat.ts",
     "db:unseed:uat": "tsx db/unseed-uat.ts",
+    "db:seed:sample": "tsx db/seed-sample.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-leaflet": "^5.0.0",
+    "sweetalert2": "^11.26.24",
     "zod": "latest"
   },
   "devDependencies": {
