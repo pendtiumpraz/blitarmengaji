@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import L from "leaflet";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 export type TitikMarker = {
@@ -36,6 +37,21 @@ function gmapsLink(m: TitikMarker): string {
   return m.gmapsUrl && m.gmapsUrl.trim() ? m.gmapsUrl : `https://www.google.com/maps?q=${m.lat},${m.lng}`;
 }
 
+/**
+ * Auto-zoom agar SEMUA marker masuk frame dengan padding (tidak mepet tepi).
+ * Hanya aktif bila ≥2 marker; untuk 0–1 marker, hormati center/zoom yang diberikan.
+ */
+function FitBounds({ markers }: { markers: TitikMarker[] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (markers.length < 2) return;
+    const bounds = L.latLngBounds(markers.map((m) => [m.lat, m.lng] as [number, number]));
+    if (!bounds.isValid()) return;
+    map.fitBounds(bounds, { padding: [56, 56], maxZoom: 14 });
+  }, [map, markers]);
+  return null;
+}
+
 export function MapView({
   markers,
   center,
@@ -55,6 +71,7 @@ export function MapView({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <FitBounds markers={markers} />
         {markers.map((m) => (
           <Marker key={m.slug} position={[m.lat, m.lng]} icon={titikIcon}>
             <Popup>
