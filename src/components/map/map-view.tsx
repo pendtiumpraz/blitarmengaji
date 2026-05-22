@@ -15,6 +15,8 @@ export type TitikMarker = {
   lng: number;
   /** Link Google Maps yang diinput pengelola (opsional). */
   gmapsUrl?: string;
+  /** Foto sampul/logo titik (opsional). */
+  image?: string;
 };
 
 /** Pusat default: Kota Blitar. */
@@ -75,7 +77,11 @@ export function MapView({
         {markers.map((m) => (
           <Marker key={m.slug} position={[m.lat, m.lng]} icon={titikIcon}>
             <Popup>
-              <div className="min-w-[160px] space-y-1">
+              <div className="min-w-[180px] space-y-1">
+                {m.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={m.image} alt={m.name} className="mb-1.5 h-20 w-full rounded object-cover" />
+                ) : null}
                 <p className="font-bold text-ink">{m.name}</p>
                 {m.kecamatan ? <p className="text-xs text-muted">{m.kecamatan}</p> : null}
                 {m.jadwal ? <p className="text-xs text-ink/80">{m.jadwal}</p> : null}
