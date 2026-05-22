@@ -9,21 +9,24 @@ Melayani umat Blitar Raya sejak **2019** — kini hadir dalam versi digital.
 ## ✨ Fitur
 
 - **Kajian & Jadwal** — info kajian per titik dakwah, jadwal rutin, rekaman & live (YouTube/Facebook).
-- **Peta Dakwah** — peta titik dakwah (Leaflet + OpenStreetMap), kunci lokasi via pin + tautan Google Maps.
+- **Peta Dakwah** — peta titik (Leaflet + OpenStreetMap), auto **fit-bounds**; pilih lokasi via **dropdown titik + tambah titik baru lewat mini-peta**; titik bisa **diaktif/nonaktifkan** tanpa hapus.
 - **Transparansi Keuangan** — pemasukan/pengeluaran per masjid & global, unduh **laporan PDF**.
 - **Donasi** — kampanye per titik dakwah, poster + target + progres, QRIS + konfirmasi WhatsApp, laporan penggunaan dana.
 - **Catatan/Blog** — transkrip kajian bergaya catatan.
 - **Perpustakaan** — pustaka PDF yang diunggah ustadz.
 - **Kelas Online** — kursus + modul + pelajaran (video/teks/PDF) + progres belajar.
-- **Event/Webinar** — info acara + pendaftaran.
+- **Event/Webinar** — info acara + pendaftaran, lokasi tertaut titik dakwah + **peta di halaman detail**.
 - **Lapak** — UMKM jamaah (maks 3 produk aktif/partner).
 - **Partner & Media Partner** — profil mitra usaha & media.
-- **Tanya Ustadz** — tanya jawab (penanya boleh "Hamba Allah").
+- **Tanya Ustadz** — tanya jawab publik **berpaginasi**; **wajib login** untuk bertanya (boleh tampil "Hamba Allah"); admin dapat menjawab, **menghapus**, & **menampilkan/menyembunyikan** dari halaman depan.
 - **Tanya AI** — asisten AI **multi-provider** (DeepSeek/OpenAI/Anthropic/Gemini/dll) dengan retrieval (RAG) + sitasi sumber.
+- **WA Ingest** — webhook penerima pesan grup WhatsApp (read-only) → AI mengekstrak info kajian & faedah → **antrian review admin** sebelum tayang (app listener desktop terpisah).
 - **RBAC dinamis** — peran & izin dapat dikonfigurasi; pendaftaran mandiri entitas (titik/ustadz/partner) + verifikasi admin.
 - **Dashboard** terpisah: Admin, Ustadz, dan Pengelola Entitas.
-- **Recycle Bin**, **Audit Log**, **Notifikasi** in-app.
-- **Tema** — 8 tema tampilan yang bisa dipilih pengguna.
+- **UX konsisten** — dialog konfirmasi **SweetAlert2**, notifikasi **toast** (sukses/error/peringatan), dan semua tabel admin punya **pencarian, filter, sorting, & pagination**.
+- **Panduan PDF berdesain** — panduan pengguna, admin, partner usaha + daftar akun ustadz & titik (kredensial, khusus admin) — di dashboard admin.
+- **Recycle Bin** (soft-delete + restore ~38 entitas), **Audit Log**, **Notifikasi** in-app.
+- **Tema** — 8 tema tampilan yang bisa dipilih pengguna; responsif penuh (sidebar/hamburger di mobile).
 - **PWA → APK** — installable, dukungan offline, siap dibungkus TWA jadi APK Android.
 
 ## 🧱 Tech Stack
@@ -37,6 +40,8 @@ Melayani umat Blitar Raya sejak **2019** — kini hadir dalam versi digital.
 | Storage | Vercel Blob (token terenkripsi AES-256-GCM per entitas) |
 | AI | Lapisan generik OpenAI-compatible (provider/model dikelola via DB) |
 | Peta | Leaflet + OpenStreetMap |
+| UI feedback | SweetAlert2 (dialog + toast), tabel data dengan search/filter/sort/pagination |
+| Dokumen | `@react-pdf/renderer` (laporan & panduan PDF berdesain) |
 | PWA | Web App Manifest + Service Worker + TWA (Bubblewrap) |
 
 ## 🚀 Mulai
@@ -61,6 +66,7 @@ cp .env.example .env.local   # lalu isi nilainya
 | `NEXTAUTH_URL` | `http://localhost:3000` (lokal) |
 | `BLOB_READ_WRITE_TOKEN` | Token Vercel Blob |
 | `STORAGE_ENC_KEY` | Hex 32 byte (64 char) — enkripsi token storage & API key AI |
+| `WA_WEBHOOK_SECRET` | Secret webhook WA Listener → `POST /api/wa/webhook` (samakan di app listener) |
 | `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` | Akun super admin awal (saat seed) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | (opsional) login Google |
 | `NEXT_PUBLIC_SITE_URL` | URL produksi (sitemap/robots/OG/TWA) |
@@ -77,7 +83,10 @@ npx drizzle-kit migrate          # terapkan ke Neon
 npm run db:seed                  # RBAC, menu, super admin, 8 tema
 npm run db:seed:ai               # provider & model AI terbaru
 npm run db:seed:uat              # (opsional) data contoh UAT  →  db:unseed:uat untuk hapus
+npm run db:seed:sample           # (opsional) data nyata Blitar: titik + ustadz + akun + kajian
 ```
+
+> `db:seed:sample` menulis kredensial akun ke `data/sample-credentials.json` (gitignored) — dipakai PDF "Daftar Akun".
 
 ### 5. Jalankan
 ```bash
@@ -93,7 +102,7 @@ Login admin memakai `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD`.
 | `typecheck` | `tsc --noEmit` |
 | `lint` | ESLint |
 | `db:generate` / `db:push` / `db:studio` | Drizzle Kit |
-| `db:seed` / `db:seed:ai` / `db:seed:uat` / `db:unseed:uat` | Seeding |
+| `db:seed` / `db:seed:ai` / `db:seed:uat` / `db:unseed:uat` / `db:seed:sample` | Seeding |
 
 ## 🗂️ Struktur Proyek
 
@@ -116,6 +125,22 @@ docs/               # brainstorm, rencana DB, design system, audit, QA, panduan 
 ## 📱 Build APK (TWA)
 
 PWA ini bisa dibungkus jadi APK Android via **Bubblewrap**. Langkah lengkap di **[docs/APK-BUILD-GUIDE.md](docs/APK-BUILD-GUIDE.md)** (butuh situs online HTTPS + Android SDK).
+
+## 📄 Panduan PDF (dalam aplikasi)
+
+Dari **Dashboard Admin** (`/admin` → kartu "Panduan & Dokumen") atau langsung:
+
+| Dokumen | Endpoint | Akses |
+|---|---|---|
+| Panduan Pengguna | `/api/guide/user` | publik |
+| Panduan Admin | `/api/guide/admin` | admin |
+| Panduan Partner Usaha | `/api/guide/partner` | publik |
+| Daftar Akun Ustadz (kredensial) | `/api/guide/akun-ustadz` | admin |
+| Daftar Akun Titik (kredensial) | `/api/guide/akun-titik` | admin |
+
+## 📡 WA Listener (terpisah)
+
+App desktop **read-only** (Electron + Baileys) di repo terpisah membaca grup WhatsApp lalu meneruskan ke `POST /api/wa/webhook` (header `x-wa-secret`). AI sisi web mengklasifikasi & mengekstrak → **antrian review** di `/admin/wa`. Tak pernah membalas WA.
 
 ## 📚 Dokumentasi
 
