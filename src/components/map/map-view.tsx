@@ -35,6 +35,23 @@ export const titikIcon = L.divIcon({
   popupAnchor: [0, -36],
 });
 
+/** Pin marker dengan thumbnail foto masjid (bulat + ekor pointer emerald). */
+export function photoIcon(url: string) {
+  const safe = url.replace(/"/g, "%22");
+  return L.divIcon({
+    className: "",
+    html: `<div style="position:relative;width:44px;height:52px;">
+      <div style="width:44px;height:44px;border-radius:50%;border:3px solid #0E5C46;background:#fff;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.35);">
+        <img src="${safe}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" />
+      </div>
+      <div style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid #0E5C46;"></div>
+    </div>`,
+    iconSize: [44, 52],
+    iconAnchor: [22, 52],
+    popupAnchor: [0, -48],
+  });
+}
+
 function gmapsLink(m: TitikMarker): string {
   return m.gmapsUrl && m.gmapsUrl.trim() ? m.gmapsUrl : `https://www.google.com/maps?q=${m.lat},${m.lng}`;
 }
@@ -75,7 +92,7 @@ export function MapView({
         />
         <FitBounds markers={markers} />
         {markers.map((m) => (
-          <Marker key={m.slug} position={[m.lat, m.lng]} icon={titikIcon}>
+          <Marker key={m.slug} position={[m.lat, m.lng]} icon={m.image ? photoIcon(m.image) : titikIcon}>
             <Popup>
               <div className="min-w-[180px] space-y-1">
                 {m.image ? (
